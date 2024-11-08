@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/LIA_24.elf",
+            "name": "Debug with OpenOCD",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F103RB",
+            "configFiles": [
+                "C:/dev/tools/openocd/openocd/scripts/interface/stlink.cfg",
+                "C:/dev/tools/openocd/openocd/scripts/target/stm32f1x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "raw",
+            "preLaunchTask": "flash",
+        },
+    ]
+}

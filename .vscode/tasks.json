@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build all",
+			"group": "build",
+			"type": "shell",
+			"command": "make",
+			"args": ["all"]
+		},
+		{
+			"label": "Build clean ",
+			"group": "build",
+			"type": "shell",
+			"command": "make",
+			"args": ["clean"]
+		},
+		{
+			"label": "clean & build ",
+			"group": "build",
+			"type": "shell",
+			"command": "make",
+			"args": [
+				"clean",
+				"all"
+			]
+		},
+		{
+            "label": "flash",
+            "type": "shell",
+            "command": "C:\\dev\\tools\\openocd\\bin\\openocd.exe",  
+            "args": [
+                "-f", "C:\\dev\\tools\\openocd\\openocd\\scripts\\interface\\stlink.cfg",  
+                "-f", "C:\\dev\\tools\\openocd\\openocd\\scripts\\target\\stm32f1x.cfg",         
+                "-c", "program ./build/test-f103.elf verify reset exit"  
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [],
+            "detail": "Flashes the firmware to the target using OpenOCD"
+        }
+
+
+	]
+}
