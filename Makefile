@@ -187,9 +187,15 @@ $(BUILD_DIR):
 #######################################
 # clean up
 #######################################
+ifeq ($(OS),Windows_NT)
+    CLEAN_CMD = rmdir /s /q $(BUILD_DIR)
+else
+    CLEAN_CMD = rm -fR $(BUILD_DIR)
+endif
+
 clean:
-	-rm -fR $(BUILD_DIR)
-  
+	$(CLEAN_CMD)
+ 
 #######################################
 # dependencies
 #######################################
