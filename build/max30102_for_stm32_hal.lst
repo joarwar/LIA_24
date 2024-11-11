@@ -1,0 +1,2157 @@
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"max30102_for_stm32_hal.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/max30102_for_stm32_hal.c"
+  18              		.section	.text.max30102_plot,"ax",%progbits
+  19              		.align	1
+  20              		.weak	max30102_plot
+  21              		.syntax unified
+  22              		.thumb
+  23              		.thumb_func
+  25              	max30102_plot:
+  26              	.LVL0:
+  27              	.LFB68:
+   1:Core/Src/max30102_for_stm32_hal.c **** #include "max30102_for_stm32_hal.h"
+   2:Core/Src/max30102_for_stm32_hal.c **** #include <stdio.h>
+   3:Core/Src/max30102_for_stm32_hal.c **** 
+   4:Core/Src/max30102_for_stm32_hal.c **** #ifdef __cplusplus
+   5:Core/Src/max30102_for_stm32_hal.c **** extern "C"
+   6:Core/Src/max30102_for_stm32_hal.c **** {
+   7:Core/Src/max30102_for_stm32_hal.c **** #endif
+   8:Core/Src/max30102_for_stm32_hal.c **** 
+   9:Core/Src/max30102_for_stm32_hal.c **** /**
+  10:Core/Src/max30102_for_stm32_hal.c ****  * @brief Built-in plotting function. Called during an interrupt to print/plot the current sample.
+  11:Core/Src/max30102_for_stm32_hal.c ****  * @note Override this in your main.c if you do not use printf() for printing.
+  12:Core/Src/max30102_for_stm32_hal.c ****  * @param ir_sample
+  13:Core/Src/max30102_for_stm32_hal.c ****  * @param red_sample
+  14:Core/Src/max30102_for_stm32_hal.c ****  */
+  15:Core/Src/max30102_for_stm32_hal.c **** __weak void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
+  16:Core/Src/max30102_for_stm32_hal.c **** {
+  28              		.loc 1 16 1 view -0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              		@ link register save eliminated.
+  17:Core/Src/max30102_for_stm32_hal.c ****     UNUSED(ir_sample);
+  33              		.loc 1 17 5 view .LVU1
+  18:Core/Src/max30102_for_stm32_hal.c ****     UNUSED(red_sample);
+  34              		.loc 1 18 5 view .LVU2
+  19:Core/Src/max30102_for_stm32_hal.c **** }
+  35              		.loc 1 19 1 is_stmt 0 view .LVU3
+  36 0000 7047     		bx	lr
+  37              		.cfi_endproc
+  38              	.LFE68:
+  40              		.section	.text.max30102_init,"ax",%progbits
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 2
+
+
+  41              		.align	1
+  42              		.global	max30102_init
+  43              		.syntax unified
+  44              		.thumb
+  45              		.thumb_func
+  47              	max30102_init:
+  48              	.LVL1:
+  49              	.LFB69:
+  20:Core/Src/max30102_for_stm32_hal.c **** 
+  21:Core/Src/max30102_for_stm32_hal.c **** /**
+  22:Core/Src/max30102_for_stm32_hal.c ****  * @brief MAX30102 initiation function.
+  23:Core/Src/max30102_for_stm32_hal.c ****  *
+  24:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  25:Core/Src/max30102_for_stm32_hal.c ****  * @param hi2c Pointer to I2C object handle
+  26:Core/Src/max30102_for_stm32_hal.c ****  */
+  27:Core/Src/max30102_for_stm32_hal.c **** void max30102_init(max30102_t *obj, I2C_HandleTypeDef *hi2c)
+  28:Core/Src/max30102_for_stm32_hal.c **** {
+  50              		.loc 1 28 1 is_stmt 1 view -0
+  51              		.cfi_startproc
+  52              		@ args = 0, pretend = 0, frame = 0
+  53              		@ frame_needed = 0, uses_anonymous_args = 0
+  54              		.loc 1 28 1 is_stmt 0 view .LVU5
+  55 0000 70B5     		push	{r4, r5, r6, lr}
+  56              	.LCFI0:
+  57              		.cfi_def_cfa_offset 16
+  58              		.cfi_offset 4, -16
+  59              		.cfi_offset 5, -12
+  60              		.cfi_offset 6, -8
+  61              		.cfi_offset 14, -4
+  62 0002 0446     		mov	r4, r0
+  29:Core/Src/max30102_for_stm32_hal.c ****     obj->_ui2c = hi2c;
+  63              		.loc 1 29 5 is_stmt 1 view .LVU6
+  64              		.loc 1 29 16 is_stmt 0 view .LVU7
+  65 0004 0160     		str	r1, [r0]
+  30:Core/Src/max30102_for_stm32_hal.c ****     obj->_interrupt_flag = 0;
+  66              		.loc 1 30 5 is_stmt 1 view .LVU8
+  67              		.loc 1 30 26 is_stmt 0 view .LVU9
+  68 0006 0025     		movs	r5, #0
+  69 0008 80F80451 		strb	r5, [r0, #260]
+  31:Core/Src/max30102_for_stm32_hal.c ****     memset(obj->_ir_samples, 0, MAX30102_SAMPLE_LEN_MAX * sizeof(uint32_t));
+  70              		.loc 1 31 5 is_stmt 1 view .LVU10
+  71 000c 8026     		movs	r6, #128
+  72 000e 3246     		mov	r2, r6
+  73 0010 2946     		mov	r1, r5
+  74              	.LVL2:
+  75              		.loc 1 31 5 is_stmt 0 view .LVU11
+  76 0012 0430     		adds	r0, r0, #4
+  77              	.LVL3:
+  78              		.loc 1 31 5 view .LVU12
+  79 0014 FFF7FEFF 		bl	memset
+  80              	.LVL4:
+  32:Core/Src/max30102_for_stm32_hal.c ****     memset(obj->_red_samples, 0, MAX30102_SAMPLE_LEN_MAX * sizeof(uint32_t));
+  81              		.loc 1 32 5 is_stmt 1 view .LVU13
+  82 0018 3246     		mov	r2, r6
+  83 001a 2946     		mov	r1, r5
+  84 001c 04F18400 		add	r0, r4, #132
+  85 0020 FFF7FEFF 		bl	memset
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 3
+
+
+  86              	.LVL5:
+  33:Core/Src/max30102_for_stm32_hal.c **** }
+  87              		.loc 1 33 1 is_stmt 0 view .LVU14
+  88 0024 70BD     		pop	{r4, r5, r6, pc}
+  89              		.loc 1 33 1 view .LVU15
+  90              		.cfi_endproc
+  91              	.LFE69:
+  93              		.section	.text.max30102_write,"ax",%progbits
+  94              		.align	1
+  95              		.global	max30102_write
+  96              		.syntax unified
+  97              		.thumb
+  98              		.thumb_func
+ 100              	max30102_write:
+ 101              	.LVL6:
+ 102              	.LFB70:
+  34:Core/Src/max30102_for_stm32_hal.c **** 
+  35:Core/Src/max30102_for_stm32_hal.c **** /**
+  36:Core/Src/max30102_for_stm32_hal.c ****  * @brief Write buffer of buflen bytes to a register of the MAX30102.
+  37:Core/Src/max30102_for_stm32_hal.c ****  *
+  38:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  39:Core/Src/max30102_for_stm32_hal.c ****  * @param reg Register address to write to.
+  40:Core/Src/max30102_for_stm32_hal.c ****  * @param buf Pointer containing the bytes to write.
+  41:Core/Src/max30102_for_stm32_hal.c ****  * @param buflen Number of bytes to write.
+  42:Core/Src/max30102_for_stm32_hal.c ****  */
+  43:Core/Src/max30102_for_stm32_hal.c **** void max30102_write(max30102_t *obj, uint8_t reg, uint8_t *buf, uint16_t buflen)
+  44:Core/Src/max30102_for_stm32_hal.c **** {
+ 103              		.loc 1 44 1 is_stmt 1 view -0
+ 104              		.cfi_startproc
+ 105              		@ args = 0, pretend = 0, frame = 0
+ 106              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107              		.loc 1 44 1 is_stmt 0 view .LVU17
+ 108 0000 2DE9F041 		push	{r4, r5, r6, r7, r8, lr}
+ 109              	.LCFI1:
+ 110              		.cfi_def_cfa_offset 24
+ 111              		.cfi_offset 4, -24
+ 112              		.cfi_offset 5, -20
+ 113              		.cfi_offset 6, -16
+ 114              		.cfi_offset 7, -12
+ 115              		.cfi_offset 8, -8
+ 116              		.cfi_offset 14, -4
+ 117 0004 82B0     		sub	sp, sp, #8
+ 118              	.LCFI2:
+ 119              		.cfi_def_cfa_offset 32
+ 120 0006 0746     		mov	r7, r0
+ 121 0008 8846     		mov	r8, r1
+ 122 000a 1646     		mov	r6, r2
+ 123 000c 1C46     		mov	r4, r3
+  45:Core/Src/max30102_for_stm32_hal.c ****     uint8_t *payload = (uint8_t *)malloc((buflen + 1) * sizeof(uint8_t));
+ 124              		.loc 1 45 5 is_stmt 1 view .LVU18
+ 125              		.loc 1 45 35 is_stmt 0 view .LVU19
+ 126 000e 581C     		adds	r0, r3, #1
+ 127              	.LVL7:
+ 128              		.loc 1 45 35 view .LVU20
+ 129 0010 FFF7FEFF 		bl	malloc
+ 130              	.LVL8:
+ 131              		.loc 1 45 35 view .LVU21
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 4
+
+
+ 132 0014 0546     		mov	r5, r0
+ 133              	.LVL9:
+  46:Core/Src/max30102_for_stm32_hal.c ****     *payload = reg;
+ 134              		.loc 1 46 5 is_stmt 1 view .LVU22
+ 135              		.loc 1 46 14 is_stmt 0 view .LVU23
+ 136 0016 80F80080 		strb	r8, [r0]
+  47:Core/Src/max30102_for_stm32_hal.c ****     if (buf != NULL && buflen != 0)
+ 137              		.loc 1 47 5 is_stmt 1 view .LVU24
+ 138              		.loc 1 47 8 is_stmt 0 view .LVU25
+ 139 001a 06B1     		cbz	r6, .L5
+ 140              		.loc 1 47 21 discriminator 1 view .LVU26
+ 141 001c 7CB9     		cbnz	r4, .L7
+ 142              	.LVL10:
+ 143              	.L5:
+  48:Core/Src/max30102_for_stm32_hal.c ****         memcpy(payload + 1, buf, buflen);
+  49:Core/Src/max30102_for_stm32_hal.c ****     HAL_I2C_Master_Transmit(obj->_ui2c, MAX30102_I2C_ADDR << 1, payload, buflen + 1, MAX30102_I2C_T
+ 144              		.loc 1 49 5 is_stmt 1 view .LVU27
+ 145 001e 631C     		adds	r3, r4, #1
+ 146 0020 4FF47A72 		mov	r2, #1000
+ 147 0024 0092     		str	r2, [sp]
+ 148 0026 9BB2     		uxth	r3, r3
+ 149 0028 2A46     		mov	r2, r5
+ 150 002a AE21     		movs	r1, #174
+ 151 002c 3868     		ldr	r0, [r7]
+ 152 002e FFF7FEFF 		bl	HAL_I2C_Master_Transmit
+ 153              	.LVL11:
+  50:Core/Src/max30102_for_stm32_hal.c ****     free(payload);
+ 154              		.loc 1 50 5 view .LVU28
+ 155 0032 2846     		mov	r0, r5
+ 156 0034 FFF7FEFF 		bl	free
+ 157              	.LVL12:
+  51:Core/Src/max30102_for_stm32_hal.c **** }
+ 158              		.loc 1 51 1 is_stmt 0 view .LVU29
+ 159 0038 02B0     		add	sp, sp, #8
+ 160              	.LCFI3:
+ 161              		.cfi_remember_state
+ 162              		.cfi_def_cfa_offset 24
+ 163              		@ sp needed
+ 164 003a BDE8F081 		pop	{r4, r5, r6, r7, r8, pc}
+ 165              	.LVL13:
+ 166              	.L7:
+ 167              	.LCFI4:
+ 168              		.cfi_restore_state
+  48:Core/Src/max30102_for_stm32_hal.c ****         memcpy(payload + 1, buf, buflen);
+ 169              		.loc 1 48 9 is_stmt 1 view .LVU30
+ 170 003e 2246     		mov	r2, r4
+ 171 0040 3146     		mov	r1, r6
+ 172 0042 0130     		adds	r0, r0, #1
+ 173              	.LVL14:
+  48:Core/Src/max30102_for_stm32_hal.c ****         memcpy(payload + 1, buf, buflen);
+ 174              		.loc 1 48 9 is_stmt 0 view .LVU31
+ 175 0044 FFF7FEFF 		bl	memcpy
+ 176              	.LVL15:
+ 177 0048 E9E7     		b	.L5
+ 178              		.cfi_endproc
+ 179              	.LFE70:
+ 181              		.section	.text.max30102_read,"ax",%progbits
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 5
+
+
+ 182              		.align	1
+ 183              		.global	max30102_read
+ 184              		.syntax unified
+ 185              		.thumb
+ 186              		.thumb_func
+ 188              	max30102_read:
+ 189              	.LVL16:
+ 190              	.LFB71:
+  52:Core/Src/max30102_for_stm32_hal.c **** 
+  53:Core/Src/max30102_for_stm32_hal.c **** /**
+  54:Core/Src/max30102_for_stm32_hal.c ****  * @brief Read buflen bytes from a register of the MAX30102 and store to buffer.
+  55:Core/Src/max30102_for_stm32_hal.c ****  *
+  56:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  57:Core/Src/max30102_for_stm32_hal.c ****  * @param reg Register address to read from.
+  58:Core/Src/max30102_for_stm32_hal.c ****  * @param buf Pointer to the array to write to.
+  59:Core/Src/max30102_for_stm32_hal.c ****  * @param buflen Number of bytes to read.
+  60:Core/Src/max30102_for_stm32_hal.c ****  */
+  61:Core/Src/max30102_for_stm32_hal.c **** void max30102_read(max30102_t *obj, uint8_t reg, uint8_t *buf, uint16_t buflen)
+  62:Core/Src/max30102_for_stm32_hal.c **** {
+ 191              		.loc 1 62 1 is_stmt 1 view -0
+ 192              		.cfi_startproc
+ 193              		@ args = 0, pretend = 0, frame = 8
+ 194              		@ frame_needed = 0, uses_anonymous_args = 0
+ 195              		.loc 1 62 1 is_stmt 0 view .LVU33
+ 196 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 197              	.LCFI5:
+ 198              		.cfi_def_cfa_offset 20
+ 199              		.cfi_offset 4, -20
+ 200              		.cfi_offset 5, -16
+ 201              		.cfi_offset 6, -12
+ 202              		.cfi_offset 7, -8
+ 203              		.cfi_offset 14, -4
+ 204 0002 85B0     		sub	sp, sp, #20
+ 205              	.LCFI6:
+ 206              		.cfi_def_cfa_offset 40
+ 207 0004 0446     		mov	r4, r0
+ 208 0006 1546     		mov	r5, r2
+ 209 0008 1E46     		mov	r6, r3
+  63:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg_addr = reg;
+ 210              		.loc 1 63 5 is_stmt 1 view .LVU34
+ 211              		.loc 1 63 13 is_stmt 0 view .LVU35
+ 212 000a 8DF80F10 		strb	r1, [sp, #15]
+  64:Core/Src/max30102_for_stm32_hal.c ****     HAL_I2C_Master_Transmit(obj->_ui2c, MAX30102_I2C_ADDR << 1, &reg_addr, 1, MAX30102_I2C_TIMEOUT)
+ 213              		.loc 1 64 5 is_stmt 1 view .LVU36
+ 214 000e 4FF47A77 		mov	r7, #1000
+ 215 0012 0097     		str	r7, [sp]
+ 216 0014 0123     		movs	r3, #1
+ 217              	.LVL17:
+ 218              		.loc 1 64 5 is_stmt 0 view .LVU37
+ 219 0016 0DF10F02 		add	r2, sp, #15
+ 220              	.LVL18:
+ 221              		.loc 1 64 5 view .LVU38
+ 222 001a AE21     		movs	r1, #174
+ 223              	.LVL19:
+ 224              		.loc 1 64 5 view .LVU39
+ 225 001c 0068     		ldr	r0, [r0]
+ 226              	.LVL20:
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 6
+
+
+ 227              		.loc 1 64 5 view .LVU40
+ 228 001e FFF7FEFF 		bl	HAL_I2C_Master_Transmit
+ 229              	.LVL21:
+  65:Core/Src/max30102_for_stm32_hal.c ****     HAL_I2C_Master_Receive(obj->_ui2c, MAX30102_I2C_ADDR << 1, buf, buflen, MAX30102_I2C_TIMEOUT);
+ 230              		.loc 1 65 5 is_stmt 1 view .LVU41
+ 231 0022 0097     		str	r7, [sp]
+ 232 0024 3346     		mov	r3, r6
+ 233 0026 2A46     		mov	r2, r5
+ 234 0028 AE21     		movs	r1, #174
+ 235 002a 2068     		ldr	r0, [r4]
+ 236 002c FFF7FEFF 		bl	HAL_I2C_Master_Receive
+ 237              	.LVL22:
+  66:Core/Src/max30102_for_stm32_hal.c **** }
+ 238              		.loc 1 66 1 is_stmt 0 view .LVU42
+ 239 0030 05B0     		add	sp, sp, #20
+ 240              	.LCFI7:
+ 241              		.cfi_def_cfa_offset 20
+ 242              		@ sp needed
+ 243 0032 F0BD     		pop	{r4, r5, r6, r7, pc}
+ 244              		.loc 1 66 1 view .LVU43
+ 245              		.cfi_endproc
+ 246              	.LFE71:
+ 248              		.section	.text.max30102_reset,"ax",%progbits
+ 249              		.align	1
+ 250              		.global	max30102_reset
+ 251              		.syntax unified
+ 252              		.thumb
+ 253              		.thumb_func
+ 255              	max30102_reset:
+ 256              	.LVL23:
+ 257              	.LFB72:
+  67:Core/Src/max30102_for_stm32_hal.c **** 
+  68:Core/Src/max30102_for_stm32_hal.c **** /**
+  69:Core/Src/max30102_for_stm32_hal.c ****  * @brief Reset the sensor.
+  70:Core/Src/max30102_for_stm32_hal.c ****  *
+  71:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  72:Core/Src/max30102_for_stm32_hal.c ****  */
+  73:Core/Src/max30102_for_stm32_hal.c **** void max30102_reset(max30102_t *obj)
+  74:Core/Src/max30102_for_stm32_hal.c **** {
+ 258              		.loc 1 74 1 is_stmt 1 view -0
+ 259              		.cfi_startproc
+ 260              		@ args = 0, pretend = 0, frame = 8
+ 261              		@ frame_needed = 0, uses_anonymous_args = 0
+ 262              		.loc 1 74 1 is_stmt 0 view .LVU45
+ 263 0000 00B5     		push	{lr}
+ 264              	.LCFI8:
+ 265              		.cfi_def_cfa_offset 4
+ 266              		.cfi_offset 14, -4
+ 267 0002 83B0     		sub	sp, sp, #12
+ 268              	.LCFI9:
+ 269              		.cfi_def_cfa_offset 16
+  75:Core/Src/max30102_for_stm32_hal.c ****     uint8_t val = 0x40;
+ 270              		.loc 1 75 5 is_stmt 1 view .LVU46
+ 271              		.loc 1 75 13 is_stmt 0 view .LVU47
+ 272 0004 4023     		movs	r3, #64
+ 273 0006 8DF80730 		strb	r3, [sp, #7]
+  76:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &val, 1);
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 7
+
+
+ 274              		.loc 1 76 5 is_stmt 1 view .LVU48
+ 275 000a 0123     		movs	r3, #1
+ 276 000c 0DF10702 		add	r2, sp, #7
+ 277 0010 0921     		movs	r1, #9
+ 278 0012 FFF7FEFF 		bl	max30102_write
+ 279              	.LVL24:
+  77:Core/Src/max30102_for_stm32_hal.c **** }
+ 280              		.loc 1 77 1 is_stmt 0 view .LVU49
+ 281 0016 03B0     		add	sp, sp, #12
+ 282              	.LCFI10:
+ 283              		.cfi_def_cfa_offset 4
+ 284              		@ sp needed
+ 285 0018 5DF804FB 		ldr	pc, [sp], #4
+ 286              		.cfi_endproc
+ 287              	.LFE72:
+ 289              		.section	.text.max30102_set_a_full,"ax",%progbits
+ 290              		.align	1
+ 291              		.global	max30102_set_a_full
+ 292              		.syntax unified
+ 293              		.thumb
+ 294              		.thumb_func
+ 296              	max30102_set_a_full:
+ 297              	.LVL25:
+ 298              	.LFB73:
+  78:Core/Src/max30102_for_stm32_hal.c **** 
+  79:Core/Src/max30102_for_stm32_hal.c **** /**
+  80:Core/Src/max30102_for_stm32_hal.c ****  * @brief Enable A_FULL interrupt.
+  81:Core/Src/max30102_for_stm32_hal.c ****  *
+  82:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  83:Core/Src/max30102_for_stm32_hal.c ****  * @param enable Enable (1) or disable (0).
+  84:Core/Src/max30102_for_stm32_hal.c ****  */
+  85:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_a_full(max30102_t *obj, uint8_t enable)
+  86:Core/Src/max30102_for_stm32_hal.c **** {
+ 299              		.loc 1 86 1 is_stmt 1 view -0
+ 300              		.cfi_startproc
+ 301              		@ args = 0, pretend = 0, frame = 8
+ 302              		@ frame_needed = 0, uses_anonymous_args = 0
+ 303              		.loc 1 86 1 is_stmt 0 view .LVU51
+ 304 0000 30B5     		push	{r4, r5, lr}
+ 305              	.LCFI11:
+ 306              		.cfi_def_cfa_offset 12
+ 307              		.cfi_offset 4, -12
+ 308              		.cfi_offset 5, -8
+ 309              		.cfi_offset 14, -4
+ 310 0002 83B0     		sub	sp, sp, #12
+ 311              	.LCFI12:
+ 312              		.cfi_def_cfa_offset 24
+ 313 0004 0446     		mov	r4, r0
+ 314 0006 0D46     		mov	r5, r1
+  87:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg = 0;
+ 315              		.loc 1 87 5 is_stmt 1 view .LVU52
+ 316              		.loc 1 87 13 is_stmt 0 view .LVU53
+ 317 0008 0023     		movs	r3, #0
+ 318 000a 8DF80730 		strb	r3, [sp, #7]
+  88:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 319              		.loc 1 88 5 is_stmt 1 view .LVU54
+ 320 000e 0123     		movs	r3, #1
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 8
+
+
+ 321 0010 0DF10702 		add	r2, sp, #7
+ 322 0014 0221     		movs	r1, #2
+ 323              	.LVL26:
+ 324              		.loc 1 88 5 is_stmt 0 view .LVU55
+ 325 0016 FFF7FEFF 		bl	max30102_read
+ 326              	.LVL27:
+  89:Core/Src/max30102_for_stm32_hal.c ****     reg &= ~(0x01 << MAX30102_INTERRUPT_A_FULL);
+ 327              		.loc 1 89 5 is_stmt 1 view .LVU56
+ 328              		.loc 1 89 9 is_stmt 0 view .LVU57
+ 329 001a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 330 001e 03F07F03 		and	r3, r3, #127
+ 331 0022 8DF80730 		strb	r3, [sp, #7]
+  90:Core/Src/max30102_for_stm32_hal.c ****     reg |= ((enable & 0x01) << MAX30102_INTERRUPT_A_FULL);
+ 332              		.loc 1 90 5 is_stmt 1 view .LVU58
+ 333              		.loc 1 90 9 is_stmt 0 view .LVU59
+ 334 0026 43EAC513 		orr	r3, r3, r5, lsl #7
+ 335 002a 8DF80730 		strb	r3, [sp, #7]
+  91:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 336              		.loc 1 91 5 is_stmt 1 view .LVU60
+ 337 002e 0123     		movs	r3, #1
+ 338 0030 0DF10702 		add	r2, sp, #7
+ 339 0034 0221     		movs	r1, #2
+ 340 0036 2046     		mov	r0, r4
+ 341 0038 FFF7FEFF 		bl	max30102_write
+ 342              	.LVL28:
+  92:Core/Src/max30102_for_stm32_hal.c **** }
+ 343              		.loc 1 92 1 is_stmt 0 view .LVU61
+ 344 003c 03B0     		add	sp, sp, #12
+ 345              	.LCFI13:
+ 346              		.cfi_def_cfa_offset 12
+ 347              		@ sp needed
+ 348 003e 30BD     		pop	{r4, r5, pc}
+ 349              		.loc 1 92 1 view .LVU62
+ 350              		.cfi_endproc
+ 351              	.LFE73:
+ 353              		.section	.text.max30102_set_ppg_rdy,"ax",%progbits
+ 354              		.align	1
+ 355              		.global	max30102_set_ppg_rdy
+ 356              		.syntax unified
+ 357              		.thumb
+ 358              		.thumb_func
+ 360              	max30102_set_ppg_rdy:
+ 361              	.LVL29:
+ 362              	.LFB74:
+  93:Core/Src/max30102_for_stm32_hal.c **** 
+  94:Core/Src/max30102_for_stm32_hal.c **** /**
+  95:Core/Src/max30102_for_stm32_hal.c ****  * @brief Enable PPG_RDY interrupt.
+  96:Core/Src/max30102_for_stm32_hal.c ****  *
+  97:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+  98:Core/Src/max30102_for_stm32_hal.c ****  * @param enable Enable (1) or disable (0).
+  99:Core/Src/max30102_for_stm32_hal.c ****  */
+ 100:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_ppg_rdy(max30102_t *obj, uint8_t enable)
+ 101:Core/Src/max30102_for_stm32_hal.c **** {
+ 363              		.loc 1 101 1 is_stmt 1 view -0
+ 364              		.cfi_startproc
+ 365              		@ args = 0, pretend = 0, frame = 8
+ 366              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 9
+
+
+ 367              		.loc 1 101 1 is_stmt 0 view .LVU64
+ 368 0000 30B5     		push	{r4, r5, lr}
+ 369              	.LCFI14:
+ 370              		.cfi_def_cfa_offset 12
+ 371              		.cfi_offset 4, -12
+ 372              		.cfi_offset 5, -8
+ 373              		.cfi_offset 14, -4
+ 374 0002 83B0     		sub	sp, sp, #12
+ 375              	.LCFI15:
+ 376              		.cfi_def_cfa_offset 24
+ 377 0004 0546     		mov	r5, r0
+ 378 0006 0C46     		mov	r4, r1
+ 102:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg = 0;
+ 379              		.loc 1 102 5 is_stmt 1 view .LVU65
+ 380              		.loc 1 102 13 is_stmt 0 view .LVU66
+ 381 0008 0023     		movs	r3, #0
+ 382 000a 8DF80730 		strb	r3, [sp, #7]
+ 103:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 383              		.loc 1 103 5 is_stmt 1 view .LVU67
+ 384 000e 0123     		movs	r3, #1
+ 385 0010 0DF10702 		add	r2, sp, #7
+ 386 0014 0221     		movs	r1, #2
+ 387              	.LVL30:
+ 388              		.loc 1 103 5 is_stmt 0 view .LVU68
+ 389 0016 FFF7FEFF 		bl	max30102_read
+ 390              	.LVL31:
+ 104:Core/Src/max30102_for_stm32_hal.c ****     reg &= ~(0x01 << MAX30102_INTERRUPT_PPG_RDY);
+ 391              		.loc 1 104 5 is_stmt 1 view .LVU69
+ 392              		.loc 1 104 9 is_stmt 0 view .LVU70
+ 393 001a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 394 001e 03F0BF03 		and	r3, r3, #191
+ 395 0022 8DF80730 		strb	r3, [sp, #7]
+ 105:Core/Src/max30102_for_stm32_hal.c ****     reg |= ((enable & 0x01) << MAX30102_INTERRUPT_PPG_RDY);
+ 396              		.loc 1 105 5 is_stmt 1 view .LVU71
+ 397              		.loc 1 105 29 is_stmt 0 view .LVU72
+ 398 0026 A401     		lsls	r4, r4, #6
+ 399 0028 04F04004 		and	r4, r4, #64
+ 400              		.loc 1 105 9 view .LVU73
+ 401 002c 2343     		orrs	r3, r3, r4
+ 402 002e 8DF80730 		strb	r3, [sp, #7]
+ 106:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 403              		.loc 1 106 5 is_stmt 1 view .LVU74
+ 404 0032 0123     		movs	r3, #1
+ 405 0034 0DF10702 		add	r2, sp, #7
+ 406 0038 0221     		movs	r1, #2
+ 407 003a 2846     		mov	r0, r5
+ 408 003c FFF7FEFF 		bl	max30102_write
+ 409              	.LVL32:
+ 107:Core/Src/max30102_for_stm32_hal.c **** }
+ 410              		.loc 1 107 1 is_stmt 0 view .LVU75
+ 411 0040 03B0     		add	sp, sp, #12
+ 412              	.LCFI16:
+ 413              		.cfi_def_cfa_offset 12
+ 414              		@ sp needed
+ 415 0042 30BD     		pop	{r4, r5, pc}
+ 416              		.loc 1 107 1 view .LVU76
+ 417              		.cfi_endproc
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 10
+
+
+ 418              	.LFE74:
+ 420              		.section	.text.max30102_set_alc_ovf,"ax",%progbits
+ 421              		.align	1
+ 422              		.global	max30102_set_alc_ovf
+ 423              		.syntax unified
+ 424              		.thumb
+ 425              		.thumb_func
+ 427              	max30102_set_alc_ovf:
+ 428              	.LVL33:
+ 429              	.LFB75:
+ 108:Core/Src/max30102_for_stm32_hal.c **** 
+ 109:Core/Src/max30102_for_stm32_hal.c **** /**
+ 110:Core/Src/max30102_for_stm32_hal.c ****  * @brief Enable ALC_OVF interrupt.
+ 111:Core/Src/max30102_for_stm32_hal.c ****  *
+ 112:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 113:Core/Src/max30102_for_stm32_hal.c ****  * @param enable Enable (1) or disable (0).
+ 114:Core/Src/max30102_for_stm32_hal.c ****  */
+ 115:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_alc_ovf(max30102_t *obj, uint8_t enable)
+ 116:Core/Src/max30102_for_stm32_hal.c **** {
+ 430              		.loc 1 116 1 is_stmt 1 view -0
+ 431              		.cfi_startproc
+ 432              		@ args = 0, pretend = 0, frame = 8
+ 433              		@ frame_needed = 0, uses_anonymous_args = 0
+ 434              		.loc 1 116 1 is_stmt 0 view .LVU78
+ 435 0000 30B5     		push	{r4, r5, lr}
+ 436              	.LCFI17:
+ 437              		.cfi_def_cfa_offset 12
+ 438              		.cfi_offset 4, -12
+ 439              		.cfi_offset 5, -8
+ 440              		.cfi_offset 14, -4
+ 441 0002 83B0     		sub	sp, sp, #12
+ 442              	.LCFI18:
+ 443              		.cfi_def_cfa_offset 24
+ 444 0004 0546     		mov	r5, r0
+ 445 0006 0C46     		mov	r4, r1
+ 117:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg = 0;
+ 446              		.loc 1 117 5 is_stmt 1 view .LVU79
+ 447              		.loc 1 117 13 is_stmt 0 view .LVU80
+ 448 0008 0023     		movs	r3, #0
+ 449 000a 8DF80730 		strb	r3, [sp, #7]
+ 118:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 450              		.loc 1 118 5 is_stmt 1 view .LVU81
+ 451 000e 0123     		movs	r3, #1
+ 452 0010 0DF10702 		add	r2, sp, #7
+ 453 0014 0221     		movs	r1, #2
+ 454              	.LVL34:
+ 455              		.loc 1 118 5 is_stmt 0 view .LVU82
+ 456 0016 FFF7FEFF 		bl	max30102_read
+ 457              	.LVL35:
+ 119:Core/Src/max30102_for_stm32_hal.c ****     reg &= ~(0x01 << MAX30102_INTERRUPT_ALC_OVF);
+ 458              		.loc 1 119 5 is_stmt 1 view .LVU83
+ 459              		.loc 1 119 9 is_stmt 0 view .LVU84
+ 460 001a 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 461 001e 03F0DF03 		and	r3, r3, #223
+ 462 0022 8DF80730 		strb	r3, [sp, #7]
+ 120:Core/Src/max30102_for_stm32_hal.c ****     reg |= ((enable & 0x01) << MAX30102_INTERRUPT_ALC_OVF);
+ 463              		.loc 1 120 5 is_stmt 1 view .LVU85
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 11
+
+
+ 464              		.loc 1 120 29 is_stmt 0 view .LVU86
+ 465 0026 6401     		lsls	r4, r4, #5
+ 466 0028 04F02004 		and	r4, r4, #32
+ 467              		.loc 1 120 9 view .LVU87
+ 468 002c 2343     		orrs	r3, r3, r4
+ 469 002e 8DF80730 		strb	r3, [sp, #7]
+ 121:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_INTERRUPT_ENABLE_1, &reg, 1);
+ 470              		.loc 1 121 5 is_stmt 1 view .LVU88
+ 471 0032 0123     		movs	r3, #1
+ 472 0034 0DF10702 		add	r2, sp, #7
+ 473 0038 0221     		movs	r1, #2
+ 474 003a 2846     		mov	r0, r5
+ 475 003c FFF7FEFF 		bl	max30102_write
+ 476              	.LVL36:
+ 122:Core/Src/max30102_for_stm32_hal.c **** }
+ 477              		.loc 1 122 1 is_stmt 0 view .LVU89
+ 478 0040 03B0     		add	sp, sp, #12
+ 479              	.LCFI19:
+ 480              		.cfi_def_cfa_offset 12
+ 481              		@ sp needed
+ 482 0042 30BD     		pop	{r4, r5, pc}
+ 483              		.loc 1 122 1 view .LVU90
+ 484              		.cfi_endproc
+ 485              	.LFE75:
+ 487              		.section	.text.max30102_set_die_temp_rdy,"ax",%progbits
+ 488              		.align	1
+ 489              		.global	max30102_set_die_temp_rdy
+ 490              		.syntax unified
+ 491              		.thumb
+ 492              		.thumb_func
+ 494              	max30102_set_die_temp_rdy:
+ 495              	.LVL37:
+ 496              	.LFB76:
+ 123:Core/Src/max30102_for_stm32_hal.c **** 
+ 124:Core/Src/max30102_for_stm32_hal.c **** /**
+ 125:Core/Src/max30102_for_stm32_hal.c ****  * @brief Enable DIE_TEMP_RDY interrupt.
+ 126:Core/Src/max30102_for_stm32_hal.c ****  *
+ 127:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 128:Core/Src/max30102_for_stm32_hal.c ****  * @param enable Enable (1) or disable (0).
+ 129:Core/Src/max30102_for_stm32_hal.c ****  */
+ 130:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_die_temp_rdy(max30102_t *obj, uint8_t enable)
+ 131:Core/Src/max30102_for_stm32_hal.c **** {
+ 497              		.loc 1 131 1 is_stmt 1 view -0
+ 498              		.cfi_startproc
+ 499              		@ args = 0, pretend = 0, frame = 8
+ 500              		@ frame_needed = 0, uses_anonymous_args = 0
+ 501              		.loc 1 131 1 is_stmt 0 view .LVU92
+ 502 0000 00B5     		push	{lr}
+ 503              	.LCFI20:
+ 504              		.cfi_def_cfa_offset 4
+ 505              		.cfi_offset 14, -4
+ 506 0002 83B0     		sub	sp, sp, #12
+ 507              	.LCFI21:
+ 508              		.cfi_def_cfa_offset 16
+ 132:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg = (enable & 0x01) << MAX30102_INTERRUPT_DIE_TEMP_RDY;
+ 509              		.loc 1 132 5 is_stmt 1 view .LVU93
+ 510              		.loc 1 132 35 is_stmt 0 view .LVU94
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 12
+
+
+ 511 0004 4900     		lsls	r1, r1, #1
+ 512              	.LVL38:
+ 513              		.loc 1 132 35 view .LVU95
+ 514 0006 01F00201 		and	r1, r1, #2
+ 515              		.loc 1 132 13 view .LVU96
+ 516 000a 8DF80710 		strb	r1, [sp, #7]
+ 133:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_INTERRUPT_ENABLE_2, &reg, 1);
+ 517              		.loc 1 133 5 is_stmt 1 view .LVU97
+ 518 000e 0123     		movs	r3, #1
+ 519 0010 0DF10702 		add	r2, sp, #7
+ 520 0014 0321     		movs	r1, #3
+ 521 0016 FFF7FEFF 		bl	max30102_write
+ 522              	.LVL39:
+ 134:Core/Src/max30102_for_stm32_hal.c **** }
+ 523              		.loc 1 134 1 is_stmt 0 view .LVU98
+ 524 001a 03B0     		add	sp, sp, #12
+ 525              	.LCFI22:
+ 526              		.cfi_def_cfa_offset 4
+ 527              		@ sp needed
+ 528 001c 5DF804FB 		ldr	pc, [sp], #4
+ 529              		.cfi_endproc
+ 530              	.LFE76:
+ 532              		.section	.text.max30102_set_die_temp_en,"ax",%progbits
+ 533              		.align	1
+ 534              		.global	max30102_set_die_temp_en
+ 535              		.syntax unified
+ 536              		.thumb
+ 537              		.thumb_func
+ 539              	max30102_set_die_temp_en:
+ 540              	.LVL40:
+ 541              	.LFB77:
+ 135:Core/Src/max30102_for_stm32_hal.c **** 
+ 136:Core/Src/max30102_for_stm32_hal.c **** /**
+ 137:Core/Src/max30102_for_stm32_hal.c ****  * @brief Enable temperature measurement.
+ 138:Core/Src/max30102_for_stm32_hal.c ****  *
+ 139:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 140:Core/Src/max30102_for_stm32_hal.c ****  * @param enable Enable (1) or disable (0).
+ 141:Core/Src/max30102_for_stm32_hal.c ****  */
+ 142:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_die_temp_en(max30102_t *obj, uint8_t enable)
+ 143:Core/Src/max30102_for_stm32_hal.c **** {
+ 542              		.loc 1 143 1 is_stmt 1 view -0
+ 543              		.cfi_startproc
+ 544              		@ args = 0, pretend = 0, frame = 8
+ 545              		@ frame_needed = 0, uses_anonymous_args = 0
+ 546              		.loc 1 143 1 is_stmt 0 view .LVU100
+ 547 0000 00B5     		push	{lr}
+ 548              	.LCFI23:
+ 549              		.cfi_def_cfa_offset 4
+ 550              		.cfi_offset 14, -4
+ 551 0002 83B0     		sub	sp, sp, #12
+ 552              	.LCFI24:
+ 553              		.cfi_def_cfa_offset 16
+ 144:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg = (enable & 0x01) << MAX30102_DIE_TEMP_EN;
+ 554              		.loc 1 144 5 is_stmt 1 view .LVU101
+ 555              		.loc 1 144 35 is_stmt 0 view .LVU102
+ 556 0004 4900     		lsls	r1, r1, #1
+ 557              	.LVL41:
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 13
+
+
+ 558              		.loc 1 144 35 view .LVU103
+ 559 0006 01F00201 		and	r1, r1, #2
+ 560              		.loc 1 144 13 view .LVU104
+ 561 000a 8DF80710 		strb	r1, [sp, #7]
+ 145:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_DIE_TEMP_CONFIG, &reg, 1);
+ 562              		.loc 1 145 5 is_stmt 1 view .LVU105
+ 563 000e 0123     		movs	r3, #1
+ 564 0010 0DF10702 		add	r2, sp, #7
+ 565 0014 2121     		movs	r1, #33
+ 566 0016 FFF7FEFF 		bl	max30102_write
+ 567              	.LVL42:
+ 146:Core/Src/max30102_for_stm32_hal.c **** }
+ 568              		.loc 1 146 1 is_stmt 0 view .LVU106
+ 569 001a 03B0     		add	sp, sp, #12
+ 570              	.LCFI25:
+ 571              		.cfi_def_cfa_offset 4
+ 572              		@ sp needed
+ 573 001c 5DF804FB 		ldr	pc, [sp], #4
+ 574              		.cfi_endproc
+ 575              	.LFE77:
+ 577              		.section	.text.max30102_on_interrupt,"ax",%progbits
+ 578              		.align	1
+ 579              		.global	max30102_on_interrupt
+ 580              		.syntax unified
+ 581              		.thumb
+ 582              		.thumb_func
+ 584              	max30102_on_interrupt:
+ 585              	.LVL43:
+ 586              	.LFB78:
+ 147:Core/Src/max30102_for_stm32_hal.c **** 
+ 148:Core/Src/max30102_for_stm32_hal.c **** /**
+ 149:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set interrupt flag on interrupt. To be called in the corresponding external interrupt han
+ 150:Core/Src/max30102_for_stm32_hal.c ****  *
+ 151:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 152:Core/Src/max30102_for_stm32_hal.c ****  */
+ 153:Core/Src/max30102_for_stm32_hal.c **** void max30102_on_interrupt(max30102_t *obj)
+ 154:Core/Src/max30102_for_stm32_hal.c **** {
+ 587              		.loc 1 154 1 is_stmt 1 view -0
+ 588              		.cfi_startproc
+ 589              		@ args = 0, pretend = 0, frame = 0
+ 590              		@ frame_needed = 0, uses_anonymous_args = 0
+ 591              		@ link register save eliminated.
+ 155:Core/Src/max30102_for_stm32_hal.c ****     obj->_interrupt_flag = 1;
+ 592              		.loc 1 155 5 view .LVU108
+ 593              		.loc 1 155 26 is_stmt 0 view .LVU109
+ 594 0000 0123     		movs	r3, #1
+ 595 0002 80F80431 		strb	r3, [r0, #260]
+ 156:Core/Src/max30102_for_stm32_hal.c **** }
+ 596              		.loc 1 156 1 view .LVU110
+ 597 0006 7047     		bx	lr
+ 598              		.cfi_endproc
+ 599              	.LFE78:
+ 601              		.section	.text.max30102_has_interrupt,"ax",%progbits
+ 602              		.align	1
+ 603              		.global	max30102_has_interrupt
+ 604              		.syntax unified
+ 605              		.thumb
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 14
+
+
+ 606              		.thumb_func
+ 608              	max30102_has_interrupt:
+ 609              	.LVL44:
+ 610              	.LFB79:
+ 157:Core/Src/max30102_for_stm32_hal.c **** 
+ 158:Core/Src/max30102_for_stm32_hal.c **** /**
+ 159:Core/Src/max30102_for_stm32_hal.c ****  * @brief Check whether the interrupt flag is active.
+ 160:Core/Src/max30102_for_stm32_hal.c ****  *
+ 161:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 162:Core/Src/max30102_for_stm32_hal.c ****  * @return uint8_t Active (1) or inactive (0).
+ 163:Core/Src/max30102_for_stm32_hal.c ****  */
+ 164:Core/Src/max30102_for_stm32_hal.c **** uint8_t max30102_has_interrupt(max30102_t *obj)
+ 165:Core/Src/max30102_for_stm32_hal.c **** {
+ 611              		.loc 1 165 1 is_stmt 1 view -0
+ 612              		.cfi_startproc
+ 613              		@ args = 0, pretend = 0, frame = 0
+ 614              		@ frame_needed = 0, uses_anonymous_args = 0
+ 615              		@ link register save eliminated.
+ 166:Core/Src/max30102_for_stm32_hal.c ****     return obj->_interrupt_flag;
+ 616              		.loc 1 166 5 view .LVU112
+ 167:Core/Src/max30102_for_stm32_hal.c **** }
+ 617              		.loc 1 167 1 is_stmt 0 view .LVU113
+ 618 0000 90F80401 		ldrb	r0, [r0, #260]	@ zero_extendqisi2
+ 619              	.LVL45:
+ 620              		.loc 1 167 1 view .LVU114
+ 621 0004 7047     		bx	lr
+ 622              		.cfi_endproc
+ 623              	.LFE79:
+ 625              		.section	.text.max30102_shutdown,"ax",%progbits
+ 626              		.align	1
+ 627              		.global	max30102_shutdown
+ 628              		.syntax unified
+ 629              		.thumb
+ 630              		.thumb_func
+ 632              	max30102_shutdown:
+ 633              	.LVL46:
+ 634              	.LFB81:
+ 168:Core/Src/max30102_for_stm32_hal.c **** 
+ 169:Core/Src/max30102_for_stm32_hal.c **** /**
+ 170:Core/Src/max30102_for_stm32_hal.c ****  * @brief Read interrupt status registers (0x00 and 0x01) and perform corresponding tasks.
+ 171:Core/Src/max30102_for_stm32_hal.c ****  *
+ 172:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 173:Core/Src/max30102_for_stm32_hal.c ****  */
+ 174:Core/Src/max30102_for_stm32_hal.c **** void max30102_interrupt_handler(max30102_t *obj)
+ 175:Core/Src/max30102_for_stm32_hal.c **** {
+ 176:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg[2] = {0x00};
+ 177:Core/Src/max30102_for_stm32_hal.c ****     // Interrupt flag in registers 0x00 and 0x01 are cleared on read
+ 178:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_INTERRUPT_STATUS_1, reg, 2);
+ 179:Core/Src/max30102_for_stm32_hal.c **** 
+ 180:Core/Src/max30102_for_stm32_hal.c ****     if ((reg[0] >> MAX30102_INTERRUPT_A_FULL) & 0x01)
+ 181:Core/Src/max30102_for_stm32_hal.c ****     {
+ 182:Core/Src/max30102_for_stm32_hal.c ****         // FIFO almost full
+ 183:Core/Src/max30102_for_stm32_hal.c ****         max30102_read_fifo(obj);
+ 184:Core/Src/max30102_for_stm32_hal.c ****     }
+ 185:Core/Src/max30102_for_stm32_hal.c **** 
+ 186:Core/Src/max30102_for_stm32_hal.c ****     if ((reg[0] >> MAX30102_INTERRUPT_PPG_RDY) & 0x01)
+ 187:Core/Src/max30102_for_stm32_hal.c ****     {
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 15
+
+
+ 188:Core/Src/max30102_for_stm32_hal.c ****         // New FIFO data ready
+ 189:Core/Src/max30102_for_stm32_hal.c ****     }
+ 190:Core/Src/max30102_for_stm32_hal.c **** 
+ 191:Core/Src/max30102_for_stm32_hal.c ****     if ((reg[0] >> MAX30102_INTERRUPT_ALC_OVF) & 0x01)
+ 192:Core/Src/max30102_for_stm32_hal.c ****     {
+ 193:Core/Src/max30102_for_stm32_hal.c ****         // Ambient light overflow
+ 194:Core/Src/max30102_for_stm32_hal.c ****     }
+ 195:Core/Src/max30102_for_stm32_hal.c **** 
+ 196:Core/Src/max30102_for_stm32_hal.c ****     if ((reg[1] >> MAX30102_INTERRUPT_DIE_TEMP_RDY) & 0x01)
+ 197:Core/Src/max30102_for_stm32_hal.c ****     {
+ 198:Core/Src/max30102_for_stm32_hal.c ****         // Temperature data ready
+ 199:Core/Src/max30102_for_stm32_hal.c ****         int8_t temp_int;
+ 200:Core/Src/max30102_for_stm32_hal.c ****         uint8_t temp_frac;
+ 201:Core/Src/max30102_for_stm32_hal.c ****         max30102_read_temp(obj, &temp_int, &temp_frac);
+ 202:Core/Src/max30102_for_stm32_hal.c ****         // float temp = temp_int + 0.0625f * temp_frac;
+ 203:Core/Src/max30102_for_stm32_hal.c ****     }
+ 204:Core/Src/max30102_for_stm32_hal.c **** 
+ 205:Core/Src/max30102_for_stm32_hal.c ****     // Reset interrupt flag
+ 206:Core/Src/max30102_for_stm32_hal.c ****     obj->_interrupt_flag = 0;
+ 207:Core/Src/max30102_for_stm32_hal.c **** }
+ 208:Core/Src/max30102_for_stm32_hal.c **** 
+ 209:Core/Src/max30102_for_stm32_hal.c **** /**
+ 210:Core/Src/max30102_for_stm32_hal.c ****  * @brief Shutdown the sensor.
+ 211:Core/Src/max30102_for_stm32_hal.c ****  *
+ 212:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 213:Core/Src/max30102_for_stm32_hal.c ****  * @param shdn Shutdown bit.
+ 214:Core/Src/max30102_for_stm32_hal.c ****  */
+ 215:Core/Src/max30102_for_stm32_hal.c **** void max30102_shutdown(max30102_t *obj, uint8_t shdn)
+ 216:Core/Src/max30102_for_stm32_hal.c **** {
+ 635              		.loc 1 216 1 is_stmt 1 view -0
+ 636              		.cfi_startproc
+ 637              		@ args = 0, pretend = 0, frame = 8
+ 638              		@ frame_needed = 0, uses_anonymous_args = 0
+ 639              		.loc 1 216 1 is_stmt 0 view .LVU116
+ 640 0000 30B5     		push	{r4, r5, lr}
+ 641              	.LCFI26:
+ 642              		.cfi_def_cfa_offset 12
+ 643              		.cfi_offset 4, -12
+ 644              		.cfi_offset 5, -8
+ 645              		.cfi_offset 14, -4
+ 646 0002 83B0     		sub	sp, sp, #12
+ 647              	.LCFI27:
+ 648              		.cfi_def_cfa_offset 24
+ 649 0004 0446     		mov	r4, r0
+ 650 0006 0D46     		mov	r5, r1
+ 217:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 651              		.loc 1 217 5 is_stmt 1 view .LVU117
+ 218:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 652              		.loc 1 218 5 view .LVU118
+ 653 0008 0123     		movs	r3, #1
+ 654 000a 0DF10702 		add	r2, sp, #7
+ 655 000e 0921     		movs	r1, #9
+ 656              	.LVL47:
+ 657              		.loc 1 218 5 is_stmt 0 view .LVU119
+ 658 0010 FFF7FEFF 		bl	max30102_read
+ 659              	.LVL48:
+ 219:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0x7f) | (shdn << MAX30102_MODE_SHDN);
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 16
+
+
+ 660              		.loc 1 219 5 is_stmt 1 view .LVU120
+ 661              		.loc 1 219 22 is_stmt 0 view .LVU121
+ 662 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 663              		.loc 1 219 30 view .LVU122
+ 664 0018 03F07F03 		and	r3, r3, #127
+ 665 001c 43EAC511 		orr	r1, r3, r5, lsl #7
+ 666              		.loc 1 219 12 view .LVU123
+ 667 0020 8DF80710 		strb	r1, [sp, #7]
+ 220:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 668              		.loc 1 220 5 is_stmt 1 view .LVU124
+ 669 0024 0123     		movs	r3, #1
+ 670 0026 0DF10702 		add	r2, sp, #7
+ 671 002a 0921     		movs	r1, #9
+ 672 002c 2046     		mov	r0, r4
+ 673 002e FFF7FEFF 		bl	max30102_write
+ 674              	.LVL49:
+ 221:Core/Src/max30102_for_stm32_hal.c **** }
+ 675              		.loc 1 221 1 is_stmt 0 view .LVU125
+ 676 0032 03B0     		add	sp, sp, #12
+ 677              	.LCFI28:
+ 678              		.cfi_def_cfa_offset 12
+ 679              		@ sp needed
+ 680 0034 30BD     		pop	{r4, r5, pc}
+ 681              		.loc 1 221 1 view .LVU126
+ 682              		.cfi_endproc
+ 683              	.LFE81:
+ 685              		.section	.text.max30102_set_sampling_rate,"ax",%progbits
+ 686              		.align	1
+ 687              		.global	max30102_set_sampling_rate
+ 688              		.syntax unified
+ 689              		.thumb
+ 690              		.thumb_func
+ 692              	max30102_set_sampling_rate:
+ 693              	.LVL50:
+ 694              	.LFB83:
+ 222:Core/Src/max30102_for_stm32_hal.c **** 
+ 223:Core/Src/max30102_for_stm32_hal.c **** /**
+ 224:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set measurement mode.
+ 225:Core/Src/max30102_for_stm32_hal.c ****  *
+ 226:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 227:Core/Src/max30102_for_stm32_hal.c ****  * @param mode Measurement mode enum (max30102_mode_t).
+ 228:Core/Src/max30102_for_stm32_hal.c ****  */
+ 229:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_mode(max30102_t *obj, max30102_mode_t mode)
+ 230:Core/Src/max30102_for_stm32_hal.c **** {
+ 231:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 232:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 233:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0xf8) | mode;
+ 234:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 235:Core/Src/max30102_for_stm32_hal.c ****     max30102_clear_fifo(obj);
+ 236:Core/Src/max30102_for_stm32_hal.c **** }
+ 237:Core/Src/max30102_for_stm32_hal.c **** 
+ 238:Core/Src/max30102_for_stm32_hal.c **** /**
+ 239:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set sampling rate.
+ 240:Core/Src/max30102_for_stm32_hal.c ****  *
+ 241:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 242:Core/Src/max30102_for_stm32_hal.c ****  * @param sr Sampling rate enum (max30102_spo2_st_t).
+ 243:Core/Src/max30102_for_stm32_hal.c ****  */
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 17
+
+
+ 244:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_sampling_rate(max30102_t *obj, max30102_sr_t sr)
+ 245:Core/Src/max30102_for_stm32_hal.c **** {
+ 695              		.loc 1 245 1 is_stmt 1 view -0
+ 696              		.cfi_startproc
+ 697              		@ args = 0, pretend = 0, frame = 8
+ 698              		@ frame_needed = 0, uses_anonymous_args = 0
+ 699              		.loc 1 245 1 is_stmt 0 view .LVU128
+ 700 0000 30B5     		push	{r4, r5, lr}
+ 701              	.LCFI29:
+ 702              		.cfi_def_cfa_offset 12
+ 703              		.cfi_offset 4, -12
+ 704              		.cfi_offset 5, -8
+ 705              		.cfi_offset 14, -4
+ 706 0002 83B0     		sub	sp, sp, #12
+ 707              	.LCFI30:
+ 708              		.cfi_def_cfa_offset 24
+ 709 0004 0446     		mov	r4, r0
+ 710 0006 0D46     		mov	r5, r1
+ 246:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 711              		.loc 1 246 5 is_stmt 1 view .LVU129
+ 247:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 712              		.loc 1 247 5 view .LVU130
+ 713 0008 0123     		movs	r3, #1
+ 714 000a 0DF10702 		add	r2, sp, #7
+ 715 000e 0A21     		movs	r1, #10
+ 716              	.LVL51:
+ 717              		.loc 1 247 5 is_stmt 0 view .LVU131
+ 718 0010 FFF7FEFF 		bl	max30102_read
+ 719              	.LVL52:
+ 248:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0x63) | (sr << MAX30102_SPO2_SR);
+ 720              		.loc 1 248 5 is_stmt 1 view .LVU132
+ 721              		.loc 1 248 22 is_stmt 0 view .LVU133
+ 722 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 723              		.loc 1 248 30 view .LVU134
+ 724 0018 03F06303 		and	r3, r3, #99
+ 725 001c 43EA8501 		orr	r1, r3, r5, lsl #2
+ 726              		.loc 1 248 12 view .LVU135
+ 727 0020 8DF80710 		strb	r1, [sp, #7]
+ 249:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 728              		.loc 1 249 5 is_stmt 1 view .LVU136
+ 729 0024 0123     		movs	r3, #1
+ 730 0026 0DF10702 		add	r2, sp, #7
+ 731 002a 0A21     		movs	r1, #10
+ 732 002c 2046     		mov	r0, r4
+ 733 002e FFF7FEFF 		bl	max30102_write
+ 734              	.LVL53:
+ 250:Core/Src/max30102_for_stm32_hal.c **** }
+ 735              		.loc 1 250 1 is_stmt 0 view .LVU137
+ 736 0032 03B0     		add	sp, sp, #12
+ 737              	.LCFI31:
+ 738              		.cfi_def_cfa_offset 12
+ 739              		@ sp needed
+ 740 0034 30BD     		pop	{r4, r5, pc}
+ 741              		.loc 1 250 1 view .LVU138
+ 742              		.cfi_endproc
+ 743              	.LFE83:
+ 745              		.section	.text.max30102_set_led_pulse_width,"ax",%progbits
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 18
+
+
+ 746              		.align	1
+ 747              		.global	max30102_set_led_pulse_width
+ 748              		.syntax unified
+ 749              		.thumb
+ 750              		.thumb_func
+ 752              	max30102_set_led_pulse_width:
+ 753              	.LVL54:
+ 754              	.LFB84:
+ 251:Core/Src/max30102_for_stm32_hal.c **** 
+ 252:Core/Src/max30102_for_stm32_hal.c **** /**
+ 253:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set led pulse width.
+ 254:Core/Src/max30102_for_stm32_hal.c ****  *
+ 255:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 256:Core/Src/max30102_for_stm32_hal.c ****  * @param pw Pulse width enum (max30102_led_pw_t).
+ 257:Core/Src/max30102_for_stm32_hal.c ****  */
+ 258:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_led_pulse_width(max30102_t *obj, max30102_led_pw_t pw)
+ 259:Core/Src/max30102_for_stm32_hal.c **** {
+ 755              		.loc 1 259 1 is_stmt 1 view -0
+ 756              		.cfi_startproc
+ 757              		@ args = 0, pretend = 0, frame = 8
+ 758              		@ frame_needed = 0, uses_anonymous_args = 0
+ 759              		.loc 1 259 1 is_stmt 0 view .LVU140
+ 760 0000 30B5     		push	{r4, r5, lr}
+ 761              	.LCFI32:
+ 762              		.cfi_def_cfa_offset 12
+ 763              		.cfi_offset 4, -12
+ 764              		.cfi_offset 5, -8
+ 765              		.cfi_offset 14, -4
+ 766 0002 83B0     		sub	sp, sp, #12
+ 767              	.LCFI33:
+ 768              		.cfi_def_cfa_offset 24
+ 769 0004 0546     		mov	r5, r0
+ 770 0006 0C46     		mov	r4, r1
+ 260:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 771              		.loc 1 260 5 is_stmt 1 view .LVU141
+ 261:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 772              		.loc 1 261 5 view .LVU142
+ 773 0008 0123     		movs	r3, #1
+ 774 000a 0DF10702 		add	r2, sp, #7
+ 775 000e 0A21     		movs	r1, #10
+ 776              	.LVL55:
+ 777              		.loc 1 261 5 is_stmt 0 view .LVU143
+ 778 0010 FFF7FEFF 		bl	max30102_read
+ 779              	.LVL56:
+ 262:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0x7c) | (pw << MAX30102_SPO2_LEW_PW);
+ 780              		.loc 1 262 5 is_stmt 1 view .LVU144
+ 781              		.loc 1 262 22 is_stmt 0 view .LVU145
+ 782 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 783              		.loc 1 262 12 view .LVU146
+ 784 0018 03F07C03 		and	r3, r3, #124
+ 785 001c 1C43     		orrs	r4, r4, r3
+ 786 001e 8DF80740 		strb	r4, [sp, #7]
+ 263:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 787              		.loc 1 263 5 is_stmt 1 view .LVU147
+ 788 0022 0123     		movs	r3, #1
+ 789 0024 0DF10702 		add	r2, sp, #7
+ 790 0028 0A21     		movs	r1, #10
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 19
+
+
+ 791 002a 2846     		mov	r0, r5
+ 792 002c FFF7FEFF 		bl	max30102_write
+ 793              	.LVL57:
+ 264:Core/Src/max30102_for_stm32_hal.c **** }
+ 794              		.loc 1 264 1 is_stmt 0 view .LVU148
+ 795 0030 03B0     		add	sp, sp, #12
+ 796              	.LCFI34:
+ 797              		.cfi_def_cfa_offset 12
+ 798              		@ sp needed
+ 799 0032 30BD     		pop	{r4, r5, pc}
+ 800              		.loc 1 264 1 view .LVU149
+ 801              		.cfi_endproc
+ 802              	.LFE84:
+ 804              		.section	.text.max30102_set_adc_resolution,"ax",%progbits
+ 805              		.align	1
+ 806              		.global	max30102_set_adc_resolution
+ 807              		.syntax unified
+ 808              		.thumb
+ 809              		.thumb_func
+ 811              	max30102_set_adc_resolution:
+ 812              	.LVL58:
+ 813              	.LFB85:
+ 265:Core/Src/max30102_for_stm32_hal.c **** 
+ 266:Core/Src/max30102_for_stm32_hal.c **** /**
+ 267:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set ADC resolution.
+ 268:Core/Src/max30102_for_stm32_hal.c ****  *
+ 269:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 270:Core/Src/max30102_for_stm32_hal.c ****  * @param adc ADC resolution enum (max30102_adc_t).
+ 271:Core/Src/max30102_for_stm32_hal.c ****  */
+ 272:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_adc_resolution(max30102_t *obj, max30102_adc_t adc)
+ 273:Core/Src/max30102_for_stm32_hal.c **** {
+ 814              		.loc 1 273 1 is_stmt 1 view -0
+ 815              		.cfi_startproc
+ 816              		@ args = 0, pretend = 0, frame = 8
+ 817              		@ frame_needed = 0, uses_anonymous_args = 0
+ 818              		.loc 1 273 1 is_stmt 0 view .LVU151
+ 819 0000 30B5     		push	{r4, r5, lr}
+ 820              	.LCFI35:
+ 821              		.cfi_def_cfa_offset 12
+ 822              		.cfi_offset 4, -12
+ 823              		.cfi_offset 5, -8
+ 824              		.cfi_offset 14, -4
+ 825 0002 83B0     		sub	sp, sp, #12
+ 826              	.LCFI36:
+ 827              		.cfi_def_cfa_offset 24
+ 828 0004 0446     		mov	r4, r0
+ 829 0006 0D46     		mov	r5, r1
+ 274:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 830              		.loc 1 274 5 is_stmt 1 view .LVU152
+ 275:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 831              		.loc 1 275 5 view .LVU153
+ 832 0008 0123     		movs	r3, #1
+ 833 000a 0DF10702 		add	r2, sp, #7
+ 834 000e 0A21     		movs	r1, #10
+ 835              	.LVL59:
+ 836              		.loc 1 275 5 is_stmt 0 view .LVU154
+ 837 0010 FFF7FEFF 		bl	max30102_read
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 20
+
+
+ 838              	.LVL60:
+ 276:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0x1f) | (adc << MAX30102_SPO2_ADC_RGE);
+ 839              		.loc 1 276 5 is_stmt 1 view .LVU155
+ 840              		.loc 1 276 22 is_stmt 0 view .LVU156
+ 841 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 842              		.loc 1 276 30 view .LVU157
+ 843 0018 03F01F03 		and	r3, r3, #31
+ 844 001c 43EA4511 		orr	r1, r3, r5, lsl #5
+ 845              		.loc 1 276 12 view .LVU158
+ 846 0020 8DF80710 		strb	r1, [sp, #7]
+ 277:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_SPO2_CONFIG, &config, 1);
+ 847              		.loc 1 277 5 is_stmt 1 view .LVU159
+ 848 0024 0123     		movs	r3, #1
+ 849 0026 0DF10702 		add	r2, sp, #7
+ 850 002a 0A21     		movs	r1, #10
+ 851 002c 2046     		mov	r0, r4
+ 852 002e FFF7FEFF 		bl	max30102_write
+ 853              	.LVL61:
+ 278:Core/Src/max30102_for_stm32_hal.c **** }
+ 854              		.loc 1 278 1 is_stmt 0 view .LVU160
+ 855 0032 03B0     		add	sp, sp, #12
+ 856              	.LCFI37:
+ 857              		.cfi_def_cfa_offset 12
+ 858              		@ sp needed
+ 859 0034 30BD     		pop	{r4, r5, pc}
+ 860              		.loc 1 278 1 view .LVU161
+ 861              		.cfi_endproc
+ 862              	.LFE85:
+ 864              		.global	__aeabi_f2d
+ 865              		.global	__aeabi_ddiv
+ 866              		.global	__aeabi_d2uiz
+ 867              		.section	.text.max30102_set_led_current_1,"ax",%progbits
+ 868              		.align	1
+ 869              		.global	max30102_set_led_current_1
+ 870              		.syntax unified
+ 871              		.thumb
+ 872              		.thumb_func
+ 874              	max30102_set_led_current_1:
+ 875              	.LVL62:
+ 876              	.LFB86:
+ 279:Core/Src/max30102_for_stm32_hal.c **** 
+ 280:Core/Src/max30102_for_stm32_hal.c **** /**
+ 281:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set LED current.
+ 282:Core/Src/max30102_for_stm32_hal.c ****  *
+ 283:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 284:Core/Src/max30102_for_stm32_hal.c ****  * @param ma LED current float (0 < ma < 51.0).
+ 285:Core/Src/max30102_for_stm32_hal.c ****  */
+ 286:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_led_current_1(max30102_t *obj, float ma)
+ 287:Core/Src/max30102_for_stm32_hal.c **** {
+ 877              		.loc 1 287 1 is_stmt 1 view -0
+ 878              		.cfi_startproc
+ 879              		@ args = 0, pretend = 0, frame = 8
+ 880              		@ frame_needed = 0, uses_anonymous_args = 0
+ 881              		.loc 1 287 1 is_stmt 0 view .LVU163
+ 882 0000 10B5     		push	{r4, lr}
+ 883              	.LCFI38:
+ 884              		.cfi_def_cfa_offset 8
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 21
+
+
+ 885              		.cfi_offset 4, -8
+ 886              		.cfi_offset 14, -4
+ 887 0002 82B0     		sub	sp, sp, #8
+ 888              	.LCFI39:
+ 889              		.cfi_def_cfa_offset 16
+ 890 0004 0446     		mov	r4, r0
+ 288:Core/Src/max30102_for_stm32_hal.c ****     uint8_t pa = ma / 0.2;
+ 891              		.loc 1 288 5 is_stmt 1 view .LVU164
+ 892              		.loc 1 288 21 is_stmt 0 view .LVU165
+ 893 0006 0846     		mov	r0, r1
+ 894              	.LVL63:
+ 895              		.loc 1 288 21 view .LVU166
+ 896 0008 FFF7FEFF 		bl	__aeabi_f2d
+ 897              	.LVL64:
+ 898              		.loc 1 288 21 view .LVU167
+ 899 000c 08A3     		adr	r3, .L34
+ 900 000e D3E90023 		ldrd	r2, [r3]
+ 901 0012 FFF7FEFF 		bl	__aeabi_ddiv
+ 902              	.LVL65:
+ 903              		.loc 1 288 13 view .LVU168
+ 904 0016 FFF7FEFF 		bl	__aeabi_d2uiz
+ 905              	.LVL66:
+ 906 001a 8DF80700 		strb	r0, [sp, #7]
+ 289:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_LED_IR_PA1, &pa, 1);
+ 907              		.loc 1 289 5 is_stmt 1 view .LVU169
+ 908 001e 0123     		movs	r3, #1
+ 909 0020 0DF10702 		add	r2, sp, #7
+ 910 0024 0C21     		movs	r1, #12
+ 911 0026 2046     		mov	r0, r4
+ 912 0028 FFF7FEFF 		bl	max30102_write
+ 913              	.LVL67:
+ 290:Core/Src/max30102_for_stm32_hal.c **** }
+ 914              		.loc 1 290 1 is_stmt 0 view .LVU170
+ 915 002c 02B0     		add	sp, sp, #8
+ 916              	.LCFI40:
+ 917              		.cfi_def_cfa_offset 8
+ 918              		@ sp needed
+ 919 002e 10BD     		pop	{r4, pc}
+ 920              	.LVL68:
+ 921              	.L35:
+ 922              		.loc 1 290 1 view .LVU171
+ 923              		.align	3
+ 924              	.L34:
+ 925 0030 9A999999 		.word	-1717986918
+ 926 0034 9999C93F 		.word	1070176665
+ 927              		.cfi_endproc
+ 928              	.LFE86:
+ 930              		.section	.text.max30102_set_led_current_2,"ax",%progbits
+ 931              		.align	1
+ 932              		.global	max30102_set_led_current_2
+ 933              		.syntax unified
+ 934              		.thumb
+ 935              		.thumb_func
+ 937              	max30102_set_led_current_2:
+ 938              	.LVL69:
+ 939              	.LFB87:
+ 291:Core/Src/max30102_for_stm32_hal.c **** 
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 22
+
+
+ 292:Core/Src/max30102_for_stm32_hal.c **** /**
+ 293:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set LED current.
+ 294:Core/Src/max30102_for_stm32_hal.c ****  *
+ 295:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 296:Core/Src/max30102_for_stm32_hal.c ****  * @param ma LED current float (0 < ma < 51.0).
+ 297:Core/Src/max30102_for_stm32_hal.c ****  */
+ 298:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_led_current_2(max30102_t *obj, float ma)
+ 299:Core/Src/max30102_for_stm32_hal.c **** {
+ 940              		.loc 1 299 1 is_stmt 1 view -0
+ 941              		.cfi_startproc
+ 942              		@ args = 0, pretend = 0, frame = 8
+ 943              		@ frame_needed = 0, uses_anonymous_args = 0
+ 944              		.loc 1 299 1 is_stmt 0 view .LVU173
+ 945 0000 10B5     		push	{r4, lr}
+ 946              	.LCFI41:
+ 947              		.cfi_def_cfa_offset 8
+ 948              		.cfi_offset 4, -8
+ 949              		.cfi_offset 14, -4
+ 950 0002 82B0     		sub	sp, sp, #8
+ 951              	.LCFI42:
+ 952              		.cfi_def_cfa_offset 16
+ 953 0004 0446     		mov	r4, r0
+ 300:Core/Src/max30102_for_stm32_hal.c ****     uint8_t pa = ma / 0.2;
+ 954              		.loc 1 300 5 is_stmt 1 view .LVU174
+ 955              		.loc 1 300 21 is_stmt 0 view .LVU175
+ 956 0006 0846     		mov	r0, r1
+ 957              	.LVL70:
+ 958              		.loc 1 300 21 view .LVU176
+ 959 0008 FFF7FEFF 		bl	__aeabi_f2d
+ 960              	.LVL71:
+ 961              		.loc 1 300 21 view .LVU177
+ 962 000c 08A3     		adr	r3, .L38
+ 963 000e D3E90023 		ldrd	r2, [r3]
+ 964 0012 FFF7FEFF 		bl	__aeabi_ddiv
+ 965              	.LVL72:
+ 966              		.loc 1 300 13 view .LVU178
+ 967 0016 FFF7FEFF 		bl	__aeabi_d2uiz
+ 968              	.LVL73:
+ 969 001a 8DF80700 		strb	r0, [sp, #7]
+ 301:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_LED_RED_PA2, &pa, 1);
+ 970              		.loc 1 301 5 is_stmt 1 view .LVU179
+ 971 001e 0123     		movs	r3, #1
+ 972 0020 0DF10702 		add	r2, sp, #7
+ 973 0024 0D21     		movs	r1, #13
+ 974 0026 2046     		mov	r0, r4
+ 975 0028 FFF7FEFF 		bl	max30102_write
+ 976              	.LVL74:
+ 302:Core/Src/max30102_for_stm32_hal.c **** }
+ 977              		.loc 1 302 1 is_stmt 0 view .LVU180
+ 978 002c 02B0     		add	sp, sp, #8
+ 979              	.LCFI43:
+ 980              		.cfi_def_cfa_offset 8
+ 981              		@ sp needed
+ 982 002e 10BD     		pop	{r4, pc}
+ 983              	.LVL75:
+ 984              	.L39:
+ 985              		.loc 1 302 1 view .LVU181
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 23
+
+
+ 986              		.align	3
+ 987              	.L38:
+ 988 0030 9A999999 		.word	-1717986918
+ 989 0034 9999C93F 		.word	1070176665
+ 990              		.cfi_endproc
+ 991              	.LFE87:
+ 993              		.section	.text.max30102_set_multi_led_slot_1_2,"ax",%progbits
+ 994              		.align	1
+ 995              		.global	max30102_set_multi_led_slot_1_2
+ 996              		.syntax unified
+ 997              		.thumb
+ 998              		.thumb_func
+ 1000              	max30102_set_multi_led_slot_1_2:
+ 1001              	.LVL76:
+ 1002              	.LFB88:
+ 303:Core/Src/max30102_for_stm32_hal.c **** 
+ 304:Core/Src/max30102_for_stm32_hal.c **** /**
+ 305:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set slot mode when in multi-LED mode.
+ 306:Core/Src/max30102_for_stm32_hal.c ****  *
+ 307:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 308:Core/Src/max30102_for_stm32_hal.c ****  * @param slot1 Slot 1 mode enum (max30102_multi_led_ctrl_t).
+ 309:Core/Src/max30102_for_stm32_hal.c ****  * @param slot2 Slot 2 mode enum (max30102_multi_led_ctrl_t).
+ 310:Core/Src/max30102_for_stm32_hal.c ****  */
+ 311:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_multi_led_slot_1_2(max30102_t *obj, max30102_multi_led_ctrl_t slot1, max30102_mul
+ 312:Core/Src/max30102_for_stm32_hal.c **** {
+ 1003              		.loc 1 312 1 is_stmt 1 view -0
+ 1004              		.cfi_startproc
+ 1005              		@ args = 0, pretend = 0, frame = 8
+ 1006              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1007              		.loc 1 312 1 is_stmt 0 view .LVU183
+ 1008 0000 00B5     		push	{lr}
+ 1009              	.LCFI44:
+ 1010              		.cfi_def_cfa_offset 4
+ 1011              		.cfi_offset 14, -4
+ 1012 0002 83B0     		sub	sp, sp, #12
+ 1013              	.LCFI45:
+ 1014              		.cfi_def_cfa_offset 16
+ 313:Core/Src/max30102_for_stm32_hal.c ****     uint8_t val = 0;
+ 1015              		.loc 1 313 5 is_stmt 1 view .LVU184
+ 1016              		.loc 1 313 13 is_stmt 0 view .LVU185
+ 1017 0004 0023     		movs	r3, #0
+ 1018 0006 8DF80730 		strb	r3, [sp, #7]
+ 314:Core/Src/max30102_for_stm32_hal.c ****     val |= ((slot1 << MAX30102_MULTI_LED_CTRL_SLOT1) | (slot2 << MAX30102_MULTI_LED_CTRL_SLOT2));
+ 1019              		.loc 1 314 5 is_stmt 1 view .LVU186
+ 1020              		.loc 1 314 9 is_stmt 0 view .LVU187
+ 1021 000a 41EA0211 		orr	r1, r1, r2, lsl #4
+ 1022              	.LVL77:
+ 1023              		.loc 1 314 9 view .LVU188
+ 1024 000e 8DF80710 		strb	r1, [sp, #7]
+ 315:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MULTI_LED_CTRL_1, &val, 1);
+ 1025              		.loc 1 315 5 is_stmt 1 view .LVU189
+ 1026 0012 0123     		movs	r3, #1
+ 1027 0014 0DF10702 		add	r2, sp, #7
+ 1028              	.LVL78:
+ 1029              		.loc 1 315 5 is_stmt 0 view .LVU190
+ 1030 0018 1121     		movs	r1, #17
+ 1031 001a FFF7FEFF 		bl	max30102_write
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 24
+
+
+ 1032              	.LVL79:
+ 316:Core/Src/max30102_for_stm32_hal.c **** }
+ 1033              		.loc 1 316 1 view .LVU191
+ 1034 001e 03B0     		add	sp, sp, #12
+ 1035              	.LCFI46:
+ 1036              		.cfi_def_cfa_offset 4
+ 1037              		@ sp needed
+ 1038 0020 5DF804FB 		ldr	pc, [sp], #4
+ 1039              		.cfi_endproc
+ 1040              	.LFE88:
+ 1042              		.section	.text.max30102_set_multi_led_slot_3_4,"ax",%progbits
+ 1043              		.align	1
+ 1044              		.global	max30102_set_multi_led_slot_3_4
+ 1045              		.syntax unified
+ 1046              		.thumb
+ 1047              		.thumb_func
+ 1049              	max30102_set_multi_led_slot_3_4:
+ 1050              	.LVL80:
+ 1051              	.LFB89:
+ 317:Core/Src/max30102_for_stm32_hal.c **** 
+ 318:Core/Src/max30102_for_stm32_hal.c **** /**
+ 319:Core/Src/max30102_for_stm32_hal.c ****  * @brief Set slot mode when in multi-LED mode.
+ 320:Core/Src/max30102_for_stm32_hal.c ****  *
+ 321:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 322:Core/Src/max30102_for_stm32_hal.c ****  * @param slot1 Slot 1 mode enum (max30102_multi_led_ctrl_t).
+ 323:Core/Src/max30102_for_stm32_hal.c ****  * @param slot2 Slot 2 mode enum (max30102_multi_led_ctrl_t).
+ 324:Core/Src/max30102_for_stm32_hal.c ****  */
+ 325:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_multi_led_slot_3_4(max30102_t *obj, max30102_multi_led_ctrl_t slot3, max30102_mul
+ 326:Core/Src/max30102_for_stm32_hal.c **** {
+ 1052              		.loc 1 326 1 is_stmt 1 view -0
+ 1053              		.cfi_startproc
+ 1054              		@ args = 0, pretend = 0, frame = 8
+ 1055              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1056              		.loc 1 326 1 is_stmt 0 view .LVU193
+ 1057 0000 00B5     		push	{lr}
+ 1058              	.LCFI47:
+ 1059              		.cfi_def_cfa_offset 4
+ 1060              		.cfi_offset 14, -4
+ 1061 0002 83B0     		sub	sp, sp, #12
+ 1062              	.LCFI48:
+ 1063              		.cfi_def_cfa_offset 16
+ 327:Core/Src/max30102_for_stm32_hal.c ****     uint8_t val = 0;
+ 1064              		.loc 1 327 5 is_stmt 1 view .LVU194
+ 1065              		.loc 1 327 13 is_stmt 0 view .LVU195
+ 1066 0004 0023     		movs	r3, #0
+ 1067 0006 8DF80730 		strb	r3, [sp, #7]
+ 328:Core/Src/max30102_for_stm32_hal.c ****     val |= ((slot3 << MAX30102_MULTI_LED_CTRL_SLOT3) | (slot4 << MAX30102_MULTI_LED_CTRL_SLOT4));
+ 1068              		.loc 1 328 5 is_stmt 1 view .LVU196
+ 1069              		.loc 1 328 9 is_stmt 0 view .LVU197
+ 1070 000a 41EA0211 		orr	r1, r1, r2, lsl #4
+ 1071              	.LVL81:
+ 1072              		.loc 1 328 9 view .LVU198
+ 1073 000e 8DF80710 		strb	r1, [sp, #7]
+ 329:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MULTI_LED_CTRL_2, &val, 1);
+ 1074              		.loc 1 329 5 is_stmt 1 view .LVU199
+ 1075 0012 0123     		movs	r3, #1
+ 1076 0014 0DF10702 		add	r2, sp, #7
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 25
+
+
+ 1077              	.LVL82:
+ 1078              		.loc 1 329 5 is_stmt 0 view .LVU200
+ 1079 0018 1221     		movs	r1, #18
+ 1080 001a FFF7FEFF 		bl	max30102_write
+ 1081              	.LVL83:
+ 330:Core/Src/max30102_for_stm32_hal.c **** }
+ 1082              		.loc 1 330 1 view .LVU201
+ 1083 001e 03B0     		add	sp, sp, #12
+ 1084              	.LCFI49:
+ 1085              		.cfi_def_cfa_offset 4
+ 1086              		@ sp needed
+ 1087 0020 5DF804FB 		ldr	pc, [sp], #4
+ 1088              		.cfi_endproc
+ 1089              	.LFE89:
+ 1091              		.section	.text.max30102_set_fifo_config,"ax",%progbits
+ 1092              		.align	1
+ 1093              		.global	max30102_set_fifo_config
+ 1094              		.syntax unified
+ 1095              		.thumb
+ 1096              		.thumb_func
+ 1098              	max30102_set_fifo_config:
+ 1099              	.LVL84:
+ 1100              	.LFB90:
+ 331:Core/Src/max30102_for_stm32_hal.c **** 
+ 332:Core/Src/max30102_for_stm32_hal.c **** /**
+ 333:Core/Src/max30102_for_stm32_hal.c ****  * @brief
+ 334:Core/Src/max30102_for_stm32_hal.c ****  *
+ 335:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 336:Core/Src/max30102_for_stm32_hal.c ****  * @param smp_ave
+ 337:Core/Src/max30102_for_stm32_hal.c ****  * @param roll_over_en Roll over enabled(1) or disabled(0).
+ 338:Core/Src/max30102_for_stm32_hal.c ****  * @param fifo_a_full Number of empty samples when A_FULL interrupt issued (0 < fifo_a_full < 15).
+ 339:Core/Src/max30102_for_stm32_hal.c ****  */
+ 340:Core/Src/max30102_for_stm32_hal.c **** void max30102_set_fifo_config(max30102_t *obj, max30102_smp_ave_t smp_ave, uint8_t roll_over_en, ui
+ 341:Core/Src/max30102_for_stm32_hal.c **** {
+ 1101              		.loc 1 341 1 is_stmt 1 view -0
+ 1102              		.cfi_startproc
+ 1103              		@ args = 0, pretend = 0, frame = 8
+ 1104              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1105              		.loc 1 341 1 is_stmt 0 view .LVU203
+ 1106 0000 00B5     		push	{lr}
+ 1107              	.LCFI50:
+ 1108              		.cfi_def_cfa_offset 4
+ 1109              		.cfi_offset 14, -4
+ 1110 0002 83B0     		sub	sp, sp, #12
+ 1111              	.LCFI51:
+ 1112              		.cfi_def_cfa_offset 16
+ 342:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config = 0x00;
+ 1113              		.loc 1 342 5 is_stmt 1 view .LVU204
+ 1114              		.loc 1 342 13 is_stmt 0 view .LVU205
+ 1115 0004 4FF0000C 		mov	ip, #0
+ 1116 0008 8DF807C0 		strb	ip, [sp, #7]
+ 343:Core/Src/max30102_for_stm32_hal.c ****     config |= smp_ave << MAX30102_FIFO_CONFIG_SMP_AVE;
+ 1117              		.loc 1 343 5 is_stmt 1 view .LVU206
+ 1118              		.loc 1 343 23 is_stmt 0 view .LVU207
+ 1119 000c 4901     		lsls	r1, r1, #5
+ 1120              	.LVL85:
+ 1121              		.loc 1 343 23 view .LVU208
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 26
+
+
+ 1122 000e C9B2     		uxtb	r1, r1
+ 1123              		.loc 1 343 12 view .LVU209
+ 1124 0010 8DF80710 		strb	r1, [sp, #7]
+ 344:Core/Src/max30102_for_stm32_hal.c ****     config |= ((roll_over_en & 0x01) << MAX30102_FIFO_CONFIG_ROLL_OVER_EN);
+ 1125              		.loc 1 344 5 is_stmt 1 view .LVU210
+ 1126              		.loc 1 344 38 is_stmt 0 view .LVU211
+ 1127 0014 1201     		lsls	r2, r2, #4
+ 1128              	.LVL86:
+ 1129              		.loc 1 344 38 view .LVU212
+ 1130 0016 02F01002 		and	r2, r2, #16
+ 1131              		.loc 1 344 12 view .LVU213
+ 1132 001a 1143     		orrs	r1, r1, r2
+ 1133 001c 8DF80710 		strb	r1, [sp, #7]
+ 345:Core/Src/max30102_for_stm32_hal.c ****     config |= ((fifo_a_full & 0x0f) << MAX30102_FIFO_CONFIG_FIFO_A_FULL);
+ 1134              		.loc 1 345 5 is_stmt 1 view .LVU214
+ 1135              		.loc 1 345 12 is_stmt 0 view .LVU215
+ 1136 0020 03F00F03 		and	r3, r3, #15
+ 1137              	.LVL87:
+ 1138              		.loc 1 345 12 view .LVU216
+ 1139 0024 1943     		orrs	r1, r1, r3
+ 1140 0026 8DF80710 		strb	r1, [sp, #7]
+ 346:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_FIFO_CONFIG, &config, 1);
+ 1141              		.loc 1 346 5 is_stmt 1 view .LVU217
+ 1142 002a 0123     		movs	r3, #1
+ 1143 002c 0DF10702 		add	r2, sp, #7
+ 1144 0030 0821     		movs	r1, #8
+ 1145 0032 FFF7FEFF 		bl	max30102_write
+ 1146              	.LVL88:
+ 347:Core/Src/max30102_for_stm32_hal.c **** }
+ 1147              		.loc 1 347 1 is_stmt 0 view .LVU218
+ 1148 0036 03B0     		add	sp, sp, #12
+ 1149              	.LCFI52:
+ 1150              		.cfi_def_cfa_offset 4
+ 1151              		@ sp needed
+ 1152 0038 5DF804FB 		ldr	pc, [sp], #4
+ 1153              		.cfi_endproc
+ 1154              	.LFE90:
+ 1156              		.section	.text.max30102_clear_fifo,"ax",%progbits
+ 1157              		.align	1
+ 1158              		.global	max30102_clear_fifo
+ 1159              		.syntax unified
+ 1160              		.thumb
+ 1161              		.thumb_func
+ 1163              	max30102_clear_fifo:
+ 1164              	.LVL89:
+ 1165              	.LFB91:
+ 348:Core/Src/max30102_for_stm32_hal.c **** 
+ 349:Core/Src/max30102_for_stm32_hal.c **** /**
+ 350:Core/Src/max30102_for_stm32_hal.c ****  * @brief Clear all FIFO pointers in the sensor.
+ 351:Core/Src/max30102_for_stm32_hal.c ****  *
+ 352:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 353:Core/Src/max30102_for_stm32_hal.c ****  */
+ 354:Core/Src/max30102_for_stm32_hal.c **** void max30102_clear_fifo(max30102_t *obj)
+ 355:Core/Src/max30102_for_stm32_hal.c **** {
+ 1166              		.loc 1 355 1 is_stmt 1 view -0
+ 1167              		.cfi_startproc
+ 1168              		@ args = 0, pretend = 0, frame = 8
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 27
+
+
+ 1169              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1170              		.loc 1 355 1 is_stmt 0 view .LVU220
+ 1171 0000 10B5     		push	{r4, lr}
+ 1172              	.LCFI53:
+ 1173              		.cfi_def_cfa_offset 8
+ 1174              		.cfi_offset 4, -8
+ 1175              		.cfi_offset 14, -4
+ 1176 0002 82B0     		sub	sp, sp, #8
+ 1177              	.LCFI54:
+ 1178              		.cfi_def_cfa_offset 16
+ 1179 0004 0446     		mov	r4, r0
+ 356:Core/Src/max30102_for_stm32_hal.c ****     uint8_t val = 0x00;
+ 1180              		.loc 1 356 5 is_stmt 1 view .LVU221
+ 1181              		.loc 1 356 13 is_stmt 0 view .LVU222
+ 1182 0006 0023     		movs	r3, #0
+ 1183 0008 8DF80730 		strb	r3, [sp, #7]
+ 357:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_FIFO_WR_PTR, &val, 3);
+ 1184              		.loc 1 357 5 is_stmt 1 view .LVU223
+ 1185 000c 0323     		movs	r3, #3
+ 1186 000e 0DF10702 		add	r2, sp, #7
+ 1187 0012 0421     		movs	r1, #4
+ 1188 0014 FFF7FEFF 		bl	max30102_write
+ 1189              	.LVL90:
+ 358:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_FIFO_RD_PTR, &val, 3);
+ 1190              		.loc 1 358 5 view .LVU224
+ 1191 0018 0323     		movs	r3, #3
+ 1192 001a 0DF10702 		add	r2, sp, #7
+ 1193 001e 0621     		movs	r1, #6
+ 1194 0020 2046     		mov	r0, r4
+ 1195 0022 FFF7FEFF 		bl	max30102_write
+ 1196              	.LVL91:
+ 359:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_OVF_COUNTER, &val, 3);
+ 1197              		.loc 1 359 5 view .LVU225
+ 1198 0026 0323     		movs	r3, #3
+ 1199 0028 0DF10702 		add	r2, sp, #7
+ 1200 002c 0521     		movs	r1, #5
+ 1201 002e 2046     		mov	r0, r4
+ 1202 0030 FFF7FEFF 		bl	max30102_write
+ 1203              	.LVL92:
+ 360:Core/Src/max30102_for_stm32_hal.c **** }
+ 1204              		.loc 1 360 1 is_stmt 0 view .LVU226
+ 1205 0034 02B0     		add	sp, sp, #8
+ 1206              	.LCFI55:
+ 1207              		.cfi_def_cfa_offset 8
+ 1208              		@ sp needed
+ 1209 0036 10BD     		pop	{r4, pc}
+ 1210              		.loc 1 360 1 view .LVU227
+ 1211              		.cfi_endproc
+ 1212              	.LFE91:
+ 1214              		.section	.text.max30102_set_mode,"ax",%progbits
+ 1215              		.align	1
+ 1216              		.global	max30102_set_mode
+ 1217              		.syntax unified
+ 1218              		.thumb
+ 1219              		.thumb_func
+ 1221              	max30102_set_mode:
+ 1222              	.LVL93:
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 28
+
+
+ 1223              	.LFB82:
+ 230:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 1224              		.loc 1 230 1 is_stmt 1 view -0
+ 1225              		.cfi_startproc
+ 1226              		@ args = 0, pretend = 0, frame = 8
+ 1227              		@ frame_needed = 0, uses_anonymous_args = 0
+ 230:Core/Src/max30102_for_stm32_hal.c ****     uint8_t config;
+ 1228              		.loc 1 230 1 is_stmt 0 view .LVU229
+ 1229 0000 30B5     		push	{r4, r5, lr}
+ 1230              	.LCFI56:
+ 1231              		.cfi_def_cfa_offset 12
+ 1232              		.cfi_offset 4, -12
+ 1233              		.cfi_offset 5, -8
+ 1234              		.cfi_offset 14, -4
+ 1235 0002 83B0     		sub	sp, sp, #12
+ 1236              	.LCFI57:
+ 1237              		.cfi_def_cfa_offset 24
+ 1238 0004 0546     		mov	r5, r0
+ 1239 0006 0C46     		mov	r4, r1
+ 231:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 1240              		.loc 1 231 5 is_stmt 1 view .LVU230
+ 232:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0xf8) | mode;
+ 1241              		.loc 1 232 5 view .LVU231
+ 1242 0008 0123     		movs	r3, #1
+ 1243 000a 0DF10702 		add	r2, sp, #7
+ 1244 000e 0921     		movs	r1, #9
+ 1245              	.LVL94:
+ 232:Core/Src/max30102_for_stm32_hal.c ****     config = (config & 0xf8) | mode;
+ 1246              		.loc 1 232 5 is_stmt 0 view .LVU232
+ 1247 0010 FFF7FEFF 		bl	max30102_read
+ 1248              	.LVL95:
+ 233:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 1249              		.loc 1 233 5 is_stmt 1 view .LVU233
+ 233:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 1250              		.loc 1 233 22 is_stmt 0 view .LVU234
+ 1251 0014 9DF80730 		ldrb	r3, [sp, #7]	@ zero_extendqisi2
+ 233:Core/Src/max30102_for_stm32_hal.c ****     max30102_write(obj, MAX30102_MODE_CONFIG, &config, 1);
+ 1252              		.loc 1 233 12 view .LVU235
+ 1253 0018 23F00703 		bic	r3, r3, #7
+ 1254 001c 1C43     		orrs	r4, r4, r3
+ 1255 001e 8DF80740 		strb	r4, [sp, #7]
+ 234:Core/Src/max30102_for_stm32_hal.c ****     max30102_clear_fifo(obj);
+ 1256              		.loc 1 234 5 is_stmt 1 view .LVU236
+ 1257 0022 0123     		movs	r3, #1
+ 1258 0024 0DF10702 		add	r2, sp, #7
+ 1259 0028 0921     		movs	r1, #9
+ 1260 002a 2846     		mov	r0, r5
+ 1261 002c FFF7FEFF 		bl	max30102_write
+ 1262              	.LVL96:
+ 235:Core/Src/max30102_for_stm32_hal.c **** }
+ 1263              		.loc 1 235 5 view .LVU237
+ 1264 0030 2846     		mov	r0, r5
+ 1265 0032 FFF7FEFF 		bl	max30102_clear_fifo
+ 1266              	.LVL97:
+ 236:Core/Src/max30102_for_stm32_hal.c **** 
+ 1267              		.loc 1 236 1 is_stmt 0 view .LVU238
+ 1268 0036 03B0     		add	sp, sp, #12
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 29
+
+
+ 1269              	.LCFI58:
+ 1270              		.cfi_def_cfa_offset 12
+ 1271              		@ sp needed
+ 1272 0038 30BD     		pop	{r4, r5, pc}
+ 236:Core/Src/max30102_for_stm32_hal.c **** 
+ 1273              		.loc 1 236 1 view .LVU239
+ 1274              		.cfi_endproc
+ 1275              	.LFE82:
+ 1277              		.section	.text.max30102_read_fifo,"ax",%progbits
+ 1278              		.align	1
+ 1279              		.global	max30102_read_fifo
+ 1280              		.syntax unified
+ 1281              		.thumb
+ 1282              		.thumb_func
+ 1284              	max30102_read_fifo:
+ 1285              	.LVL98:
+ 1286              	.LFB92:
+ 361:Core/Src/max30102_for_stm32_hal.c **** 
+ 362:Core/Src/max30102_for_stm32_hal.c **** /**
+ 363:Core/Src/max30102_for_stm32_hal.c ****  * @brief Read FIFO content and store to buffer in max30102_t object instance.
+ 364:Core/Src/max30102_for_stm32_hal.c ****  *
+ 365:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 366:Core/Src/max30102_for_stm32_hal.c ****  */
+ 367:Core/Src/max30102_for_stm32_hal.c **** void max30102_read_fifo(max30102_t *obj)
+ 368:Core/Src/max30102_for_stm32_hal.c **** {
+ 1287              		.loc 1 368 1 is_stmt 1 view -0
+ 1288              		.cfi_startproc
+ 1289              		@ args = 0, pretend = 0, frame = 8
+ 1290              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1291              		.loc 1 368 1 is_stmt 0 view .LVU241
+ 1292 0000 70B5     		push	{r4, r5, r6, lr}
+ 1293              	.LCFI59:
+ 1294              		.cfi_def_cfa_offset 16
+ 1295              		.cfi_offset 4, -16
+ 1296              		.cfi_offset 5, -12
+ 1297              		.cfi_offset 6, -8
+ 1298              		.cfi_offset 14, -4
+ 1299 0002 82B0     		sub	sp, sp, #8
+ 1300              	.LCFI60:
+ 1301              		.cfi_def_cfa_offset 24
+ 1302 0004 0546     		mov	r5, r0
+ 369:Core/Src/max30102_for_stm32_hal.c ****     // First transaction: Get the FIFO_WR_PTR
+ 370:Core/Src/max30102_for_stm32_hal.c ****     uint8_t wr_ptr = 0, rd_ptr = 0;
+ 1303              		.loc 1 370 5 is_stmt 1 view .LVU242
+ 1304              		.loc 1 370 13 is_stmt 0 view .LVU243
+ 1305 0006 0023     		movs	r3, #0
+ 1306 0008 8DF80730 		strb	r3, [sp, #7]
+ 1307              		.loc 1 370 25 view .LVU244
+ 1308 000c 8DF80630 		strb	r3, [sp, #6]
+ 371:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_FIFO_WR_PTR, &wr_ptr, 1);
+ 1309              		.loc 1 371 5 is_stmt 1 view .LVU245
+ 1310 0010 0123     		movs	r3, #1
+ 1311 0012 0DF10702 		add	r2, sp, #7
+ 1312 0016 0421     		movs	r1, #4
+ 1313 0018 FFF7FEFF 		bl	max30102_read
+ 1314              	.LVL99:
+ 372:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_FIFO_RD_PTR, &rd_ptr, 1);
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 30
+
+
+ 1315              		.loc 1 372 5 view .LVU246
+ 1316 001c 0123     		movs	r3, #1
+ 1317 001e 0DF10602 		add	r2, sp, #6
+ 1318 0022 0621     		movs	r1, #6
+ 1319 0024 2846     		mov	r0, r5
+ 1320 0026 FFF7FEFF 		bl	max30102_read
+ 1321              	.LVL100:
+ 373:Core/Src/max30102_for_stm32_hal.c **** 
+ 374:Core/Src/max30102_for_stm32_hal.c ****     int8_t num_samples;
+ 1322              		.loc 1 374 5 view .LVU247
+ 375:Core/Src/max30102_for_stm32_hal.c **** 
+ 376:Core/Src/max30102_for_stm32_hal.c ****     num_samples = (int8_t)wr_ptr - (int8_t)rd_ptr;
+ 1323              		.loc 1 376 5 view .LVU248
+ 1324              		.loc 1 376 19 is_stmt 0 view .LVU249
+ 1325 002a 9DF80760 		ldrb	r6, [sp, #7]	@ zero_extendqisi2
+ 1326              		.loc 1 376 36 view .LVU250
+ 1327 002e 9DF80630 		ldrb	r3, [sp, #6]	@ zero_extendqisi2
+ 1328              		.loc 1 376 34 view .LVU251
+ 1329 0032 F61A     		subs	r6, r6, r3
+ 1330 0034 F3B2     		uxtb	r3, r6
+ 1331              		.loc 1 376 17 view .LVU252
+ 1332 0036 76B2     		sxtb	r6, r6
+ 1333              	.LVL101:
+ 377:Core/Src/max30102_for_stm32_hal.c ****     if (num_samples < 1)
+ 1334              		.loc 1 377 5 is_stmt 1 view .LVU253
+ 1335              		.loc 1 377 8 is_stmt 0 view .LVU254
+ 1336 0038 002E     		cmp	r6, #0
+ 1337 003a 01DD     		ble	.L55
+ 1338              	.L51:
+ 378:Core/Src/max30102_for_stm32_hal.c ****     {
+ 379:Core/Src/max30102_for_stm32_hal.c ****         num_samples += 32;
+ 380:Core/Src/max30102_for_stm32_hal.c ****     }
+ 381:Core/Src/max30102_for_stm32_hal.c **** 
+ 382:Core/Src/max30102_for_stm32_hal.c ****     // Second transaction: Read NUM_SAMPLES_TO_READ samples from the FIFO
+ 383:Core/Src/max30102_for_stm32_hal.c ****     for (int8_t i = 0; i < num_samples; i++)
+ 1339              		.loc 1 383 5 is_stmt 1 view .LVU255
+ 1340              	.LBB2:
+ 1341              		.loc 1 383 10 view .LVU256
+ 1342              	.LVL102:
+ 1343              		.loc 1 383 17 is_stmt 0 view .LVU257
+ 1344 003c 0024     		movs	r4, #0
+ 1345              		.loc 1 383 5 view .LVU258
+ 1346 003e 2CE0     		b	.L52
+ 1347              	.LVL103:
+ 1348              	.L55:
+ 1349              		.loc 1 383 5 view .LVU259
+ 1350              	.LBE2:
+ 379:Core/Src/max30102_for_stm32_hal.c ****     }
+ 1351              		.loc 1 379 9 is_stmt 1 view .LVU260
+ 379:Core/Src/max30102_for_stm32_hal.c ****     }
+ 1352              		.loc 1 379 21 is_stmt 0 view .LVU261
+ 1353 0040 2033     		adds	r3, r3, #32
+ 1354 0042 5EB2     		sxtb	r6, r3
+ 1355              	.LVL104:
+ 379:Core/Src/max30102_for_stm32_hal.c ****     }
+ 1356              		.loc 1 379 21 view .LVU262
+ 1357 0044 FAE7     		b	.L51
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 31
+
+
+ 1358              	.LVL105:
+ 1359              	.L53:
+ 1360              	.LBB4:
+ 1361              	.LBB3:
+ 384:Core/Src/max30102_for_stm32_hal.c ****     {
+ 385:Core/Src/max30102_for_stm32_hal.c ****         uint8_t sample[6];
+ 1362              		.loc 1 385 9 is_stmt 1 discriminator 3 view .LVU263
+ 386:Core/Src/max30102_for_stm32_hal.c ****         max30102_read(obj, MAX30102_FIFO_DATA, sample, 6);
+ 1363              		.loc 1 386 9 discriminator 3 view .LVU264
+ 1364 0046 0623     		movs	r3, #6
+ 1365 0048 6A46     		mov	r2, sp
+ 1366 004a 0721     		movs	r1, #7
+ 1367 004c 2846     		mov	r0, r5
+ 1368 004e FFF7FEFF 		bl	max30102_read
+ 1369              	.LVL106:
+ 387:Core/Src/max30102_for_stm32_hal.c ****         uint32_t ir_sample = ((uint32_t)(sample[0] << 16) | (uint32_t)(sample[1] << 8) | (uint32_t)
+ 1370              		.loc 1 387 9 discriminator 3 view .LVU265
+ 1371              		.loc 1 387 48 is_stmt 0 discriminator 3 view .LVU266
+ 1372 0052 9DF80030 		ldrb	r3, [sp]	@ zero_extendqisi2
+ 1373              		.loc 1 387 78 discriminator 3 view .LVU267
+ 1374 0056 9DF80100 		ldrb	r0, [sp, #1]	@ zero_extendqisi2
+ 1375              		.loc 1 387 61 discriminator 3 view .LVU268
+ 1376 005a 0002     		lsls	r0, r0, #8
+ 1377              		.loc 1 387 59 discriminator 3 view .LVU269
+ 1378 005c 40EA0340 		orr	r0, r0, r3, lsl #16
+ 1379              		.loc 1 387 107 discriminator 3 view .LVU270
+ 1380 0060 9DF80230 		ldrb	r3, [sp, #2]	@ zero_extendqisi2
+ 1381              		.loc 1 387 88 discriminator 3 view .LVU271
+ 1382 0064 1843     		orrs	r0, r0, r3
+ 1383              		.loc 1 387 18 discriminator 3 view .LVU272
+ 1384 0066 C0F31100 		ubfx	r0, r0, #0, #18
+ 1385              	.LVL107:
+ 388:Core/Src/max30102_for_stm32_hal.c ****         uint32_t red_sample = ((uint32_t)(sample[3] << 16) | (uint32_t)(sample[4] << 8) | (uint32_t
+ 1386              		.loc 1 388 9 is_stmt 1 discriminator 3 view .LVU273
+ 1387              		.loc 1 388 49 is_stmt 0 discriminator 3 view .LVU274
+ 1388 006a 9DF80330 		ldrb	r3, [sp, #3]	@ zero_extendqisi2
+ 1389              		.loc 1 388 79 discriminator 3 view .LVU275
+ 1390 006e 9DF80410 		ldrb	r1, [sp, #4]	@ zero_extendqisi2
+ 1391              		.loc 1 388 62 discriminator 3 view .LVU276
+ 1392 0072 0902     		lsls	r1, r1, #8
+ 1393              		.loc 1 388 60 discriminator 3 view .LVU277
+ 1394 0074 41EA0341 		orr	r1, r1, r3, lsl #16
+ 1395              		.loc 1 388 108 discriminator 3 view .LVU278
+ 1396 0078 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 1397              		.loc 1 388 89 discriminator 3 view .LVU279
+ 1398 007c 1943     		orrs	r1, r1, r3
+ 1399              		.loc 1 388 18 discriminator 3 view .LVU280
+ 1400 007e C1F31101 		ubfx	r1, r1, #0, #18
+ 1401              	.LVL108:
+ 389:Core/Src/max30102_for_stm32_hal.c ****         obj->_ir_samples[i] = ir_sample;
+ 1402              		.loc 1 389 9 is_stmt 1 discriminator 3 view .LVU281
+ 1403              		.loc 1 389 29 is_stmt 0 discriminator 3 view .LVU282
+ 1404 0082 05EB8403 		add	r3, r5, r4, lsl #2
+ 1405 0086 5860     		str	r0, [r3, #4]
+ 390:Core/Src/max30102_for_stm32_hal.c ****         obj->_red_samples[i] = red_sample;
+ 1406              		.loc 1 390 9 is_stmt 1 discriminator 3 view .LVU283
+ 1407              		.loc 1 390 30 is_stmt 0 discriminator 3 view .LVU284
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 32
+
+
+ 1408 0088 04F12003 		add	r3, r4, #32
+ 1409 008c 05EB8303 		add	r3, r5, r3, lsl #2
+ 1410 0090 5960     		str	r1, [r3, #4]
+ 391:Core/Src/max30102_for_stm32_hal.c ****         max30102_plot(ir_sample, red_sample);
+ 1411              		.loc 1 391 9 is_stmt 1 discriminator 3 view .LVU285
+ 1412 0092 FFF7FEFF 		bl	max30102_plot
+ 1413              	.LVL109:
+ 1414              		.loc 1 391 9 is_stmt 0 discriminator 3 view .LVU286
+ 1415              	.LBE3:
+ 383:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1416              		.loc 1 383 42 is_stmt 1 discriminator 3 view .LVU287
+ 1417 0096 0134     		adds	r4, r4, #1
+ 1418              	.LVL110:
+ 383:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1419              		.loc 1 383 42 is_stmt 0 discriminator 3 view .LVU288
+ 1420 0098 64B2     		sxtb	r4, r4
+ 1421              	.LVL111:
+ 1422              	.L52:
+ 383:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1423              		.loc 1 383 26 is_stmt 1 discriminator 1 view .LVU289
+ 1424 009a A642     		cmp	r6, r4
+ 1425 009c D3DC     		bgt	.L53
+ 1426              	.LBE4:
+ 392:Core/Src/max30102_for_stm32_hal.c ****     }
+ 393:Core/Src/max30102_for_stm32_hal.c **** }
+ 1427              		.loc 1 393 1 is_stmt 0 view .LVU290
+ 1428 009e 02B0     		add	sp, sp, #8
+ 1429              	.LCFI61:
+ 1430              		.cfi_def_cfa_offset 16
+ 1431              		@ sp needed
+ 1432 00a0 70BD     		pop	{r4, r5, r6, pc}
+ 1433              		.loc 1 393 1 view .LVU291
+ 1434              		.cfi_endproc
+ 1435              	.LFE92:
+ 1437              		.section	.text.max30102_read_temp,"ax",%progbits
+ 1438              		.align	1
+ 1439              		.global	max30102_read_temp
+ 1440              		.syntax unified
+ 1441              		.thumb
+ 1442              		.thumb_func
+ 1444              	max30102_read_temp:
+ 1445              	.LVL112:
+ 1446              	.LFB93:
+ 394:Core/Src/max30102_for_stm32_hal.c **** 
+ 395:Core/Src/max30102_for_stm32_hal.c **** /**
+ 396:Core/Src/max30102_for_stm32_hal.c ****  * @brief Read die temperature.
+ 397:Core/Src/max30102_for_stm32_hal.c ****  *
+ 398:Core/Src/max30102_for_stm32_hal.c ****  * @param obj Pointer to max30102_t object instance.
+ 399:Core/Src/max30102_for_stm32_hal.c ****  * @param temp_int Pointer to store the integer part of temperature. Stored in 2's complement forma
+ 400:Core/Src/max30102_for_stm32_hal.c ****  * @param temp_frac Pointer to store the fractional part of temperature. Increments of 0.0625 deg C
+ 401:Core/Src/max30102_for_stm32_hal.c ****  */
+ 402:Core/Src/max30102_for_stm32_hal.c **** 
+ 403:Core/Src/max30102_for_stm32_hal.c **** void max30102_read_temp(max30102_t *obj, int8_t *temp_int, uint8_t *temp_frac)
+ 404:Core/Src/max30102_for_stm32_hal.c **** {
+ 1447              		.loc 1 404 1 is_stmt 1 view -0
+ 1448              		.cfi_startproc
+ 1449              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 33
+
+
+ 1450              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1451              		.loc 1 404 1 is_stmt 0 view .LVU293
+ 1452 0000 38B5     		push	{r3, r4, r5, lr}
+ 1453              	.LCFI62:
+ 1454              		.cfi_def_cfa_offset 16
+ 1455              		.cfi_offset 3, -16
+ 1456              		.cfi_offset 4, -12
+ 1457              		.cfi_offset 5, -8
+ 1458              		.cfi_offset 14, -4
+ 1459 0002 0446     		mov	r4, r0
+ 1460 0004 1546     		mov	r5, r2
+ 405:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_DIE_TINT, (uint8_t *)temp_int, 1);
+ 1461              		.loc 1 405 5 is_stmt 1 view .LVU294
+ 1462 0006 0123     		movs	r3, #1
+ 1463 0008 0A46     		mov	r2, r1
+ 1464              	.LVL113:
+ 1465              		.loc 1 405 5 is_stmt 0 view .LVU295
+ 1466 000a 1F21     		movs	r1, #31
+ 1467              	.LVL114:
+ 1468              		.loc 1 405 5 view .LVU296
+ 1469 000c FFF7FEFF 		bl	max30102_read
+ 1470              	.LVL115:
+ 406:Core/Src/max30102_for_stm32_hal.c ****     max30102_read(obj, MAX30102_DIE_TFRAC, temp_frac, 1);
+ 1471              		.loc 1 406 5 is_stmt 1 view .LVU297
+ 1472 0010 0123     		movs	r3, #1
+ 1473 0012 2A46     		mov	r2, r5
+ 1474 0014 2021     		movs	r1, #32
+ 1475 0016 2046     		mov	r0, r4
+ 1476 0018 FFF7FEFF 		bl	max30102_read
+ 1477              	.LVL116:
+ 407:Core/Src/max30102_for_stm32_hal.c **** }
+ 1478              		.loc 1 407 1 is_stmt 0 view .LVU298
+ 1479 001c 38BD     		pop	{r3, r4, r5, pc}
+ 1480              		.loc 1 407 1 view .LVU299
+ 1481              		.cfi_endproc
+ 1482              	.LFE93:
+ 1484              		.section	.text.max30102_interrupt_handler,"ax",%progbits
+ 1485              		.align	1
+ 1486              		.global	max30102_interrupt_handler
+ 1487              		.syntax unified
+ 1488              		.thumb
+ 1489              		.thumb_func
+ 1491              	max30102_interrupt_handler:
+ 1492              	.LVL117:
+ 1493              	.LFB80:
+ 175:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg[2] = {0x00};
+ 1494              		.loc 1 175 1 is_stmt 1 view -0
+ 1495              		.cfi_startproc
+ 1496              		@ args = 0, pretend = 0, frame = 8
+ 1497              		@ frame_needed = 0, uses_anonymous_args = 0
+ 175:Core/Src/max30102_for_stm32_hal.c ****     uint8_t reg[2] = {0x00};
+ 1498              		.loc 1 175 1 is_stmt 0 view .LVU301
+ 1499 0000 10B5     		push	{r4, lr}
+ 1500              	.LCFI63:
+ 1501              		.cfi_def_cfa_offset 8
+ 1502              		.cfi_offset 4, -8
+ 1503              		.cfi_offset 14, -4
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 34
+
+
+ 1504 0002 82B0     		sub	sp, sp, #8
+ 1505              	.LCFI64:
+ 1506              		.cfi_def_cfa_offset 16
+ 1507 0004 0446     		mov	r4, r0
+ 176:Core/Src/max30102_for_stm32_hal.c ****     // Interrupt flag in registers 0x00 and 0x01 are cleared on read
+ 1508              		.loc 1 176 5 is_stmt 1 view .LVU302
+ 176:Core/Src/max30102_for_stm32_hal.c ****     // Interrupt flag in registers 0x00 and 0x01 are cleared on read
+ 1509              		.loc 1 176 13 is_stmt 0 view .LVU303
+ 1510 0006 0021     		movs	r1, #0
+ 1511 0008 ADF80410 		strh	r1, [sp, #4]	@ movhi
+ 178:Core/Src/max30102_for_stm32_hal.c **** 
+ 1512              		.loc 1 178 5 is_stmt 1 view .LVU304
+ 1513 000c 0223     		movs	r3, #2
+ 1514 000e 01AA     		add	r2, sp, #4
+ 1515 0010 FFF7FEFF 		bl	max30102_read
+ 1516              	.LVL118:
+ 180:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1517              		.loc 1 180 5 view .LVU305
+ 180:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1518              		.loc 1 180 13 is_stmt 0 view .LVU306
+ 1519 0014 9DF80430 		ldrb	r3, [sp, #4]	@ zero_extendqisi2
+ 180:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1520              		.loc 1 180 8 view .LVU307
+ 1521 0018 DB09     		lsrs	r3, r3, #7
+ 1522 001a 09D1     		bne	.L62
+ 1523              	.L59:
+ 186:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1524              		.loc 1 186 5 is_stmt 1 view .LVU308
+ 189:Core/Src/max30102_for_stm32_hal.c **** 
+ 1525              		.loc 1 189 5 view .LVU309
+ 191:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1526              		.loc 1 191 5 view .LVU310
+ 194:Core/Src/max30102_for_stm32_hal.c **** 
+ 1527              		.loc 1 194 5 view .LVU311
+ 196:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1528              		.loc 1 196 5 view .LVU312
+ 196:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1529              		.loc 1 196 13 is_stmt 0 view .LVU313
+ 1530 001c 9DF80530 		ldrb	r3, [sp, #5]	@ zero_extendqisi2
+ 196:Core/Src/max30102_for_stm32_hal.c ****     {
+ 1531              		.loc 1 196 8 view .LVU314
+ 1532 0020 13F0020F 		tst	r3, #2
+ 1533 0024 08D1     		bne	.L63
+ 1534              	.L60:
+ 206:Core/Src/max30102_for_stm32_hal.c **** }
+ 1535              		.loc 1 206 5 is_stmt 1 view .LVU315
+ 206:Core/Src/max30102_for_stm32_hal.c **** }
+ 1536              		.loc 1 206 26 is_stmt 0 view .LVU316
+ 1537 0026 0023     		movs	r3, #0
+ 1538 0028 84F80431 		strb	r3, [r4, #260]
+ 207:Core/Src/max30102_for_stm32_hal.c **** 
+ 1539              		.loc 1 207 1 view .LVU317
+ 1540 002c 02B0     		add	sp, sp, #8
+ 1541              	.LCFI65:
+ 1542              		.cfi_remember_state
+ 1543              		.cfi_def_cfa_offset 8
+ 1544              		@ sp needed
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 35
+
+
+ 1545 002e 10BD     		pop	{r4, pc}
+ 1546              	.LVL119:
+ 1547              	.L62:
+ 1548              	.LCFI66:
+ 1549              		.cfi_restore_state
+ 183:Core/Src/max30102_for_stm32_hal.c ****     }
+ 1550              		.loc 1 183 9 is_stmt 1 view .LVU318
+ 1551 0030 2046     		mov	r0, r4
+ 1552 0032 FFF7FEFF 		bl	max30102_read_fifo
+ 1553              	.LVL120:
+ 1554 0036 F1E7     		b	.L59
+ 1555              	.L63:
+ 1556              	.LBB5:
+ 199:Core/Src/max30102_for_stm32_hal.c ****         uint8_t temp_frac;
+ 1557              		.loc 1 199 9 view .LVU319
+ 200:Core/Src/max30102_for_stm32_hal.c ****         max30102_read_temp(obj, &temp_int, &temp_frac);
+ 1558              		.loc 1 200 9 view .LVU320
+ 201:Core/Src/max30102_for_stm32_hal.c ****         // float temp = temp_int + 0.0625f * temp_frac;
+ 1559              		.loc 1 201 9 view .LVU321
+ 1560 0038 0DF10302 		add	r2, sp, #3
+ 1561 003c 0DF10201 		add	r1, sp, #2
+ 1562 0040 2046     		mov	r0, r4
+ 1563 0042 FFF7FEFF 		bl	max30102_read_temp
+ 1564              	.LVL121:
+ 1565 0046 EEE7     		b	.L60
+ 1566              	.LBE5:
+ 1567              		.cfi_endproc
+ 1568              	.LFE80:
+ 1570              		.text
+ 1571              	.Letext0:
+ 1572              		.file 2 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/../
+ 1573              		.file 3 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/../
+ 1574              		.file 4 "Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xb.h"
+ 1575              		.file 5 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/inc
+ 1576              		.file 6 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_def.h"
+ 1577              		.file 7 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_dma.h"
+ 1578              		.file 8 "Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h"
+ 1579              		.file 9 "Core/Inc/max30102_for_stm32_hal.h"
+ 1580              		.file 10 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/..
+ 1581              		.file 11 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/..
+ 1582              		.file 12 "<built-in>"
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 36
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 max30102_for_stm32_hal.c
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:19     .text.max30102_plot:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:25     .text.max30102_plot:00000000 max30102_plot
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:41     .text.max30102_init:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:47     .text.max30102_init:00000000 max30102_init
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:94     .text.max30102_write:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:100    .text.max30102_write:00000000 max30102_write
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:182    .text.max30102_read:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:188    .text.max30102_read:00000000 max30102_read
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:249    .text.max30102_reset:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:255    .text.max30102_reset:00000000 max30102_reset
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:290    .text.max30102_set_a_full:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:296    .text.max30102_set_a_full:00000000 max30102_set_a_full
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:354    .text.max30102_set_ppg_rdy:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:360    .text.max30102_set_ppg_rdy:00000000 max30102_set_ppg_rdy
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:421    .text.max30102_set_alc_ovf:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:427    .text.max30102_set_alc_ovf:00000000 max30102_set_alc_ovf
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:488    .text.max30102_set_die_temp_rdy:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:494    .text.max30102_set_die_temp_rdy:00000000 max30102_set_die_temp_rdy
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:533    .text.max30102_set_die_temp_en:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:539    .text.max30102_set_die_temp_en:00000000 max30102_set_die_temp_en
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:578    .text.max30102_on_interrupt:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:584    .text.max30102_on_interrupt:00000000 max30102_on_interrupt
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:602    .text.max30102_has_interrupt:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:608    .text.max30102_has_interrupt:00000000 max30102_has_interrupt
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:626    .text.max30102_shutdown:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:632    .text.max30102_shutdown:00000000 max30102_shutdown
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:686    .text.max30102_set_sampling_rate:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:692    .text.max30102_set_sampling_rate:00000000 max30102_set_sampling_rate
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:746    .text.max30102_set_led_pulse_width:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:752    .text.max30102_set_led_pulse_width:00000000 max30102_set_led_pulse_width
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:805    .text.max30102_set_adc_resolution:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:811    .text.max30102_set_adc_resolution:00000000 max30102_set_adc_resolution
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:868    .text.max30102_set_led_current_1:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:874    .text.max30102_set_led_current_1:00000000 max30102_set_led_current_1
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:925    .text.max30102_set_led_current_1:00000030 $d
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:931    .text.max30102_set_led_current_2:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:937    .text.max30102_set_led_current_2:00000000 max30102_set_led_current_2
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:988    .text.max30102_set_led_current_2:00000030 $d
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:994    .text.max30102_set_multi_led_slot_1_2:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1000   .text.max30102_set_multi_led_slot_1_2:00000000 max30102_set_multi_led_slot_1_2
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1043   .text.max30102_set_multi_led_slot_3_4:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1049   .text.max30102_set_multi_led_slot_3_4:00000000 max30102_set_multi_led_slot_3_4
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1092   .text.max30102_set_fifo_config:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1098   .text.max30102_set_fifo_config:00000000 max30102_set_fifo_config
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1157   .text.max30102_clear_fifo:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1163   .text.max30102_clear_fifo:00000000 max30102_clear_fifo
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1215   .text.max30102_set_mode:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1221   .text.max30102_set_mode:00000000 max30102_set_mode
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1278   .text.max30102_read_fifo:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1284   .text.max30102_read_fifo:00000000 max30102_read_fifo
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1438   .text.max30102_read_temp:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1444   .text.max30102_read_temp:00000000 max30102_read_temp
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1485   .text.max30102_interrupt_handler:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s:1491   .text.max30102_interrupt_handler:00000000 max30102_interrupt_handler
+
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\cccHvVOs.s 			page 37
+
+
+UNDEFINED SYMBOLS
+memset
+malloc
+HAL_I2C_Master_Transmit
+free
+memcpy
+HAL_I2C_Master_Receive
+__aeabi_f2d
+__aeabi_ddiv
+__aeabi_d2uiz

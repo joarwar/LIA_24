@@ -15,7 +15,7 @@
             ],
             "runToEntryPoint": "main",
             "showDevDebugOutput": "raw",
-            "preLaunchTask": "flash",
+            //"preLaunchTask": "flash",
         },
     ]
 }
