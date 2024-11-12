@@ -1,170 +1,120 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "max30102.h"           // MAX30102 sensor driver
+#include "algorithm_by_RF.h"     // RF algorithm for HR and SpO2
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-#include <stdio.h>
-#include "max30102_for_stm32_hal.h"
-/* USER CODE END Includes */
+// Buffer size and sampling configuration
+#define BUFFER_SIZE  1000        // Size of the signal buffer
+#define FS            100        // Sampling frequency in Hz (100 samples per second)
+#define ST            10         // Sampling time in seconds (this is adjustable)
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
+#define PRINT_INTERVAL 5         // Interval for printing HR and SpO2 in seconds
 
-/* USER CODE END PTD */
+uint32_t ir_buffer[BUFFER_SIZE];   // Buffer for IR signal
+uint32_t red_buffer[BUFFER_SIZE];  // Buffer for Red signal
 
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
+// Results variables for heart rate and SpO2
+float spo2 = 0.0f;
+int8_t spo2_valid = 0;
+int32_t heart_rate = 0;
+int8_t hr_valid = 0;
+float ratio = 0.0f;
+float correlation = 0.0f;
 
-/* USER CODE END PD */
+// I2C handler, assume it is already defined elsewhere in your project
+extern I2C_HandleTypeDef hi2c1;
 
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
-
-UART_HandleTypeDef huart1;
-UART_HandleTypeDef huart2;
-
-
-/* USER CODE BEGIN PV */
-
-
-// UART function for printf (assuming you're using HAL for STM32)
-int __io_putchar(int ch)
-{
-    uint8_t temp = ch;
-    HAL_UART_Transmit(&huart2, &temp, 1, HAL_MAX_DELAY); 
-    return ch;
-}
-
-// Override plot function with HR and SpO2 calculations
-void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
-{
-    static int counter = 0;  // Static counter to keep track of function calls
-    counter++;  // Increment the counter each time the function is called
-
-    // Print counter along with the IR and Red sample values
-    printf("Counter: %d, ir: %u, r: %u\n", counter, ir_sample, red_sample);  
-}
-
-
-
-// MAX30102 object
-max30102_t max30102;
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_USART1_UART_Init(void);
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
+    // Initialize the HAL Library
+    HAL_Init();
 
-  /* USER CODE BEGIN 1 */
+    // Configure the system clock
+    SystemClock_Config();
 
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_I2C1_Init();
-  MX_USART1_UART_Init();
-  /* USER CODE BEGIN 2 */
-  max30102_init(&max30102, &hi2c1);
-  max30102_reset(&max30102);
-  max30102_clear_fifo(&max30102);
-  max30102_set_fifo_config(&max30102, max30102_smp_ave_8, 1, 7);
-  
-  // Sensor settings
-  max30102_set_led_pulse_width(&max30102, max30102_pw_16_bit);
-  max30102_set_adc_resolution(&max30102, max30102_adc_2048);
-  max30102_set_sampling_rate(&max30102, max30102_sr_800);
-  max30102_set_led_current_1(&max30102, 6.2);
-  max30102_set_led_current_2(&max30102, 6.2);
-
-  // Enter SpO2 mode
-  max30102_set_mode(&max30102, max30102_spo2);
-  max30102_set_a_full(&max30102, 1);
-  
-  // Initiate 1 temperature measurement
-  max30102_set_die_temp_en(&max30102, 1);
-  max30102_set_die_temp_rdy(&max30102, 1);
-  
-  uint8_t en_reg[2] = {0};
-  max30102_read(&max30102, 0x00, en_reg, 1);
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    if (max30102_has_interrupt(&max30102))
-    {
-      max30102_interrupt_handler(&max30102);
+    // Initialize the peripherals: GPIO, I2C, UART
+    MX_GPIO_Init();
+    MX_I2C1_Init();
+    MX_USART1_UART_Init();
+    
+    // Initialize the MAX30102 sensor
+    if (MAX30102_Init(&hi2c1) != HAL_OK) {
+        printf("MAX30102 initialization failed!\n");
+        while (1); // Halt execution if sensor initialization fails
     }
-    /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+    // Configure the MAX30102 sensor (e.g., LED current, sample rate)
+    MAX30102_Config();
+
+    // Data acquisition loop
+    uint32_t bufferIndex = 0;
+    uint32_t lastPrintTime = HAL_GetTick();
+    
+    while (1) {
+        // Read IR and Red values from MAX30102 sensor
+        uint32_t ir_value = MAX30102_ReadIR();
+        uint32_t red_value = MAX30102_ReadRed();
+
+        if (ir_value > 0 && red_value > 0) {
+            // Store the readings in the buffers
+            ir_buffer[bufferIndex] = ir_value;
+            red_buffer[bufferIndex] = red_value;
+            bufferIndex++;
+
+            // If buffer is full, process the data and reset buffer index
+            if (bufferIndex >= BUFFER_SIZE) {
+                // Call the RF algorithm to calculate heart rate and SpO2 from the acquired data
+                rf_heart_rate_and_oxygen_saturation(ir_buffer, BUFFER_SIZE, red_buffer, 
+                                                    &spo2, &spo2_valid, &heart_rate, 
+                                                    &hr_valid, &ratio, &correlation);
+
+                // Output the results via UART if the values are valid
+                if (spo2_valid) {
+                    printf("SpO2: %.2f%%\n", spo2);
+                } else {
+                    printf("SpO2 invalid\n");
+                }
+
+                if (hr_valid) {
+                    printf("Heart Rate: %d BPM\n", heart_rate);
+                } else {
+                    printf("Heart Rate invalid\n");
+                }
+
+                printf("Signal Correlation: %.2f\n", correlation);
+
+                // Reset buffer index for next set of data
+                bufferIndex = 0;
+            }
+        }
+
+        // Periodically print HR and SpO2 results (every `PRINT_INTERVAL` seconds)
+        uint32_t currentTime = HAL_GetTick();
+        if (currentTime - lastPrintTime >= PRINT_INTERVAL * 1000) {
+            lastPrintTime = currentTime;
+
+            // Output the results (you can also print intermediate results if desired)
+            if (spo2_valid) {
+                printf("Continuous SpO2: %.2f%%\n", spo2);
+            } else {
+                printf("SpO2 invalid\n");
+            }
+
+            if (hr_valid) {
+                printf("Continuous Heart Rate: %d BPM\n", heart_rate);
+            } else {
+                printf("Heart Rate invalid\n");
+            }
+        }
+
+        // Delay to maintain sampling rate (100Hz, so 10ms delay)
+        HAL_Delay(10);
+    }
 }
-
-/**
-  * @brief System Clock Configuration
-  * @retval None
-  */
 
 void SystemClock_Config(void)
 {
