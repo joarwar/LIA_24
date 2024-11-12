@@ -46,21 +46,29 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
+
 /* USER CODE BEGIN PV */
+
+
+// UART function for printf (assuming you're using HAL for STM32)
 int __io_putchar(int ch)
 {
-  uint8_t temp = ch;
-  HAL_UART_Transmit(&huart1, &temp, 1, HAL_MAX_DELAY);
-  return ch;
+    uint8_t temp = ch;
+    HAL_UART_Transmit(&huart2, &temp, 1, HAL_MAX_DELAY); 
+    return ch;
 }
 
-// Override plot function
+// Override plot function with HR and SpO2 calculations
 void max30102_plot(uint32_t ir_sample, uint32_t red_sample)
 {
-    printf("ir:%u\n", ir_sample);                  // Print IR only
-    printf("r:%u\n", red_sample);                  // Print Red only
-    printf("ir:%u,r:%u\n", ir_sample, red_sample);    // Print IR and Red
+    static int counter = 0;  // Static counter to keep track of function calls
+    counter++;  // Increment the counter each time the function is called
+
+    // Print counter along with the IR and Red sample values
+    printf("Counter: %d, ir: %u, r: %u\n", counter, ir_sample, red_sample);  
 }
+
+
 
 // MAX30102 object
 max30102_t max30102;
@@ -98,7 +106,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  printf("Hello World\n"); 
 
   /* USER CODE END Init */
 
@@ -148,8 +155,6 @@ int main(void)
       max30102_interrupt_handler(&max30102);
     }
     /* USER CODE END WHILE */
-    HAL_GPIO_TogglePin (GPIOA, GPIO_PIN_5);
-    HAL_Delay (1000);
 
     /* USER CODE BEGIN 3 */
   }
@@ -160,6 +165,7 @@ int main(void)
   * @brief System Clock Configuration
   * @retval None
   */
+
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
