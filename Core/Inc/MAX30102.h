@@ -1,10 +1,14 @@
 /*
  *
- * Max30102 I2C Driver
+ * Max30102.h
  *
  * Author: Joar Warholm
  * Created: 13 November 2024
+ * 
  *
+ * 
+ * Adapted from:
+ * https://morf.lv/implementing-pulse-oximeter-using-max30100
  */
 
 #ifndef MAX30102_I2C_DRIVER_H
@@ -17,10 +21,27 @@
 #include <string.h>
 #include <stdbool.h>
 
-/* Pulse detection parameters */
-#define PULSE_MIN_THRESHOLD         300 // 300 for finger and around 20 for wrist
-#define PULSE_MAX_THRESHOLD         2000
-#define PULSE_GO_DOWN_THRESHOLD     1
+/* PULSE DETECTION PARAMETERS */
+#define PULSE_MIN_THRESHOLD 300 // 300 for finger and around 20 for wrist
+#define PULSE_MAX_THRESHOLD 2000
+#define PULSE_GO_DOWN_THRESHOLD 1
+
+#define PULSE_BPM_SAMPLE_SIZE 10
+
+/*SpO2*/
+#define RESET_SPO2_EVERY_N_PULSES 4
+
+/*RED LED CURRENT BALANCE*/
+#define MAGIC_ACCEPTABLE_INTENSITY_DIFF 65000
+#define RED_LED_CURRENT_ADJUTSMENT_MS 500
+
+//p.23 
+#define DEFAULT_SAMPLING_RATE MAX30102_SAMPLING_RATE_400HZ; 
+#define DEFAULT_PULSE_WIDTH MAX30102_PULSE_WIDTH_411US_ADC_18
+
+//p.20
+#define DEFAULT_IR_LED_CURRENT MAX30102_LED_CURRENT_51MA
+#define STARTING_RED_LED_CURRENT MAX30102_CURRENT_25_4MA
 
 /*
  * DEFINES
@@ -90,41 +111,141 @@
 #define MAX30102_DIE_TEMP_CONFIG 0x21
 #define MAX30102_DIE_TEMP_EN 1
 
+#define RED_LED 1
+#define IR_LED 2
+#define INTERRUPT 1
+
+#define DATA_READ_FAIL 0xFFFFFFFF
+
 /*
- * SENSOR STRUCT
+ * SENSOR STRUCT * ENUMS
  */
+
+typedef enum{
+    HEART_RATE,
+    SP02,
+    MULTI_LED,
+    MEASURMENT_MODE_FAIL
+} MEASURMENT_MODE;
+
+typedef enum{
+    NORMAL,
+    LOW_POWER,
+    POWER_MODE_FAIL
+} POWER_MODE;
+
+typedef enum{
+	_50SPS,
+	_100SPS,
+	_200SPS,
+	_400SPS,
+	_800SPS,
+	_1000SPS,
+	_1600SPS,
+	_3200SPS,
+	_SAMPLE_RATE_FAIL
+}SAMPLE_RATE;
+
+typedef enum{
+	_69_US,
+	_118_US,
+	_215_US,
+	_411_US,
+	_PULSE_WIDTH_FAIL
+}PULSE_WIDTH;
+
+extern MEASURMENT_MODE measurment_mode;
+extern POWER_MODE power_mode;
+extern SAMPLE_RATE sample_rate;
+extern PULSE_WIDTH pulse_width;
+
+typedef struct {
+    uint16_t ir_led_raw;
+    uint16_t red_led_raw;
+}FIFO_LED_DATA;
+
+typedef enum LEDCURRENT {
+    MAX30102_LED_CURRENT_0MA = 0x00,
+    MAX30102_LED_CURRENT_0_2MA = 0x01,
+    MAX30102_LED_CURRENT_0_4MA = 0x02,
+    MAX30102_LED_CURRENT_3MA = 0x0F,
+    MAX30102_LED_CURRENT_6_2MA = 0x1F,
+    MAX30102_LED_CURRENT_12_6MA = 0x3F,
+    MAX30102_LED_CURRENT_25_4MA = 0x7F,
+    MAX30102_LED_CURRENT_51MA = 0xFF
+
+}LEDCURRENT;
 
 typedef struct {
     /* I2C Handle*/
     I2C_HandleTypeDef *i2cHandle;
-    
-    /* IR and red sample data*/
-    uint32_t _ir_samples[32];
-    uint32_t _red_samples[32];
-
-    /* Interrupt flag*/
-    uint8_t _interrupt_flag;
-
+    bool pulse_Detected;
+    float heart_BPM;
+    float ir_Cardiogram;
+    float ir_Dc_Value;
+    float red_Dc_Value;
+    float SpO2;
+    uint32_t last_Beat_Threshold;
+    float dc_Filtered_IR;
+    float dc_Filtered_Red;
+    float temperature;
 } MAX30102;
+
+typedef enum {
+    PULSE_IDLE,
+    PULSE_TRACE_UP,
+    PULSE_TRACE_DOWN
+}PULSE_STATE;
+
+extern PULSE_STATE currentPulseDetectorState;
+
+extern MAX30102 max_Sensor;
+
 
 /*
  * INITIALISATION
  */
-uint8_t MAX30102_Initialise ( MAX30102 * dev, I2C_HandleTypeDef *i2cHandle);
+void I2C_Init(void);
+
+//
 
 /*
- * DATA ACQUISITION
+ * TEMPLATES FUNC
  */
+void MAX30102_setMeasMode(uint8_t mode);
+MEASURMENT_MODE MAX30102_getMeasMode(void);
 
-HAL_StatusTypeDef MAX30102_ReadIR ( MAX30102 *dev);
-HAL_StatusTypeDef MAX30102_ReadRED ( MAX30102 * dev);
+void MAX30102_setPowerMode (uint8_t mode);
+POWER_MODE MAX30102_getPowerMode(void);
 
-/*
- * LOW-LEVEL FUNCTIONS
- */
-HAL_StatusTypeDef MAX30102_ReadRegister ( MAX30102 *dev, uint8_t reg, uint8_t *data);
-HAL_StatusTypeDef MAX30102_ReadRegisters ( MAX30102 *dev, uint8_t reg, uint8_t * data, uint8_t length);
+void MAX30102_setSampleRate (uint8_t rate);
+SAMPLE_RATE MAX30102_getSampleRate (void);
 
-HAL_StatusTypeDef MAX30102_WriteRegister( MAX30102 *dev, uint8_t reg, uint8_t *data);
+void MAX30102_setPulseWidth(uint8_t width);
+PULSE_WIDTH MAX30102_getPulseWidth(void);
+
+void MAX30102_setLedCurrent(uint8_t led, float currentLevel);
+float MAX30102_getLedCurrent(uint8_t);
+
+int8_t MAX30102_readFIFO(uint8_t* dataBuf, uint8_t numBytes);
+void MAX30102_resetRegister(void);
+void MAX30102_resetFIFO(void);
+FIFO_LED_DATA MAX30102_read_FIFO(void);
+void MAX30102_initFIFO(void);
+
+float MAX30102_readTemp(void);
+void MAX30102_clearInterrupt(void);
+MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData);
+bool detectPulse(float sensor_value);
+void balanceIntensity(float redLedDC, float IRLedDC);
+
+void MAX30102_displayData(void);
+
+int8_t MAX30102_readReg(uint8_t reg, uint8_t* value);
+HAL_StatusTypeDef MAX30102_writeReg(uint8_t reg, uint8_t value);
+
+HAL_StatusTypeDef MAX30102_readRegister ( MAX30102 *dev, uint8_t reg, uint8_t *data);
+HAL_StatusTypeDef MAX30102_readRegisters ( MAX30102 *dev, uint8_t reg, uint8_t * data, uint8_t length);
+HAL_StatusTypeDef MAX30102_writeRegister( MAX30102 *dev, uint8_t reg, uint8_t *data);
 
 #endif
