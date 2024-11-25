@@ -4,4 +4,4 @@ set xlabel "Time [sec]"
 set ylabel "Value"
 set title "IR & R"
 
-plot sin(x/x*x*x)
+plot sin(x) + cos(x)
