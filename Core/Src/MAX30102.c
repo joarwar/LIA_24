@@ -48,10 +48,10 @@ uint32_t lastBeatThreshold = 0;
 
 //IR & RED
 
-float irACValuesSqSum = 0;
+float irACValueSqSum = 0;
 float redACValueSqSum = 0;
 uint16_t samplesRecorded = 0;
-uint16_t pulseDetected = 0;
+uint16_t pulsesDetected = 0;
 float currentSpO2Value = 0;
 
 //CURRENT
@@ -509,6 +509,7 @@ int8_t MAX30102_readFIFO(uint8_t* dataBuf, uint8_t numBytes)
     }
 
     address = (MAX30102_I2C_ADDR_S | MAX30102_I2C_ADDR_READ);
+    retStatus = HAL_I2C_Master_Receive(&hi2c1, address, buf, numBytes, HAL_MAX_DELAY);
     if (retStatus != HAL_OK ){
 		return -1;
 	}
@@ -522,5 +523,192 @@ int8_t MAX30102_readFIFO(uint8_t* dataBuf, uint8_t numBytes)
 	return 0;
 
 }
+
+void MAX30102_clearInterrupt(void)
+{
+    uint8_t readResult;
+    MAX30102_readReg(MAX30102_INTERRUPT_STATUS_1, &readResult);
+}
+
+float MAX30102_readTemp(void)
+{
+    uint8_t tempReady = 1;
+    uint8_t readResult;
+    int8_t tempFraction;
+    uint8_t tempInteger;
+    float temperature;
+
+    MAX30102_writeReg(MAX30102_DIE_TEMP_CONFIG, 1);
+
+    while (tempReady != 0)
+    {
+        MAX30102_readReg(MAX30102_DIE_TEMP_CONFIG, &tempReady);
+    }
+
+    MAX30102_readReg(MAX30102_DIE_TINT, &readResult);
+    tempInteger = readResult;
+
+    MAX30102_readReg(MAX30102_DIE_TFRAC, &readResult);
+    tempFraction = readResult;
+
+    temperature = tempInteger + (tempFraction * MAX30102_DIE_TFRAC_INCREMENT);
+
+    return temperature;
+}
+
+MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
+{
+    MAX30102 result = {
+        .pulse_Detected = false,
+        .heart_BPM = 0.0,
+        .ir_Cardiogram = 0.0,
+        .ir_Dc_Value = 0.0,
+        .red_Dc_Value = 0.0,
+        .SpO2 = max_Sensor.SpO2,
+        .last_Beat_Threshold = 0,
+        .dc_Filtered_IR = 0.0,
+        .dc_Filtered_Red = 0.0,
+        .temperature = 0.0
+    };
+
+    result.temperature = MAX30102_readTemp();
+
+    dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, ALPHA);
+    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, ALPHA);
+
+    float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
+    lowPassButterworthFilter(meanDiffResIR, &lpbFilterIR);
+
+    irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
+    redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
+    samplesRecorded++;
+
+    if (detectPulse(lpbFilterIR.result) && samplesRecorded > 0) {
+        result.pulse_Detected = true;
+        pulsesDetected++;
+
+        float ratioRMS = log(sqrt(redACValueSqSum / samplesRecorded)) /
+                         log(sqrt(irACValueSqSum / samplesRecorded));
+
+        max_Sensor.SpO2 = 110.0 - 18.0 * ratioRMS;
+        result.SpO2 = max_Sensor.SpO2;
+
+        if (pulsesDetected % RESET_SPO2_EVERY_N_PULSES == 0) {
+            irACValueSqSum = 0;
+            redACValueSqSum = 0;
+            samplesRecorded = 0;
+        }
+    }
+
+    balanceIntensity(dcFilterRed.w, dcFilterIR.w);
+
+    result.heart_BPM = max_Sensor.heart_BPM;
+    result.ir_Cardiogram = lpbFilterIR.result;
+    result.ir_Dc_Value = dcFilterIR.w;
+    result.red_Dc_Value = dcFilterRed.w;
+    result.last_Beat_Threshold = max_Sensor.last_Beat_Threshold;
+    result.dc_Filtered_IR = dcFilterIR.result;
+    result.dc_Filtered_Red = dcFilterRed.result;
+
+    return result;
+}
+
+bool detectPulse(float sensor_value)
+{
+    static float prev_sensor_value = 0;
+    static uint8_t values_went_down = 0;
+    static uint32_t currentBeat = 0;
+    static uint32_t lastBeat = 0;
+
+    if (sensor_value > PULSE_MAX_THRESHOLD) {
+        currentPulseDetectorState = PULSE_IDLE;
+        prev_sensor_value = 0;
+        lastBeat = 0;
+        currentBeat = 0;
+        values_went_down = 0;
+        max_Sensor.last_Beat_Threshold = 0;
+        return false;
+    }
+
+    switch (currentPulseDetectorState) {
+        case PULSE_IDLE:
+            if (sensor_value >= PULSE_MIN_THRESHOLD) {
+                currentPulseDetectorState = PULSE_TRACE_UP;
+                values_went_down = 0;
+            }
+            break;
+
+        case PULSE_TRACE_UP:
+            if (sensor_value > prev_sensor_value) {
+                currentBeat = HAL_GetTick();
+                max_Sensor.last_Beat_Threshold = sensor_value;
+            } else {
+                uint32_t beatDuration = currentBeat - lastBeat;
+                lastBeat = currentBeat;
+
+                float rawBPM = (beatDuration > 0) ? (60000.0 / (float)beatDuration) : 0;
+
+                valuesBPM[bpmIndex] = rawBPM;
+                valuesBPMSum = 0;
+
+                for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
+                    valuesBPMSum += valuesBPM[i];
+                }
+
+                bpmIndex = (bpmIndex + 1) % PULSE_BPM_SAMPLE_SIZE;
+
+                if (valuesBPMCount < PULSE_BPM_SAMPLE_SIZE) {
+                    valuesBPMCount++;
+                }
+
+                max_Sensor.heart_BPM = valuesBPMSum / valuesBPMCount;
+
+                currentPulseDetectorState = PULSE_TRACE_DOWN;
+
+                return true;
+            }
+            break;
+
+        case PULSE_TRACE_DOWN:
+            if (sensor_value < prev_sensor_value) {
+                values_went_down++;
+            }
+
+            if (sensor_value < PULSE_MIN_THRESHOLD) {
+                currentPulseDetectorState = PULSE_IDLE;
+            }
+            break;
+    }
+
+    prev_sensor_value = sensor_value;
+    return false;
+}
+
+void balanceIntensity(float redLedDC, float IRLedDC)
+{
+    uint32_t currentTime = HAL_GetTick();
+    if (currentTime - lastREDLedCurrentCheck >= RED_LED_CURRENT_ADJUTSMENT_MS) {
+        if (IRLedDC - redLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent < MAX30102_LED_CURRENT_51MA) {
+            redLEDCurrent++;
+            MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
+        } else if (redLedDC - IRLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent > 0) {
+            redLEDCurrent--;
+            MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
+        }
+
+        lastREDLedCurrentCheck = HAL_GetTick();
+    }
+}
+
+void MAX30102_displayData(void)
+{
+    printf("MAX30102 Pulse Oximeter Data:\n");
+    printf("Die Temperature: %.2f\n", max_Sensor.temperature);
+    printf("Heart Rate (BPM): %.2f\n", max_Sensor.heart_BPM);
+    printf("Oxygen Saturation SpO2 (%%): %.2f\n", max_Sensor.SpO2);
+}
+
+
+
 
 
