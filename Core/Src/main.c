@@ -16,11 +16,16 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
+/* Includes ------------------------s------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
+#include "max_sensor.h"
+#include "string.h"
+#include "stm32f1xx_hal.h"
+#include "uart.h"
 
 /* USER CODE END Includes */
 
@@ -42,10 +47,12 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
+volatile uint8_t MAX30102_Flag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -53,12 +60,17 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint32_t millis(void)
+{
+	return HAL_GetTick();
+}
 
 /* USER CODE END 0 */
 
@@ -93,7 +105,32 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  //MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  I2C_Init();
+  uart_Init();
+  FIFO_LED_DATA fifoledData;
+  long currentMillis = 0;
+  long lastMillis = 0;
+
+  MAX30102_resetRegister();
+  MAX30102_initFIFO();
+
+  //Sampling & pulse width
+  MAX30102_setSampleRate(_1000SPS);
+  MAX30102_setPulseWidth(_411_US);
+
+  // LED current
+  MAX30102_setLedCurrent(RED_LED, 30);
+  MAX30102_setLedCurrent(IR_LED, 5);
+
+  MAX30102_resetFIFO();
+
+  //Mode
+  MAX30102_setMeasMode(HEART_RATE);
+
+  currentMillis = millis();
 
   /* USER CODE END 2 */
 
@@ -101,8 +138,36 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
+    if (INTERRUPT == 1)
+    {
+      if ( MAX30102_Flag == 0)
+      {
+        fifoledData = MAX30102_read_FIFO();
 
+        max_Sensor = MAX30102_update(fifoledData);
+
+        MAX30102_clearInterrupt();
+
+      }
+
+    }else{
+      fifoledData = MAX30102_read_FIFO();
+      
+      max_Sensor = MAX30102_update(fifoledData);
+
+      MAX30102_resetFIFO();
+
+      HAL_Delay(10);
+    }
+
+    currentMillis = millis();
+    if (currentMillis - lastMillis > 1000)
+    {
+      MAX30102_displayData();
+      lastMillis = currentMillis;
+      //MAX30102_registerData();
+    }
+    /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

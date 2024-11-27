@@ -1,6 +1,6 @@
 /*
  *
- * Max30102.h
+ * Max30102
  *
  * Author: Joar Warholm
  * Created: 13 November 2024
@@ -15,11 +15,9 @@
 #define MAX30102_I2C_DRIVER_H
 
 #include "stm32f1xx_hal.h" /*Needed for I2C*/
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
+#include <stdio.h>
+
 
 /* PULSE DETECTION PARAMETERS */
 #define PULSE_MIN_THRESHOLD 300 // 300 for finger and around 20 for wrist
@@ -106,7 +104,7 @@
 #define MAX30102_MULTI_LED_CTRL_SLOT3 0
 
 //DIE TEMP
-#define MAX30102_DIE_TINT 0x1f
+#define MAX30102_DIE_TINT 0x1F
 #define MAX30102_DIE_TFRAC 0x20
 #define MAX30102_DIE_TFRAC_INCREMENT 0.0625f
 #define MAX30102_DIE_TEMP_CONFIG 0x21
@@ -192,6 +190,8 @@ typedef struct {
     float temperature;
 } MAX30102;
 
+extern MAX30102 max_Sensor;
+
 typedef enum {
     PULSE_IDLE,
     PULSE_TRACE_UP,
@@ -199,9 +199,6 @@ typedef enum {
 }PULSE_STATE;
 
 extern PULSE_STATE currentPulseDetectorState;
-
-extern MAX30102 max_Sensor;
-
 
 /*
  * INITIALISATION
@@ -245,8 +242,8 @@ void MAX30102_displayData(void);
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value);
 HAL_StatusTypeDef MAX30102_writeReg(uint8_t reg, uint8_t value);
 
-HAL_StatusTypeDef MAX30102_readRegister ( MAX30102 *dev, uint8_t reg, uint8_t *data);
-HAL_StatusTypeDef MAX30102_readRegisters ( MAX30102 *dev, uint8_t reg, uint8_t * data, uint8_t length);
-HAL_StatusTypeDef MAX30102_writeRegister( MAX30102 *dev, uint8_t reg, uint8_t *data);
+//HAL_StatusTypeDef MAX30102_readRegister ( MAX30102 *dev, uint8_t reg, uint8_t *data);
+//HAL_StatusTypeDef MAX30102_readRegisters ( MAX30102 *dev, uint8_t reg, uint8_t * data, uint8_t length);
+//HAL_StatusTypeDef MAX30102_writeRegister( MAX30102 *dev, uint8_t reg, uint8_t *data);
 
 #endif

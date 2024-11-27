@@ -56,7 +56,11 @@ Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c \
 Core/Src/system_stm32f1xx.c \
 Core/Src/sysmem.c \
 Core/Src/syscalls.c \
-Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c
+Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c \
+Core/Src/max_sensor.c \
+Core/Src/filter_max30102.c \
+Core/Src/uart.c
+
 
 # ASM sources
 ASM_SOURCES =  \

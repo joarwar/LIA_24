@@ -11,11 +11,11 @@
  * https://morf.lv/implementing-pulse-oximeter-using-max30100
  */
 #include "filter_max30102.h"
-#include "filter_max30102.h"
+#include "max_sensor.h"
 /**
  *DC removal filter
  */
-DC_FILTER_T applyDCFilter(float input, float prevState, float alpha)
+DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
 {
     DC_FILTER_T output;
     output.w = input + alpha * prevState;
@@ -26,7 +26,7 @@ DC_FILTER_T applyDCFilter(float input, float prevState, float alpha)
 /**
  * Butterworth filter.
  */
-void applyLowPassFilter(float input, BUTTERWORTH_FILTER_T *filterState)
+void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 {
     filterState->v[0] = filterState->v[1];
     filterState->v[1] = (0.2452372752527856026 * input) + (0.50952544949442879485 * filterState->v[0]);
@@ -36,7 +36,7 @@ void applyLowPassFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 /**
  *  Mean difference.
  */
-float calculateMeanDifference(float input, MEAN_DIFF_FILTER_T *filterData)
+float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
 {
     filterData->sum -= filterData->values[filterData->index];
     filterData->values[filterData->index] = input;

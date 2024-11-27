@@ -1,6 +1,6 @@
 /*
  *
- * Max30102.c
+ * Max30102
  *
  * Author: Joar Warholm
  * Created: 13 November 2024
@@ -10,16 +10,15 @@
  * Adapted from:
  * https://morf.lv/implementing-pulse-oximeter-using-max30100
  */
-
-#include "MAX30102.h"
-#include "filter_max30102.h"
 #include "stm32f1xx_hal.h"
+#include "max_sensor.h"
+#include "filter_max30102.h"
 #include "math.h"
-#include "main.h"
 #include <stm32f103xb.h>
+#include "uart.h"
 
 
-I2C_HandleTypeDef hi2c1;
+extern I2C_HandleTypeDef hi2c1;
 
 MAX30102 max_Sensor = {0};
 FIFO_LED_DATA fifoData = {0};
@@ -78,11 +77,11 @@ void I2C_Init(void)
 	// Call the HAL error handler on error
 	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
 	{
-		errorHandler();
+		Error_Handler();
 	}
 }
 
-int8_t MAX30102_redReg(uint8_t reg, uint8_t* value)
+int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
 {
     HAL_StatusTypeDef retStatus;
     uint8_t buf[2];
@@ -91,8 +90,8 @@ int8_t MAX30102_redReg(uint8_t reg, uint8_t* value)
     buf[1] = 0x03;
     
     uint8_t address = (MAX30102_I2C_ADDR_S | MAX30102_I2C_ADDR_WRITE);
-
-    if (HAL_I2C_Master_Transmit(&hi2c1, address, buf, 1, HAL_MAX_DELAY) != HAL_OK)
+    retStatus = HAL_I2C_Master_Transmit(&hi2c1, address, buf, 1, HAL_MAX_DELAY);
+    if (retStatus != HAL_OK)
     {
         return -1;
     }
@@ -156,37 +155,6 @@ void MAX30102_setMeasMode(MEASURMENT_MODE mode)
         measurment_mode = mode;
     }
 
-}
-
-MEASURMENT_MODE MAX30102_getMeasMode(void)
-{
-    int8_t readStatus = 0;
-    uint8_t readResult;
-
-    readStatus = MAX30102_readReg(MAX30102_MODE_CONFIG, &readResult);
-    if (readStatus == -1){
-        return MEASURMENT_MODE_FAIL;
-    }
-    
-    readResult &= 0x07;
-
-    return (MEASURMENT_MODE)readResult;
-
-    switch(readResult)
-    {
-        case 2:
-            return HEART_RATE;
-            break;
-        case 3: 
-            return SP02;
-            break;
-        case 7:
-            return MULTI_LED;
-            break;
-        default:
-            return HEART_RATE;
-            break;
-    }
 }
 
 MEASURMENT_MODE MAX30102_getMeasMode(void)
@@ -347,7 +315,7 @@ float MAX30102_getLedCurrent(uint8_t led)
     return currentLevel;
 }
 
-void MAX30102_setSample(uint8_t rate)
+void MAX30102_setSampleRate(uint8_t rate)
 {
     int8_t readStatus = 0;
     uint8_t readResult;
@@ -397,7 +365,7 @@ void MAX30102_setPulseWidth(uint8_t width)
     readStatus = MAX30102_readReg(MAX30102_SPO2_CONFIG, &readResult);
     if (readStatus == -1)
     {
-        return _SAMPLE_FAIL;
+        return;
     }
 
     readResult &= ~(0x03 << 0);
@@ -448,7 +416,7 @@ PULSE_WIDTH MAX30102_getPulseWidth(void)
 
 }
 
-void MAX30102_initFIFO(void)
+void MAX30102_resetFIFO(void)
 {
     MAX30102_writeReg(MAX30102_FIFO_WRITE_POINTER, 0);
     MAX30102_writeReg(MAX30102_FIFO_READ_POINTER, 0);
@@ -471,7 +439,7 @@ void MAX30102_initFIFO(void)
     }
 }
 
-FIFO_LED_DATA MAX30102_readFIFO(void)
+FIFO_LED_DATA MAX30102_read_FIFO(void)
 {
     uint8_t address;
     uint8_t buf[12];
@@ -700,12 +668,224 @@ void balanceIntensity(float redLedDC, float IRLedDC)
     }
 }
 
+void MAX30102_registerData(void)
+{
+    int8_t readStatus;
+    uint8_t readResult;
+
+    readStatus = MAX30102_readReg(MAX30102_INTERRUPT_STATUS_1, &readResult);
+    if (readStatus == -1)
+    {
+        uart_PrintString("I2C read issue");
+        return;
+    }
+
+    uart_PrintString("MAX30102_INTERRUPT_STATUS_1: 0x");
+    uart_PrintInt(readResult, 16);
+
+    readStatus = MAX30102_readReg(MAX30102_INTERRUPT_STATUS_2, &readResult);
+    if (readStatus == -1)
+    {
+        uart_PrintString("I2C read issue");
+        return;
+    }
+
+	uart_PrintString("MAX30102_INTERRUPT_STATUS_2: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_INTERRUPT_ENABLE_1, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_INTERRUPT_ENABLE_1: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_INTERRUPT_ENABLE_2, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_INTERRUPT_ENABLE_2: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_FIFO_WRITE_POINTER, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_FIFO_WRITE_POINTER: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_OVERFLOW_COUNTER, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_OVERFLOW_COUNTER: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_FIFO_READ_POINTER, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_FIFO_READ_POINTER: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_FIFO_DATA_REGISTER, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_FIFO_DATA_REGISTER: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_FIFO_CONFIG, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_FIFO_CONFIG: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_MODE_CONFIG, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_MODE_CONFIG: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_SPO2_CONFIG, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_SPO2_CONFIG: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_LED1_PULSE, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_LED1_PULSE: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_LED2_PULSE, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_LED2_PULSE: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_MULTI_LED_CTRL_1, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_MULTI_LED_CTRL_1: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_MULTI_LED_CTRL_2, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_MULTI_LED_CTRL_2: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_DIE_TINT, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_DIE_TINT: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_DIE_TFRAC, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_DIE_TFRAC: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_DIE_TEMP_CONFIG, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_DIE_TEMP_CONFIG: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_REV_ID, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_REV_ID: 0x");
+	uart_PrintInt(readResult, 16);
+
+	readStatus = MAX30102_readReg(MAX30102_PART_ID, &readResult);
+	if( readStatus == -1){
+		uart_PrintString("I2C read error!");
+		return;
+	}
+
+	uart_PrintString("MAX30102_PART_ID: 0x");
+	uart_PrintInt(readResult, 16);
+
+	uart_PrintString("\r\n");
+
+}
+
 void MAX30102_displayData(void)
 {
-    printf("MAX30102 Pulse Oximeter Data:\n");
-    printf("Die Temperature: %.2f\n", max_Sensor.temperature);
-    printf("Heart Rate (BPM): %.2f\n", max_Sensor.heart_BPM);
-    printf("Oxygen Saturation SpO2 (%%): %.2f\n", max_Sensor.SpO2);
+
+//uart_PrintString("TEMP ");
+//uart_PrintFloat(max_Sensor.temperature);
+//uart_PrintString(" ----- \n");
+
+    uart_PrintString("BPM ");
+    uart_PrintFloat(max_Sensor.heart_BPM);
+    uart_PrintString(" ----- \n");
+
+    uart_PrintString("dc_filter_red ");
+    uart_PrintFloat(max_Sensor.dc_Filtered_Red);
+    uart_PrintString(" ----- \n");
+
+    uart_PrintString("red_dc ");
+    uart_PrintFloat(max_Sensor.red_Dc_Value);
+    uart_PrintString(" ----- \n");
+
+    uart_PrintString("dc_filter_IR ");
+    uart_PrintFloat(max_Sensor.dc_Filtered_IR);
+    uart_PrintString(" ----- \n");
+
+    uart_PrintString("ir_dc ");
+    uart_PrintFloat(max_Sensor.ir_Dc_Value);
+    uart_PrintString(" ----- \n");
+
 }
 
 
