@@ -13,5 +13,4 @@ To be able to measure the wellbeing of women through the use of their phone by c
 - [Acknowledgments](#acknowledgments)
 
 ## Usage
-
-Explain how to use the project. Include code snippets or screenshots if applicable. For example:
+Working on it...
