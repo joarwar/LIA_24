@@ -1,0 +1,12 @@
+# input 65535.0
+# alpha: 0.0
+# prevState: 1310545.0
+# output.w : 1310553.0
+# output.result: 7.0
+# input 65343.0
+# alpha: 0.0
+# prevState: 1306719.0
+# output.w : 1306726.0
+# output.result: 7.0
+# LowPass Butterworth: 3.0
+# filterState->result: 8.0

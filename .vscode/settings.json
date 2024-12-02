@@ -15,6 +15,7 @@
     "files.associations": {
         "string.h": "c",
         "filter_max30102.h": "c",
-        "MAX30102.h": "c"
+        "MAX30102.h": "c",
+        "stdio.h": "c"
     },
 }

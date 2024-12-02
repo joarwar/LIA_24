@@ -19,7 +19,7 @@
 
 
 /* Filter parameters */
-#define ALPHA 0.95  //dc filter alpha value
+#define ALPHA 0.95  //dc filter alpha values = Statistical significance, often an constant at 0.05 => 5% 
 #define MEAN_FILTER_SIZE 15
 
 
@@ -42,7 +42,7 @@ typedef struct
   uint8_t count;
 }MEAN_DIFF_FILTER_T;
 
-DC_FILTER_T dcRemoval(float x, float prev_w, float alpha);
+DC_FILTER_T dcRemoval(float input, float prevState, float alpha);
 void lowPassButterworthFilter(float x, BUTTERWORTH_FILTER_T * filterResult);
 float meanDiff(float M, MEAN_DIFF_FILTER_T* filterValues);
 

@@ -541,9 +541,24 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 
     result.temperature = MAX30102_readTemp();
 
-    dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, ALPHA);
-    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, ALPHA);
+    // Apply DC Removal filter
+    uart_PrintString("dcFilterIR ");
+    uart_PrintFloat(dcFilterIR.w);
+    uart_PrintString("ALPHA ");
+    uart_PrintFloat(ALPHA);
+    uart_PrintString("fifoData_IR ");
+    uart_PrintFloat(m_fifoData.ir_led_raw);
 
+    dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha = 0.95
+    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);  // alpha = 0.95
+    
+
+
+    uart_PrintString("Filtered_IR ");
+    uart_PrintFloat(dcFilterIR.result );
+
+
+    // Apply mean difference filter
     float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
     lowPassButterworthFilter(meanDiffResIR, &lpbFilterIR);
 
@@ -551,16 +566,16 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
     samplesRecorded++;
 
+    // Detect pulse (check if the heart rate is fluctuating)
     if (detectPulse(lpbFilterIR.result) && samplesRecorded > 0) {
         result.pulse_Detected = true;
         pulsesDetected++;
 
-        float ratioRMS = log(sqrt(redACValueSqSum / samplesRecorded)) /
-                         log(sqrt(irACValueSqSum / samplesRecorded));
+        //float ratioRMS = log(sqrt(redACValueSqSum / samplesRecorded)) / log(sqrt(irACValueSqSum / samplesRecorded));
+        //ax_Sensor.SpO2 = 110.0 - 18.0 * ratioRMS;
+        //result.SpO2 = max_Sensor.SpO2;
 
-        max_Sensor.SpO2 = 110.0 - 18.0 * ratioRMS;
-        result.SpO2 = max_Sensor.SpO2;
-
+        // Reset after a certain number of pulses
         if (pulsesDetected % RESET_SPO2_EVERY_N_PULSES == 0) {
             irACValueSqSum = 0;
             redACValueSqSum = 0;
@@ -570,6 +585,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 
     balanceIntensity(dcFilterRed.w, dcFilterIR.w);
 
+    // Final heart BPM calculation (from pulse detection logic)
     result.heart_BPM = max_Sensor.heart_BPM;
     result.ir_Cardiogram = lpbFilterIR.result;
     result.ir_Dc_Value = dcFilterIR.w;
@@ -862,29 +878,32 @@ void MAX30102_registerData(void)
 void MAX30102_displayData(void)
 {
 
-//uart_PrintString("TEMP ");
-//uart_PrintFloat(max_Sensor.temperature);
-//uart_PrintString(" ----- \n");
+    // uart_PrintString("TEMP ");
+    // uart_PrintFloat(max_Sensor.temperature);
+    // uart_PrintString(" ----- \n");
 
-    uart_PrintString("BPM ");
-    uart_PrintFloat(max_Sensor.heart_BPM);
-    uart_PrintString(" ----- \n");
+    // uart_PrintString("BPM ");
+    // uart_PrintFloat(max_Sensor.heart_BPM);
 
-    uart_PrintString("dc_filter_red ");
-    uart_PrintFloat(max_Sensor.dc_Filtered_Red);
-    uart_PrintString(" ----- \n");
 
-    uart_PrintString("red_dc ");
-    uart_PrintFloat(max_Sensor.red_Dc_Value);
-    uart_PrintString(" ----- \n");
+    // uart_PrintString("ir_dc  ");
+    // uart_PrintFloat(max_Sensor.ir_Dc_Value);
+    // uart_PrintString(" ----- \n");
+    
+    // uart_PrintString("dc_filter_ir ");
+    // uart_PrintFloat(max_Sensor.ir_Dc_Value);
+    // uart_PrintString(" ----- \n");
 
-    uart_PrintString("dc_filter_IR ");
-    uart_PrintFloat(max_Sensor.dc_Filtered_IR);
-    uart_PrintString(" ----- \n");
+    // uart_PrintString("red_dc ");
+    // uart_PrintFloat(max_Sensor.red_Dc_Value);
 
-    uart_PrintString("ir_dc ");
-    uart_PrintFloat(max_Sensor.ir_Dc_Value);
-    uart_PrintString(" ----- \n");
+
+    // uart_PrintString("red_filter ");
+    // uart_PrintFloat(max_Sensor.dc_Filtered_Red);
+
+
+    // uart_PrintString("IR_cardiogram ");
+    // uart_PrintFloat(max_Sensor.ir_Cardiogram);
 
 }
 

@@ -79,6 +79,7 @@ uint32_t millis(void)
   * @retval int
   */
 int main(void)
+
 {
 
   /* USER CODE BEGIN 1 */
@@ -122,8 +123,8 @@ int main(void)
   MAX30102_setPulseWidth(_411_US);
 
   // LED current
-  MAX30102_setLedCurrent(RED_LED, 30);
-  MAX30102_setLedCurrent(IR_LED, 5);
+  MAX30102_setLedCurrent(RED_LED, 5);
+  MAX30102_setLedCurrent(IR_LED, 30);
 
   MAX30102_resetFIFO();
 
