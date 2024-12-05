@@ -34,11 +34,11 @@
 #define RED_LED_CURRENT_ADJUTSMENT_MS 500
 
 //p.23 
-#define DEFAULT_SAMPLING_RATE MAX30102_SAMPLING_RATE_400HZ 
+#define DEFAULT_SAMPLING_RATE MAX30102_SAMPLING_RATE_100HZ 
 #define DEFAULT_PULSE_WIDTH MAX30102_PULSE_WIDTH_411US_ADC_18
 
 //p.20
-#define DEFAULT_IR_LED_CURRENT MAX30102_LED_CURRENT_51MA
+#define DEFAULT_IR_LED_CURRENT MAX30102_LED_CURRENT_50MA
 #define STARTING_RED_LED_CURRENT MAX30102_CURRENT_25_4MA
 
 /*
@@ -159,8 +159,8 @@ extern SAMPLE_RATE sample_rate;
 extern PULSE_WIDTH pulse_width;
 
 typedef struct {
-    uint16_t ir_led_raw;
-    uint16_t red_led_raw;
+    uint32_t ir_led_raw;
+    uint32_t red_led_raw;
 }FIFO_LED_DATA;
 
 typedef enum LEDCURRENT {

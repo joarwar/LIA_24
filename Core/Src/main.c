@@ -79,7 +79,6 @@ uint32_t millis(void)
   * @retval int
   */
 int main(void)
-
 {
 
   /* USER CODE BEGIN 1 */
@@ -124,7 +123,7 @@ int main(void)
 
   // LED current
   MAX30102_setLedCurrent(RED_LED, 5);
-  MAX30102_setLedCurrent(IR_LED, 30);
+  MAX30102_setLedCurrent(IR_LED, 0);
 
   MAX30102_resetFIFO();
 
@@ -161,13 +160,13 @@ int main(void)
       HAL_Delay(10);
     }
 
-    currentMillis = millis();
-    if (currentMillis - lastMillis > 1000)
-    {
-      MAX30102_displayData();
-      lastMillis = currentMillis;
-      //MAX30102_registerData();
-    }
+    // currentMillis = millis();
+    // if (currentMillis - lastMillis > 1000)
+    // {
+    //   MAX30102_displayData();
+    //   lastMillis = currentMillis;
+    //   MAX30102_registerData();
+    // }
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }

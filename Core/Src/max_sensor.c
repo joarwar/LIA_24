@@ -40,7 +40,7 @@ BUTTERWORTH_FILTER_T lpbFilterIR = {0};
 
 float currentBPM;
 float valuesBPM[PULSE_BPM_SAMPLE_SIZE] = {0};
-float valuesBPMSum =0;
+float valuesBPMSum = 0;
 uint8_t valuesBPMCount = 0;
 uint8_t bpmIndex = 0;
 uint32_t lastBeatThreshold = 0;
@@ -61,6 +61,8 @@ uint8_t lastREDLedCurrentCheck = 0;
 PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 
 LEDCURRENT irLedCurrent;
+
+uint16_t counter = 0;
 
 void I2C_Init(void)
 {
@@ -96,8 +98,10 @@ int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
         return -1;
     }
     address = (MAX30102_I2C_ADDR_S | MAX30102_I2C_ADDR_READ);
+    
+    retStatus = HAL_I2C_Master_Receive(&hi2c1, address, buf, 1, HAL_MAX_DELAY);
 
-    if (HAL_I2C_Master_Receive(&hi2c1, address, buf, 1, HAL_MAX_DELAY) != HAL_OK)
+    if (retStatus != HAL_OK)
     {
         return -1;
     }
@@ -532,7 +536,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
         .ir_Cardiogram = 0.0,
         .ir_Dc_Value = 0.0,
         .red_Dc_Value = 0.0,
-        .SpO2 = max_Sensor.SpO2,
+        .SpO2 = max_Sensor.SpO2,    
         .last_Beat_Threshold = 0,
         .dc_Filtered_IR = 0.0,
         .dc_Filtered_Red = 0.0,
@@ -540,33 +544,31 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
+    //uart_PrintString("ir_dc ");
+    //uart_PrintInt(counter++, 10);
+    //uart_PrintString(",");
+    //uart_PrintFloat(m_fifoData.ir_led_raw);
+    
+    uart_PrintString("red_dc ");
+    //uart_PrintFloat(m_fifoData.red_led_raw);
+    uart_PrintFloat(m_fifoData.red_led_raw);
 
-    // Apply DC Removal filter
-    uart_PrintString("dcFilterIR ");
-    uart_PrintFloat(dcFilterIR.w);
-    uart_PrintString("ALPHA ");
-    uart_PrintFloat(ALPHA);
-    uart_PrintString("fifoData_IR ");
-    uart_PrintFloat(m_fifoData.ir_led_raw);
 
     dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha = 0.95
     dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);  // alpha = 0.95
     
+    uart_PrintString("red_dcFilter ");
+    uart_PrintFloat(dcFilterRed.result );
 
-
-    uart_PrintString("Filtered_IR ");
-    uart_PrintFloat(dcFilterIR.result );
 
 
     // Apply mean difference filter
     float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
     lowPassButterworthFilter(meanDiffResIR, &lpbFilterIR);
-
     irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
     redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
     samplesRecorded++;
 
-    // Detect pulse (check if the heart rate is fluctuating)
     if (detectPulse(lpbFilterIR.result) && samplesRecorded > 0) {
         result.pulse_Detected = true;
         pulsesDetected++;
@@ -594,8 +596,11 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     result.dc_Filtered_IR = dcFilterIR.result;
     result.dc_Filtered_Red = dcFilterRed.result;
 
+    //uart_PrintFloat(max_Sensor.heart_BPM);
+
     return result;
 }
+
 
 bool detectPulse(float sensor_value)
 {
@@ -684,7 +689,7 @@ void balanceIntensity(float redLedDC, float IRLedDC)
     }
 }
 
-void MAX30102_registerData(void)
+void MAX30102_registerData(voixd)
 {
     int8_t readStatus;
     uint8_t readResult;
@@ -696,7 +701,7 @@ void MAX30102_registerData(void)
         return;
     }
 
-    uart_PrintString("MAX30102_INTERRUPT_STATUS_1: 0x");
+    uart_PrintString(" MAX30102_INTERRUPT_STATUS_1: 0x");
     uart_PrintInt(readResult, 16);
 
     readStatus = MAX30102_readReg(MAX30102_INTERRUPT_STATUS_2, &readResult);
@@ -706,7 +711,7 @@ void MAX30102_registerData(void)
         return;
     }
 
-	uart_PrintString("MAX30102_INTERRUPT_STATUS_2: 0x");
+	uart_PrintString(" MAX30102_INTERRUPT_STATUS_2: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_INTERRUPT_ENABLE_1, &readResult);
@@ -715,7 +720,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_INTERRUPT_ENABLE_1: 0x");
+	uart_PrintString(" MAX30102_INTERRUPT_ENABLE_1: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_INTERRUPT_ENABLE_2, &readResult);
@@ -724,7 +729,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_INTERRUPT_ENABLE_2: 0x");
+	uart_PrintString(" MAX30102_INTERRUPT_ENABLE_2: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_FIFO_WRITE_POINTER, &readResult);
@@ -733,7 +738,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_FIFO_WRITE_POINTER: 0x");
+	uart_PrintString(" MAX30102_FIFO_WRITE_POINTER: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_OVERFLOW_COUNTER, &readResult);
@@ -742,7 +747,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_OVERFLOW_COUNTER: 0x");
+	uart_PrintString(" MAX30102_OVERFLOW_COUNTER: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_FIFO_READ_POINTER, &readResult);
@@ -751,7 +756,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_FIFO_READ_POINTER: 0x");
+	uart_PrintString(" MAX30102_FIFO_READ_POINTER: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_FIFO_DATA_REGISTER, &readResult);
@@ -760,7 +765,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_FIFO_DATA_REGISTER: 0x");
+	uart_PrintString(" MAX30102_FIFO_DATA_REGISTER: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_FIFO_CONFIG, &readResult);
@@ -769,7 +774,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_FIFO_CONFIG: 0x");
+	uart_PrintString(" MAX30102_FIFO_CONFIG: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_MODE_CONFIG, &readResult);
@@ -778,7 +783,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_MODE_CONFIG: 0x");
+	uart_PrintString(" MAX30102_MODE_CONFIG: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_SPO2_CONFIG, &readResult);
@@ -787,7 +792,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_SPO2_CONFIG: 0x");
+	uart_PrintString(" MAX30102_SPO2_CONFIG: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_LED1_PULSE, &readResult);
@@ -796,7 +801,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_LED1_PULSE: 0x");
+	uart_PrintString(" MAX30102_LED1_PULSE: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_LED2_PULSE, &readResult);
@@ -805,7 +810,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_LED2_PULSE: 0x");
+	uart_PrintString(" MAX30102_LED2_PULSE: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_MULTI_LED_CTRL_1, &readResult);
@@ -814,7 +819,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_MULTI_LED_CTRL_1: 0x");
+	uart_PrintString(" MAX30102_MULTI_LED_CTRL_1: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_MULTI_LED_CTRL_2, &readResult);
@@ -823,7 +828,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_MULTI_LED_CTRL_2: 0x");
+	uart_PrintString(" MAX30102_MULTI_LED_CTRL_2: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_DIE_TINT, &readResult);
@@ -832,7 +837,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_DIE_TINT: 0x");
+	uart_PrintString(" MAX30102_DIE_TINT: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_DIE_TFRAC, &readResult);
@@ -841,7 +846,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_DIE_TFRAC: 0x");
+	uart_PrintString(" MAX30102_DIE_TFRAC: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_DIE_TEMP_CONFIG, &readResult);
@@ -850,7 +855,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_DIE_TEMP_CONFIG: 0x");
+	uart_PrintString(" MAX30102_DIE_TEMP_CONFIG: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_REV_ID, &readResult);
@@ -859,7 +864,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_REV_ID: 0x");
+	uart_PrintString(" MAX30102_REV_ID: 0x");
 	uart_PrintInt(readResult, 16);
 
 	readStatus = MAX30102_readReg(MAX30102_PART_ID, &readResult);
@@ -868,7 +873,7 @@ void MAX30102_registerData(void)
 		return;
 	}
 
-	uart_PrintString("MAX30102_PART_ID: 0x");
+	uart_PrintString(" MAX30102_PART_ID: 0x");
 	uart_PrintInt(readResult, 16);
 
 	uart_PrintString("\r\n");
@@ -886,8 +891,8 @@ void MAX30102_displayData(void)
     // uart_PrintFloat(max_Sensor.heart_BPM);
 
 
-    // uart_PrintString("ir_dc  ");
-    // uart_PrintFloat(max_Sensor.ir_Dc_Value);
+    //uart_PrintString("ir_dc,");
+    //uart_PrintFloat(max_Sensor.ir_Dc_Value);
     // uart_PrintString(" ----- \n");
     
     // uart_PrintString("dc_filter_ir ");

@@ -27,8 +27,10 @@ DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
     // uart_PrintFloat(prevState);
 
     DC_FILTER_T output;
-    output.w = input + alpha * prevState;
-    output.result = output.w - prevState;
+    output.w = alpha * prevState + (1.0 - alpha) * input;  
+    output.result = input - output.w;                     
+
+
 
     
     // uart_PrintString("output.w : ");
