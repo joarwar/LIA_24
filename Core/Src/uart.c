@@ -38,14 +38,34 @@ void uart_PrintString(char * str)
 
 void uart_PrintFloat(float value)
 {
-	uint8_t buf[12];
+    uint8_t buf[12];
 
-	value *= 100;
-	sprintf((char*)buf, "%u.%02\r\n",
-			(unsigned int)value/100,
-			(unsigned int)value % 100);
+    // Extract the integer part and fractional part
+    int integerPart = (int)value;
+    int fractionalPart = (int)((value - integerPart) * 100);  // Get two digits after decimal point
+    
+    // Handle negative fractional part (if value is negative, ensure fractional is positive)
+    if (fractionalPart < 0)
+    {
+        fractionalPart = -fractionalPart;
+    }
 
-	HAL_UART_Transmit(&stLink_Uart, buf, strlen((char*)buf), HAL_MAX_DELAY);}
+    // Print integer part and fractional part separately (without negative sign)
+    if (fractionalPart == 0)
+    {
+        sprintf((char*)buf, "%d\r\n", integerPart);  // Just print integer if no fractional part
+    }
+    else
+    {
+        // Print with 2 decimal places
+        sprintf((char*)buf, "%d.%02d\r\n", integerPart, fractionalPart);
+    }
+
+    // Transmit the string via UART
+    HAL_UART_Transmit(&stLink_Uart, buf, strlen((char*)buf), HAL_MAX_DELAY);
+}
+
+
 
 void uart_PrintInt(unsigned int value, unsigned char base)
 {

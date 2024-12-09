@@ -16,6 +16,8 @@
 #include "math.h"
 #include <stm32f103xb.h>
 #include "uart.h"
+#include "stm32f1xx_hal_i2c.h"
+
 
 
 extern I2C_HandleTypeDef hi2c1;
@@ -27,7 +29,7 @@ FIFO_LED_DATA fifoData = {0};
 
 MEASURMENT_MODE measurment_mode = HEART_RATE;
 POWER_MODE power_mode = NORMAL;
-SAMPLE_RATE sample_rate = _400SPS;
+SAMPLE_RATE sample_rate = _1000SPS;
 
 //FILTERS
 
@@ -62,26 +64,26 @@ PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 
 LEDCURRENT irLedCurrent;
 
-uint16_t counter = 0;
+//COUNTERS
 
-void I2C_Init(void)
-{
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 100000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+// void I2C_Init(void)
+// {
+// 	hi2c1.Instance = I2C1;
+// 	hi2c1.Init.ClockSpeed = 100000;
+// 	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+// 	hi2c1.Init.OwnAddress1 = 0;
+// 	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+// 	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+// 	hi2c1.Init.OwnAddress2 = 0;
+// 	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+// 	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
-	// Call the HAL error handler on error
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-}
+// 	// Call the HAL error handler on error
+// 	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+// 	{
+// 		Error_Handler();
+// 	}
+// }
 
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
 {
@@ -544,18 +546,12 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
-    //uart_PrintString("ir_dc ");
-    //uart_PrintInt(counter++, 10);
-    //uart_PrintString(",");
-    //uart_PrintFloat(m_fifoData.ir_led_raw);
-    
-    uart_PrintString("red_dc ");
+    //uart_PrintString("red_dc ");
     //uart_PrintFloat(m_fifoData.red_led_raw);
-    uart_PrintFloat(m_fifoData.red_led_raw);
 
 
-    dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha = 0.95
-    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);  // alpha = 0.95
+    //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.25);  // alpha
+    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.25);  // alpha 
     
     uart_PrintString("red_dcFilter ");
     uart_PrintFloat(dcFilterRed.result );
@@ -600,7 +596,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 
     return result;
 }
-
 
 bool detectPulse(float sensor_value)
 {
@@ -885,19 +880,17 @@ void MAX30102_displayData(void)
 
     // uart_PrintString("TEMP ");
     // uart_PrintFloat(max_Sensor.temperature);
-    // uart_PrintString(" ----- \n");
+
 
     // uart_PrintString("BPM ");
     // uart_PrintFloat(max_Sensor.heart_BPM);
 
 
-    //uart_PrintString("ir_dc,");
-    //uart_PrintFloat(max_Sensor.ir_Dc_Value);
-    // uart_PrintString(" ----- \n");
+    // uart_PrintString("ir_dc,");
+    // uart_PrintFloat(max_Sensor.ir_Dc_Value);
     
     // uart_PrintString("dc_filter_ir ");
     // uart_PrintFloat(max_Sensor.ir_Dc_Value);
-    // uart_PrintString(" ----- \n");
 
     // uart_PrintString("red_dc ");
     // uart_PrintFloat(max_Sensor.red_Dc_Value);

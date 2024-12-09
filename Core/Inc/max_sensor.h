@@ -112,7 +112,8 @@
 
 #define RED_LED 1
 #define IR_LED 2
-#define INTERRUPT 1
+
+#define INTERRUPT 0
 
 #define DATA_READ_FAIL 0xFFFFFFFF
 

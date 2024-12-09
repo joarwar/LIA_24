@@ -108,7 +108,7 @@ int main(void)
   //MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  I2C_Init();
+  //I2C_Init();
   uart_Init();
   FIFO_LED_DATA fifoledData;
   long currentMillis = 0;
@@ -123,7 +123,7 @@ int main(void)
 
   // LED current
   MAX30102_setLedCurrent(RED_LED, 5);
-  MAX30102_setLedCurrent(IR_LED, 0);
+  MAX30102_setLedCurrent(IR_LED, 5);
 
   MAX30102_resetFIFO();
 
@@ -140,8 +140,9 @@ int main(void)
   {
     if (INTERRUPT == 1)
     {
-      if ( MAX30102_Flag == 0)
+      if ( MAX30102_Flag)
       {
+        MAX30102_Flag = 0;
         fifoledData = MAX30102_read_FIFO();
 
         max_Sensor = MAX30102_update(fifoledData);
@@ -163,7 +164,7 @@ int main(void)
     // currentMillis = millis();
     // if (currentMillis - lastMillis > 1000)
     // {
-    //   MAX30102_displayData();
+    MAX30102_displayData();
     //   lastMillis = currentMillis;
     //   MAX30102_registerData();
     // }
@@ -227,7 +228,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.ClockSpeed = 400000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;

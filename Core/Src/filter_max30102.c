@@ -19,24 +19,20 @@
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
 {
     
-    // Debug: Log all
-    // uart_PrintString("input ");
-    // uart_PrintFloat(input);
-    // uart_PrintString("alpha: ");
-    // uart_PrintString("prevState: ");
-    // uart_PrintFloat(prevState);
 
     DC_FILTER_T output;
-    output.w = alpha * prevState + (1.0 - alpha) * input;  
-    output.result = input - output.w;                     
-
-
-
+    output.w = input + alpha * prevState;
+    output.result = input - output.w;           
     
+    // uart_PrintString("red_dc (input) ");
+    // uart_PrintFloat(input);
+    // uart_PrintString("prevState: ");
+    // uart_PrintFloat(prevState);           
     // uart_PrintString("output.w : ");
     // uart_PrintFloat(output.w);
     // uart_PrintString("output.result: ");
     // uart_PrintFloat(output.result);
+    prevState = output.w;
 
     return output;
 }
