@@ -36,7 +36,9 @@ SAMPLE_RATE sample_rate = _1000SPS;
 DC_FILTER_T dcFilterIR = {0};
 DC_FILTER_T dcFilterRed = {0};
 MEAN_DIFF_FILTER_T meanDiffIR = {0};
+MEAN_DIFF_FILTER_T meanDiffRed = {0};
 BUTTERWORTH_FILTER_T lpbFilterIR = {0};
+BUTTERWORTH_FILTER_T lpbFilterRed = {0};
 
 //BPM 
 
@@ -550,22 +552,29 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     //uart_PrintFloat(m_fifoData.red_led_raw);
 
 
-    //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.25);  // alpha
-    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.25);  // alpha 
+    //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha
+    dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);  // alpha 
     
-    uart_PrintString("red_dcFilter ");
-    uart_PrintFloat(dcFilterRed.result );
+    //uart_PrintString("red_dcFilter ");
+    //uart_PrintFloat(dcFilterRed.result );
 
 
 
     // Apply mean difference filter
-    float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
-    lowPassButterworthFilter(meanDiffResIR, &lpbFilterIR);
+    //float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
+    float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
+
+    uart_PrintString("red_meanFilter ");
+    uart_PrintFloat(meanDiffResRed);
+    
+    lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
     irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
     redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
     samplesRecorded++;
+    //uart_PrintString("red_butter ");
+    //uart_PrintFloat(lpbFilterRed.result);
 
-    if (detectPulse(lpbFilterIR.result) && samplesRecorded > 0) {
+    if (detectPulse(lpbFilterRed.result) && samplesRecorded > 0) {
         result.pulse_Detected = true;
         pulsesDetected++;
 
@@ -585,7 +594,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 
     // Final heart BPM calculation (from pulse detection logic)
     result.heart_BPM = max_Sensor.heart_BPM;
-    result.ir_Cardiogram = lpbFilterIR.result;
+    result.ir_Cardiogram = lpbFilterRed.result;
     result.ir_Dc_Value = dcFilterIR.w;
     result.red_Dc_Value = dcFilterRed.w;
     result.last_Beat_Threshold = max_Sensor.last_Beat_Threshold;
@@ -882,8 +891,8 @@ void MAX30102_displayData(void)
     // uart_PrintFloat(max_Sensor.temperature);
 
 
-    // uart_PrintString("BPM ");
-    // uart_PrintFloat(max_Sensor.heart_BPM);
+    //uart_PrintString("BPM ");
+    //uart_PrintFloat(max_Sensor.heart_BPM);
 
 
     // uart_PrintString("ir_dc,");

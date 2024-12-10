@@ -14,7 +14,7 @@
 #include "max_sensor.h"
 #include "uart.h"
 
-/*Attempt to remove dc*/
+/*Working dc removal*/
 
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
 {
@@ -22,7 +22,7 @@ DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
 
     DC_FILTER_T output;
     output.w = input + alpha * prevState;
-    output.result = input - output.w;           
+    output.result = output.w - prevState;          
     
     // uart_PrintString("red_dc (input) ");
     // uart_PrintFloat(input);
@@ -32,7 +32,6 @@ DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
     // uart_PrintFloat(output.w);
     // uart_PrintString("output.result: ");
     // uart_PrintFloat(output.result);
-    prevState = output.w;
 
     return output;
 }
@@ -46,12 +45,9 @@ void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 
     filterState->v[1] = (0.2452372752527856026 * input) + (0.50952544949442879485 * filterState->v[0]);  
     filterState->result = filterState->v[0] + filterState->v[1];
-
-    // uart_PrintString("filterState->result: ");
-    // uart_PrintFloat(filterState->result);
 }
 
-
+/*Working mean filter*/
 float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
 {
     float avg = 0;

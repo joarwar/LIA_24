@@ -122,8 +122,8 @@ int main(void)
   MAX30102_setPulseWidth(_411_US);
 
   // LED current
-  MAX30102_setLedCurrent(RED_LED, 5);
-  MAX30102_setLedCurrent(IR_LED, 5);
+  MAX30102_setLedCurrent(RED_LED, 5); // Saturated over 5 => Stuck on 65k max number.
+  MAX30102_setLedCurrent(IR_LED, 2); // Shouldnt be used but w/e
 
   MAX30102_resetFIFO();
 
@@ -140,7 +140,7 @@ int main(void)
   {
     if (INTERRUPT == 1)
     {
-      if ( MAX30102_Flag)
+      if (MAX30102_Flag)
       {
         MAX30102_Flag = 0;
         fifoledData = MAX30102_read_FIFO();
@@ -158,7 +158,7 @@ int main(void)
 
       MAX30102_resetFIFO();
 
-      HAL_Delay(10);
+      //HAL_Delay(10);
     }
 
     // currentMillis = millis();
@@ -228,7 +228,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.ClockSpeed = 400000;
+  hi2c1.Init.ClockSpeed = 100000;
   hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
