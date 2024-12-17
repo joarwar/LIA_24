@@ -40,25 +40,21 @@ void uart_PrintFloat(float value)
 {
     uint8_t buf[12];
 
-    // Extract the integer part and fractional part
     int integerPart = (int)value;
-    int fractionalPart = (int)((value - integerPart) * 100);  // Get two digits after decimal point
+    int fractionalPart = (int)((value - integerPart) * 100);  
     
-    // Handle negative fractional part (if value is negative, ensure fractional is positive)
     if (fractionalPart < 0)
     {
         fractionalPart = -fractionalPart;
     }
 
-    // Print integer part and fractional part separately (without negative sign)
     if (fractionalPart == 0)
     {
-        sprintf((char*)buf, "%d\r\n", integerPart);  // Just print integer if no fractional part
+        sprintf((char*)buf, "%d", integerPart); 
     }
     else
     {
-        // Print with 2 decimal places
-        sprintf((char*)buf, "%d.%02d\r\n", integerPart, fractionalPart);
+        sprintf((char*)buf, "%d.%02d", integerPart, fractionalPart);
     }
 
     // Transmit the string via UART

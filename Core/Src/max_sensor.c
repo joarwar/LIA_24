@@ -39,6 +39,10 @@ MEAN_DIFF_FILTER_T meanDiffIR = {0};
 MEAN_DIFF_FILTER_T meanDiffRed = {0};
 BUTTERWORTH_FILTER_T lpbFilterIR = {0};
 BUTTERWORTH_FILTER_T lpbFilterRed = {0};
+FIRFilter filMovAvg;
+EMA_Low_H filLowEmAvg;
+EMA_High_H filHighEmAvg;
+
 
 //BPM 
 
@@ -65,8 +69,7 @@ uint8_t lastREDLedCurrentCheck = 0;
 PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 
 LEDCURRENT irLedCurrent;
-
-//COUNTERS
+uint16_t counter = 0;
 
 // void I2C_Init(void)
 // {
@@ -548,8 +551,11 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
-    //uart_PrintString("red_dc ");
-    //uart_PrintFloat(m_fifoData.red_led_raw);
+    // uart_PrintString("$");
+    // //uart_PrintFloat(m_fifoData.red_led_raw);
+    // uart_PrintInt(m_fifoData.red_led_raw, 10);
+    // uart_PrintString(";");
+
 
 
     //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha
@@ -557,22 +563,38 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     
     //uart_PrintString("red_dcFilter ");
     //uart_PrintFloat(dcFilterRed.result );
-
-
+    // float EmLowAvg;
+    // float EmHighAvg;
 
     // Apply mean difference filter
     //float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
     float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
+    FIRFilter_Update(&filMovAvg,dcFilterRed.result);
 
-    uart_PrintString("red_meanFilter ");
-    uart_PrintFloat(meanDiffResRed);
+    // EMA_Low_Init(&filLowEmAvg, 0.5f);
+    // EMA_High_Init(&filHighEmAvg, 0.5f);
+    // EmLowAvg = EMA_Low_Update(&filLowEmAvg,dcFilterRed.result);
+    // EmHighAvg = EMA_High_Update(&filHighEmAvg,dcFilterRed.result);
+    //uart_PrintString("red_meanFilter ");
+    //uart_PrintFloat(meanDiffResRed);
     
     lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
     irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
     redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
     samplesRecorded++;
-    //uart_PrintString("red_butter ");
-    //uart_PrintFloat(lpbFilterRed.result);
+    uart_PrintString("$");
+    uart_PrintFloat(fifoData.red_led_raw);
+    uart_PrintString(" ");
+    uart_PrintFloat(dcFilterRed.result);
+    uart_PrintString(" ");
+    uart_PrintFloat(filMovAvg.out);
+    uart_PrintString(" ");
+    uart_PrintFloat(meanDiffResRed);
+    //uart_PrintString(" ");
+    //uart_PrintFloat(EmLowAvg);
+    //uart_PrintString(" ");
+    //uart_PrintFloat(EmHighAvg);
+    uart_PrintString(";");
 
     if (detectPulse(lpbFilterRed.result) && samplesRecorded > 0) {
         result.pulse_Detected = true;

@@ -53,6 +53,7 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 
 volatile uint8_t MAX30102_Flag = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,15 +114,14 @@ int main(void)
   FIFO_LED_DATA fifoledData;
   long currentMillis = 0;
   long lastMillis = 0;
-
   MAX30102_resetRegister();
   MAX30102_initFIFO();
 
   //Sampling & pulse width
-  MAX30102_setSampleRate(_1000SPS);
+  MAX30102_setSampleRate(_800SPS);
   MAX30102_setPulseWidth(_411_US);
 
-  // LED current
+  // LED current (mA)
   MAX30102_setLedCurrent(RED_LED, 5); // Saturated over 5 => Stuck on 65k max number.
   MAX30102_setLedCurrent(IR_LED, 2); // Shouldnt be used but w/e
 
