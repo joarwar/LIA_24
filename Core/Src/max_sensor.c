@@ -534,9 +534,16 @@ float MAX30102_readTemp(void)
 
     return temperature;
 }
-
+static uint32_t lastTimeChecked = 0;
+static bool actionPerformed = false;
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 {
+    static float lastPeakTime = 0.0f;
+    static float lastPeakValue = 0.0f;
+    static float bpm = 0.0f;
+    static float peakThreshold = 0.1f;  
+    static float sampleRate = 1.0f;
+
     MAX30102 result = {
         .pulse_Detected = false,
         .heart_BPM = 0.0,
@@ -551,58 +558,56 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
-    uint32_t timeCheck = HAL_GetTick();
-    if(fifoData.red_led_raw > 9000)
-    {
-        //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha
-        dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);  // alpha 
-        
+    uint32_t currentTime  = HAL_GetTick();
 
-        // float EmLowAvg;
-        // float EmHighAvg;
-        //float meanDiffResIR = meanDiff(dcFilterIR.result, &meanDiffIR);
+    if (currentTime - lastTimeChecked >= 10000 && !actionPerformed) {
+        bpm *= 6;
+
+        actionPerformed = true;
+        uart_PrintString("Action performed after 10 seconds: bpm * 6\n");
+        uart_PrintFloat(bpm);
+    }
+
+    if (m_fifoData.red_led_raw > 9000) {
+        dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);
+
         float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
-        FIRFilter_Update(&filMovAvg,dcFilterRed.result);
+        FIRFilter_Update(&filMovAvg, dcFilterRed.result);
 
-        // EMA_Low_Init(&filLowEmAvg, 0.5f);
-        // EMA_High_Init(&filHighEmAvg, 0.5f);
-        // EmLowAvg = EMA_Low_Update(&filLowEmAvg,dcFilterRed.result);
-        // EmHighAvg = EMA_High_Update(&filHighEmAvg,dcFilterRed.result);
-        
         lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
-        irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
-        redACValueSqSum += dcFilterRed.result * dcFilterRed.result;
-        samplesRecorded++;
+
+        if (lpbFilterRed.result > lastPeakValue + peakThreshold) {
+            lastPeakValue = lpbFilterRed.result;
+            lastPeakTime = currentTime;
+
+            if (lastPeakTime - lastPeakTime >= sampleRate * 1000) {
+                bpm = 60.0f / (float)(currentTime - lastPeakTime) * 1000;
+            }
+        }
+
         uart_PrintString("$");
-        uart_PrintFloat(fifoData.red_led_raw);
+        uart_PrintFloat(m_fifoData.red_led_raw);
         uart_PrintString(" ");
         uart_PrintFloat(dcFilterRed.result);
         uart_PrintString(" ");
         uart_PrintFloat(meanDiffResRed);
         uart_PrintString(" ");
         uart_PrintFloat(filMovAvg.out);
-        //uart_PrintFloat(EmLowAvg);
-        // uart_PrintString(" ");
-        //uart_PrintFloat(EmHighAvg);
-        // uart_PrintFloat(lpbFilterRed.result);
-        uart_PrintString(" ");
-        float inverseMA = filMovAvg.out * -1;
-        uart_PrintFloat(inverseMA);
-        uart_PrintString(" ");
-        uart_PrintInt(timeCheck, 10);
         uart_PrintString(" ");
         uart_PrintFloat(lpbFilterRed.result);
+        uart_PrintString(" ");
+        uart_PrintFloat(bpm);
         uart_PrintString(";");
-    }else{
+    } else {
         uart_PrintString("No finger?");
         uart_PrintString("$");
         uart_PrintFloat(0);
         uart_PrintString(";");
     }
+
     balanceIntensity(dcFilterRed.w, dcFilterIR.w);
 
-
-    result.heart_BPM = max_Sensor.heart_BPM;
+    result.heart_BPM = bpm;
     result.ir_Cardiogram = lpbFilterRed.result;
     result.ir_Dc_Value = dcFilterIR.w;
     result.red_Dc_Value = dcFilterRed.w;
@@ -610,82 +615,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     result.dc_Filtered_IR = dcFilterIR.result;
     result.dc_Filtered_Red = dcFilterRed.result;
 
-    //uart_PrintFloat(max_Sensor.heart_BPM);
-
     return result;
-}
-
-
-bool detectPulse(float sensor_value)
-{
-    static float prev_sensor_value = 0;
-    static uint8_t values_went_down = 0;
-    static uint32_t currentBeat = 0;
-    static uint32_t lastBeat = 0;
-
-    if (sensor_value > PULSE_MAX_THRESHOLD) {
-        currentPulseDetectorState = PULSE_IDLE;
-        prev_sensor_value = 0;
-        lastBeat = 0;
-        currentBeat = 0;
-        values_went_down = 0;
-        max_Sensor.last_Beat_Threshold = 0;
-        return false;
-    }
-
-    switch (currentPulseDetectorState) {
-        case PULSE_IDLE:
-            if (sensor_value >= PULSE_MIN_THRESHOLD) {
-                currentPulseDetectorState = PULSE_TRACE_UP;
-                values_went_down = 0;
-            }
-            break;
-
-        case PULSE_TRACE_UP:
-            if (sensor_value > prev_sensor_value) {
-                currentBeat = HAL_GetTick();
-                max_Sensor.last_Beat_Threshold = sensor_value;
-            } else {
-                uint32_t beatDuration = currentBeat - lastBeat;
-                lastBeat = currentBeat;
-
-                float rawBPM = (beatDuration > 0) ? (60000.0 / (float)beatDuration) : 0;
-
-                valuesBPM[bpmIndex] = rawBPM;
-                valuesBPMSum = 0;
-
-                for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
-                    valuesBPMSum += valuesBPM[i];
-                }
-
-                bpmIndex = (bpmIndex + 1) % PULSE_BPM_SAMPLE_SIZE;
-
-                if (valuesBPMCount < PULSE_BPM_SAMPLE_SIZE) {
-                    valuesBPMCount++;
-                }
-
-                max_Sensor.heart_BPM = valuesBPMSum / valuesBPMCount;
-
-                currentPulseDetectorState = PULSE_TRACE_DOWN;
-
-                return true;
-            }
-            break;
-
-        case PULSE_TRACE_DOWN:
-            if (sensor_value < prev_sensor_value) {
-                values_went_down++;
-            }
-
-            if (sensor_value < PULSE_MIN_THRESHOLD) {
-                currentPulseDetectorState = PULSE_IDLE;
-            }
-            break;
-    }
-
-    prev_sensor_value = sensor_value;
-    
-    return false;
 }
 
 void balanceIntensity(float redLedDC, float IRLedDC)
