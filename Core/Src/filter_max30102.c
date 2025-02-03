@@ -30,7 +30,8 @@ void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 {
     filterState->v[0] = filterState->v[1];
 
-    filterState->v[1] = (0.2452372752527856026 * input) + (0.50952544949442879485 * filterState->v[0]);  
+    // New coefficients for 1 Hz cutoff
+    filterState->v[1] = (0.909 * input) + (0.909 * filterState->v[0]);  
     filterState->result = filterState->v[0] + filterState->v[1];
 }
 
@@ -39,7 +40,7 @@ float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
 {
     float avg = 0; // average value
     
-    // Ta bort gamla värde rån pågående summa
+    // Ta bort gamla värde från pågående summa
     filterData->sum -= filterData->values[filterData->index];
     
     // Ersätt gamla värdet med nytt värde på index
@@ -158,7 +159,6 @@ float EMA_High_Update(EMA_High_H *filt, float inp){
     filt->inp = inp;
 
     return filt->out;
-
 }
 
 

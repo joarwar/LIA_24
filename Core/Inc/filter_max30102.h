@@ -66,6 +66,12 @@ typedef struct
   float out;
 }EMA_High_H;
 
+typedef struct 
+{
+  float counter;
+  float out;
+
+}FALLCounter;
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha);
 void lowPassButterworthFilter(float x, BUTTERWORTH_FILTER_T * filterResult);
 float meanDiff(float M, MEAN_DIFF_FILTER_T* filterValues);

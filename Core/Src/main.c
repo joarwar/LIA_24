@@ -118,7 +118,7 @@ int main(void)
   MAX30102_initFIFO();
 
   //Sampling & pulse width
-  MAX30102_setSampleRate(_800SPS);
+  MAX30102_setSampleRate(_100SPS);
   MAX30102_setPulseWidth(_411_US);
 
   // LED current (mA)
