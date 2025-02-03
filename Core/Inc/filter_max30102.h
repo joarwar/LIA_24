@@ -19,7 +19,7 @@
 
 
 /* Filter parameters */
-#define ALPHA 0.95  //dc filter alpha values = Statistical significance, higher value is consistent and lower is more changable
+#define ALPHA 0.95  //dc filter alpha values = Statistical significance, higher value is consistent and lower is inconsistent
 #define MEAN_FILTER_SIZE 10 //
 #define FIR_FILTER_LENGTH 10
 #define EMA

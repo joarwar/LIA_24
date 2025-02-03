@@ -112,25 +112,25 @@ int main(void)
   //I2C_Init();
   uart_Init();
   FIFO_LED_DATA fifoledData;
-  long currentMillis = 0;
-  long lastMillis = 0;
+  //long currentMillis = 0;
+  //long lastMillis = 0;
   MAX30102_resetRegister();
   MAX30102_initFIFO();
 
   //Sampling & pulse width
-  MAX30102_setSampleRate(_100SPS);
+  MAX30102_setSampleRate(_200SPS);
   MAX30102_setPulseWidth(_411_US);
 
   // LED current (mA)
   MAX30102_setLedCurrent(RED_LED, 5); // Saturated over 5 => Stuck on 65k max number.
-  MAX30102_setLedCurrent(IR_LED, 2); // Shouldnt be used but w/e
+  MAX30102_setLedCurrent(IR_LED, 1); // Shouldn't be needed
 
   MAX30102_resetFIFO();
 
   //Mode
   MAX30102_setMeasMode(HEART_RATE);
 
-  currentMillis = millis();
+  //currentMillis = millis();
 
   /* USER CODE END 2 */
 

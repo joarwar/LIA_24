@@ -551,7 +551,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
-
+    uint32_t timeCheck = HAL_GetTick();
     if(fifoData.red_led_raw > 9000)
     {
         //dcFilterIR = dcRemoval((float)m_fifoData.ir_led_raw, dcFilterIR.w, 0.95);  // alpha
@@ -568,8 +568,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
         // EMA_High_Init(&filHighEmAvg, 0.5f);
         // EmLowAvg = EMA_Low_Update(&filLowEmAvg,dcFilterRed.result);
         // EmHighAvg = EMA_High_Update(&filHighEmAvg,dcFilterRed.result);
-        //uart_PrintString("red_meanFilter ");
-        //uart_PrintFloat(meanDiffResRed);
         
         lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
         irACValueSqSum += dcFilterIR.result * dcFilterIR.result;
@@ -584,8 +582,15 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
         uart_PrintString(" ");
         uart_PrintFloat(filMovAvg.out);
         //uart_PrintFloat(EmLowAvg);
-        uart_PrintString(" ");
+        // uart_PrintString(" ");
         //uart_PrintFloat(EmHighAvg);
+        // uart_PrintFloat(lpbFilterRed.result);
+        uart_PrintString(" ");
+        float inverseMA = filMovAvg.out * -1;
+        uart_PrintFloat(inverseMA);
+        uart_PrintString(" ");
+        uart_PrintInt(timeCheck, 10);
+        uart_PrintString(" ");
         uart_PrintFloat(lpbFilterRed.result);
         uart_PrintString(";");
     }else{
@@ -596,7 +601,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     }
     balanceIntensity(dcFilterRed.w, dcFilterIR.w);
 
-    // Final heart BPM calculation (from pulse detection logic)
+
     result.heart_BPM = max_Sensor.heart_BPM;
     result.ir_Cardiogram = lpbFilterRed.result;
     result.ir_Dc_Value = dcFilterIR.w;
@@ -609,87 +614,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 
     return result;
 }
-
-// bool detectPulseFromFilteredData()
-// {
-//     static float prev_filtered_value = 0;
-//     static uint8_t values_went_down = 0;
-//     static uint32_t currentBeat = 0;
-//     static uint32_t lastBeat = 0;
-
-//     // Use the filtered result instead of the sensor value
-//     float sensor_value = lpbFilterRed.result;
-
-//     // Reset if the filtered value exceeds a maximum threshold
-//     if (sensor_value > PULSE_MAX_THRESHOLD) {
-//         currentPulseDetectorState = PULSE_IDLE;
-//         prev_filtered_value = 0;
-//         lastBeat = 0;
-//         currentBeat = 0;
-//         values_went_down = 0;
-//         max_Sensor.last_Beat_Threshold = 0;
-//         return false;
-//     }
-
-//     switch (currentPulseDetectorState) {
-//         case PULSE_IDLE:
-//             // Start detecting a pulse if filtered value crosses the minimum threshold
-//             if (sensor_value >= PULSE_MIN_THRESHOLD) {
-//                 currentPulseDetectorState = PULSE_TRACE_UP;
-//                 values_went_down = 0;
-//             }
-//             break;
-
-//         case PULSE_TRACE_UP:
-//             if (sensor_value > prev_filtered_value) {
-//                 currentBeat = HAL_GetTick();
-//                 max_Sensor.last_Beat_Threshold = sensor_value;
-//             } else {
-//                 uint32_t beatDuration = currentBeat - lastBeat;
-//                 lastBeat = currentBeat;
-
-//                 // Calculate the BPM
-//                 float rawBPM = (beatDuration > 0) ? (60000.0f / (float)beatDuration) : 0.0f;
-
-//                 // Store the BPM values
-//                 valuesBPM[bpmIndex] = rawBPM;
-//                 valuesBPMSum = 0;
-
-//                 // Sum up the BPM values for averaging
-//                 for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
-//                     valuesBPMSum += valuesBPM[i];
-//                 }
-
-//                 bpmIndex = (bpmIndex + 1) % PULSE_BPM_SAMPLE_SIZE;
-
-//                 // Update the average heart BPM
-//                 if (valuesBPMCount < PULSE_BPM_SAMPLE_SIZE) {
-//                     valuesBPMCount++;
-//                 }
-
-//                 max_Sensor.heart_BPM = valuesBPMSum / valuesBPMCount;
-
-//                 // Print the heart rate (BPM)
-//                 uart_PrintFloat(max_Sensor.heart_BPM);
-//                 currentPulseDetectorState = PULSE_TRACE_DOWN;
-//                 return true;
-//             }
-//             break;
-
-//         case PULSE_TRACE_DOWN:
-//             if (sensor_value < prev_filtered_value) {
-//                 values_went_down++;
-//             }
-
-//             if (sensor_value < PULSE_MIN_THRESHOLD) {
-//                 currentPulseDetectorState = PULSE_IDLE;
-//             }
-//             break;
-//     }
-
-//     prev_filtered_value = sensor_value;
-//     return false;
-// }
 
 
 bool detectPulse(float sensor_value)
@@ -760,6 +684,7 @@ bool detectPulse(float sensor_value)
     }
 
     prev_sensor_value = sensor_value;
+    
     return false;
 }
 
@@ -779,7 +704,7 @@ void balanceIntensity(float redLedDC, float IRLedDC)
     }
 }
 
-void MAX30102_registerData(voixd)
+void MAX30102_registerData(int voixd)
 {
     int8_t readStatus;
     uint8_t readResult;

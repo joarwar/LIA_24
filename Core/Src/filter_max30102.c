@@ -14,7 +14,6 @@
 #include "uart.h"
 
 static float FIR_IMPULSE_RESPONSE[FIR_FILTER_LENGTH] = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f,};
-
 /*Working dc removal*/
 
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
@@ -23,16 +22,6 @@ DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
     output.w = input + alpha * prevState;
     output.result = output.w - prevState;          
     return output;
-}
-
-/*Attempt to add a lowpassButterworth*/
-void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
-{
-    filterState->v[0] = filterState->v[1];
-
-    // New coefficients for 1 Hz cutoff
-    filterState->v[1] = (0.909 * input) + (0.909 * filterState->v[0]);  
-    filterState->result = filterState->v[0] + filterState->v[1];
 }
 
 /*WIP mean filter => Moving average?*/
@@ -65,8 +54,19 @@ float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
 
 }
 
-/*Moving average filter*/
+/*Attempt to add a lowpassButterworth*/
+void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
+{
+    filterState->v[0] = filterState->v[1];
 
+    filterState->v[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * filterState->v[0]);
+    filterState->result = filterState->v[0] + filterState->v[1];
+}
+
+
+
+
+/*Moving average filter*/
 void FIRFilter_Init(FIRFilter * fir)
 {
     /*Rensar filter buffer*/

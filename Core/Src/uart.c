@@ -33,12 +33,14 @@ void uart_Init(void)
 
 void uart_PrintString(char * str)
 {
-	HAL_UART_Transmit(&stLink_Uart, str, strlen(str), HAL_MAX_DELAY);
+  HAL_UART_Transmit(&stLink_Uart, (unsigned char *)str, strlen(str), HAL_MAX_DELAY);
+
 }
+
 
 void uart_PrintFloat(float value)
 {
-    uint8_t buf[12];
+    char buf[24]; 
 
     int integerPart = (int)value;
     int fractionalPart = (int)((value - integerPart) * 100);  
@@ -50,18 +52,16 @@ void uart_PrintFloat(float value)
 
     if (fractionalPart == 0)
     {
-        sprintf((char*)buf, "%d", integerPart); 
+        snprintf(buf, sizeof(buf), "%d", integerPart); 
     }
     else
     {
-        sprintf((char*)buf, "%d.%02d", integerPart, fractionalPart);
+        snprintf(buf, sizeof(buf), "%d.%02d", integerPart, fractionalPart); 
     }
 
     // Transmit the string via UART
-    HAL_UART_Transmit(&stLink_Uart, buf, strlen((char*)buf), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&stLink_Uart, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
 }
-
-
 
 void uart_PrintInt(unsigned int value, unsigned char base)
 {
