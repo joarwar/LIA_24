@@ -58,13 +58,22 @@ float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
 void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 {
     filterState->v[0] = filterState->v[1];
-
-    filterState->v[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * filterState->v[0]);
+    filterState->v[1] = (0.75 * input) + (0.75 * filterState->v[0]);
     filterState->result = filterState->v[0] + filterState->v[1];
 }
+void bandPassFilter(float input, HP_FILTER_T *filterState)
+{
+    static float v_low[2] = {0}; // For low-pass filter
+    static float v_high[2] = {0}; // For high-pass filter
 
+    v_low[0] = v_low[1];
+    v_low[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * v_low[0]);
 
+    v_high[0] = v_high[1];
+    v_high[1] = (1.367287359973195227e-1 * input) - (0.72654252800536101020 * v_high[0]);
 
+    filterState->result = v_low[1] - v_high[1];
+}
 
 /*Moving average filter*/
 void FIRFilter_Init(FIRFilter * fir)

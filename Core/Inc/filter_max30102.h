@@ -36,6 +36,12 @@ typedef struct
   float v[2];
   float result;
 }BUTTERWORTH_FILTER_T;
+typedef struct 
+{
+  float v_low[2];
+  float v_high[2];
+  float result;
+}HP_FILTER_T;
 
 typedef struct
 {
@@ -72,12 +78,14 @@ typedef struct
   float out;
 
 }FALLCounter;
+
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha);
 void lowPassButterworthFilter(float x, BUTTERWORTH_FILTER_T * filterResult);
 float meanDiff(float M, MEAN_DIFF_FILTER_T* filterValues);
-
+void bandPassFilter( float x, HP_FILTER_T * filterResult);
 void FIRFilter_Init(FIRFilter *fir);
 float FIRFilter_Update(FIRFilter * fir, float inp);
+
 
 void EMA_Low_Init(EMA_Low_H *filt, float alpha);
 void EMA_Low_SetAlpha(EMA_Low_H *filt, float alpha);

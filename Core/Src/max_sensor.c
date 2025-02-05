@@ -39,9 +39,13 @@ MEAN_DIFF_FILTER_T meanDiffIR = {0};
 MEAN_DIFF_FILTER_T meanDiffRed = {0};
 BUTTERWORTH_FILTER_T lpbFilterIR = {0};
 BUTTERWORTH_FILTER_T lpbFilterRed = {0};
+HP_FILTER_T hpbpFilterRed = {0};
 FIRFilter filMovAvg;
+FIRFilter withButter;
+FIRFilter withMean;
 EMA_Low_H filLowEmAvg;
 EMA_High_H filHighEmAvg;
+
 
 
 //BPM 
@@ -534,15 +538,15 @@ float MAX30102_readTemp(void)
 
     return temperature;
 }
-static uint32_t lastTimeChecked = 0;
-static bool actionPerformed = false;
+
+
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
 {
-    static float lastPeakTime = 0.0f;
-    static float lastPeakValue = 0.0f;
-    static float bpm = 0.0f;
-    static float peakThreshold = 0.1f;  
-    static float sampleRate = 1.0f;
+    static uint32_t lastBPMTime = 0;  
+    static float bpmButter = 0.0f;    
+    static float bpmMA = 0.0f;        
+    static float peakThresholdButter = 0.1f;  
+    static float sampleRateButter = 1.0f;     
 
     MAX30102 result = {
         .pulse_Detected = false,
@@ -558,33 +562,29 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     };
 
     result.temperature = MAX30102_readTemp();
-    uint32_t currentTime  = HAL_GetTick();
-
-    if (currentTime - lastTimeChecked >= 10000 && !actionPerformed) {
-        bpm *= 6;
-
-        actionPerformed = true;
-        uart_PrintString("Action performed after 10 seconds: bpm * 6\n");
-        uart_PrintFloat(bpm);
-    }
 
     if (m_fifoData.red_led_raw > 9000) {
         dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);
 
         float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
+        bandPassFilter(meanDiffResRed, &hpbpFilterRed);
         FIRFilter_Update(&filMovAvg, dcFilterRed.result);
+        FIRFilter_Update(&withButter, lpbFilterRed.result);
+        FIRFilter_Update(&withMean, meanDiffResRed);
 
         lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
-
-        if (lpbFilterRed.result > lastPeakValue + peakThreshold) {
-            lastPeakValue = lpbFilterRed.result;
-            lastPeakTime = currentTime;
-
-            if (lastPeakTime - lastPeakTime >= sampleRate * 1000) {
-                bpm = 60.0f / (float)(currentTime - lastPeakTime) * 1000;
-            }
+        if (lpbFilterRed.result > 1000)
+        {
+            bpmButter++;
         }
+        if (HAL_GetTick() - lastBPMTime >= 10000) { 
 
+            uart_PrintString(" bpmButter: ");
+            uart_PrintString("\n ");
+            uart_PrintFloat(bpmButter * 6);
+            lastBPMTime = HAL_GetTick();  
+        }
+        float filMovInverse = filMovAvg.out * -1;
         uart_PrintString("$");
         uart_PrintFloat(m_fifoData.red_led_raw);
         uart_PrintString(" ");
@@ -592,11 +592,13 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
         uart_PrintString(" ");
         uart_PrintFloat(meanDiffResRed);
         uart_PrintString(" ");
-        uart_PrintFloat(filMovAvg.out);
+        uart_PrintFloat(filMovInverse);
+        uart_PrintString(" ");
+        uart_PrintFloat(withButter.out);
+        uart_PrintString(" ");
+        uart_PrintFloat(withMean.out);
         uart_PrintString(" ");
         uart_PrintFloat(lpbFilterRed.result);
-        uart_PrintString(" ");
-        uart_PrintFloat(bpm);
         uart_PrintString(";");
     } else {
         uart_PrintString("No finger?");
@@ -605,9 +607,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
         uart_PrintString(";");
     }
 
-    balanceIntensity(dcFilterRed.w, dcFilterIR.w);
-
-    result.heart_BPM = bpm;
     result.ir_Cardiogram = lpbFilterRed.result;
     result.ir_Dc_Value = dcFilterIR.w;
     result.red_Dc_Value = dcFilterRed.w;
@@ -618,21 +617,22 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData)
     return result;
 }
 
-void balanceIntensity(float redLedDC, float IRLedDC)
-{
-    uint32_t currentTime = HAL_GetTick();
-    if (currentTime - lastREDLedCurrentCheck >= RED_LED_CURRENT_ADJUTSMENT_MS) {
-        if (IRLedDC - redLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent < MAX30102_LED_CURRENT_51MA) {
-            redLEDCurrent++;
-            MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
-        } else if (redLedDC - IRLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent > 0) {
-            redLEDCurrent--;
-            MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
-        }
 
-        lastREDLedCurrentCheck = HAL_GetTick();
-    }
-}
+// void balanceIntensity(float redLedDC, float IRLedDC)
+// {
+//     uint32_t currentTime = HAL_GetTick();
+//     if (currentTime - lastREDLedCurrentCheck >= RED_LED_CURRENT_ADJUTSMENT_MS) {
+//         if (IRLedDC - redLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent < MAX30102_LED_CURRENT_51MA) {
+//             redLEDCurrent++;
+//             MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
+//         } else if (redLedDC - IRLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent > 0) {
+//             redLEDCurrent--;
+//             MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
+//         }
+
+//         lastREDLedCurrentCheck = HAL_GetTick();
+//     }
+// }
 
 void MAX30102_registerData(int voixd)
 {
