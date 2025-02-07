@@ -123,7 +123,7 @@ int main(void)
   MAX30102_setPulseWidth(_411_US);
 
   // LED current (mA)
-  MAX30102_setLedCurrent(RED_LED, 5); // Saturated over 5 => Stuck on 65k max number.
+  MAX30102_setLedCurrent(RED_LED, 5); // Saturates pretty easily depending on surrounding lights
   MAX30102_setLedCurrent(IR_LED, 1); // Shouldn't be needed
 
   MAX30102_resetFIFO();

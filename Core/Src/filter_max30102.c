@@ -59,6 +59,7 @@ void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
 {
     filterState->v[0] = filterState->v[1];
     filterState->v[1] = (0.75 * input) + (0.75 * filterState->v[0]);
+    //filterState->v[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * filterState->v[0]); //> Kanske bättre men mindre "peaks"
     filterState->result = filterState->v[0] + filterState->v[1];
 }
 void bandPassFilter(float input, HP_FILTER_T *filterState)
