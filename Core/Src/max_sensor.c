@@ -37,23 +37,24 @@ DC_FILTER_T dcFilterIR = {0};
 DC_FILTER_T dcFilterRed = {0};
 MEAN_DIFF_FILTER_T meanDiffIR = {0};
 MEAN_DIFF_FILTER_T meanDiffRed = {0};
-BUTTERWORTH_FILTER_T lpbFilterIR = {0};
+BUTTERWORTH_FILTER_T lpbFilterRedCoef = {0};
 BUTTERWORTH_FILTER_T lpbFilterRed = {0};
 HP_FILTER_T hpbpFilterRed = {0};
 FIRFilter filMovAvg;
 FIRFilter withButter;
-FIRFilter withMean;
 EMA_Low_H filLowEmAvg;
 EMA_High_H filHighEmAvg;
 
 
 
+
 //BPM 
 
-//Need to be change depending on PEAK value and light in room
-#define PEAK_THRESHOLD 600
-#define PEAK_MIN_DISTANCE 500
-#define BPM_WINDOW 5
+//Need to be change depending on PEAK value 
+#define PEAK_THRESHOLD 1500
+#define PEAK_THRESHOLD_BUTTER 300
+#define PEAK_MIN_DISTANCE 400
+#define BPM_WINDOW 10
 
 static uint32_t lastPeakTimeButterMA = 0;
 static uint32_t lastPeakTimeButter = 0;
@@ -64,6 +65,12 @@ static uint32_t last60sTime = 0;
 static float peakCount10sButterMA = 0;
 static float peakCount30sButterMA = 0;
 static float peakCount60sButterMA = 0;
+
+static float peakCount = 0;
+unsigned long firstTimeByPeak = 0;
+unsigned long lastTimeByPeak = 0 ;
+float peakIncrement = 0;
+
 
 static float peakCount10sButter = 0;
 static float peakCount30sButter = 0;
@@ -100,11 +107,11 @@ static uint32_t lastPeakTime = 0;
 
 //IR & RED
 
-float irACValueSqSum = 0;
+float irACValueSqSum = 0; // används ej
 float redACValueSqSum = 0;
 uint16_t samplesRecorded = 0;
-uint16_t pulsesDetected = 0;
-float currentSpO2Value = 0;
+uint16_t pulsesDetected = 0; // omgjort
+float currentSpO2Value = 0; // används ej 
 
 //CURRENT
 
@@ -626,47 +633,60 @@ void updateRRInterval(uint32_t peakTime) {
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     MAX30102 result = {0};
     result.temperature = MAX30102_readTemp();
-    static float currentLevel = 5.0;
     if (m_fifoData.red_led_raw > 9000) {
-        if (m_fifoData.red_led_raw < 30000)
-        {
-            float currentIncrease = 0.05;     
-            currentLevel += currentIncrease;  
+        // if (m_fifoData.red_led_raw < 35000)
+        // {
+        //     float currentIncrease = 0.05;     
+        //     currentLevel += currentIncrease;  
 
-            MAX30102_setLedCurrent(RED_LED, currentLevel);
-        }
+        //     MAX30102_setLedCurrent(RED_LED, currentLevel);
+        // }
 
-        else if (m_fifoData.red_led_raw > 55000)
-        {
-            float currentDecrease = 0.05;
-            currentLevel -= currentDecrease;
+        // else if (m_fifoData.red_led_raw > 50000)
+        // {
+        //     float currentDecrease = 0.05;
+        //     currentLevel -= currentDecrease;
 
-            MAX30102_setLedCurrent(RED_LED, currentLevel);        
-        }
+        //     MAX30102_setLedCurrent(RED_LED, currentLevel);        
+        // }
         
-        else
-        {
+        // else
+        // {
             dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);
             float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
             lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
-            FIRFilter_Update(&withButter, lpbFilterRed.result); 
+            FIRFilter_Update(&withButter, lpbFilterRed.result);
+            float filMovInverse = (filMovAvg.out * -1);
+            float dummyGain = (lpbFilterRed.result * 3);
 
             uint32_t now = HAL_GetTick();
 
-            if (lpbFilterRed.result > PEAK_THRESHOLD && (now - lastPeakTimeButter > PEAK_MIN_DISTANCE)) {
+            if (dummyGain > PEAK_THRESHOLD && (now - lastPeakTimeButter > PEAK_MIN_DISTANCE)) {
                 peakCount10sButter++;
                 peakCount30sButter++;
                 peakCount60sButter++;
-                lastPeakTimeButter = now;
+                peakCount++;
+                lastPeakTimeButter = now; 
                 updateRRInterval(now);
+                if (peakCount >= 10) {
+                    
+                    peakIncrement += 10;
+                    float bpmByPeak = (60.0 * peakIncrement) / (now / 1000.0); 
+                    
+                    uart_PrintString("BPM by Peak: ");
+                    uart_PrintFloat(bpmByPeak);
+                    uart_PrintString("\n");
+            
+                    peakCount = 0;
+                }
             }
-
-            if (withButter.out > PEAK_THRESHOLD && (now - lastPeakTimeButterMA > PEAK_MIN_DISTANCE)) {
+            
+            if (withButter.out > PEAK_THRESHOLD_BUTTER && (now - lastPeakTimeButterMA > PEAK_MIN_DISTANCE)) {
                 peakCount10sButterMA++;
                 peakCount30sButterMA++;
                 peakCount60sButterMA++;
                 lastPeakTimeButterMA = now;
-                updateRRInterval(now);
+                //updateRRInterval(now);
             }
 
             if (now - lastBPMTime >= 10000) {
@@ -715,44 +735,44 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             }
 
 
-            if (now - last30sTime >= 30000) {
-                float bpm30sButterMA = (peakCount30sButterMA * 2);  
-                float bpm30sButter = (peakCount30sButter * 2);  
-                peakCount30sButter = 0;
-                last30sTime = now;
+            // if (now - last30sTime >= 30000) {
+            //     float bpm30sButterMA = (peakCount30sButterMA * 2);  
+            //     float bpm30sButter = (peakCount30sButter * 2);  
+            //     peakCount30sButter = 0;
+            //     last30sTime = now;
 
 
-                bpm30sButterHistory[bpmIndex30s] = bpm30sButter;
-                bpm30sButterMAHistory[bpmIndex30s] = bpm30sButterMA;
-                bpmIndex30s = (bpmIndex30s + 1) % BPM_WINDOW;
-                if (count30s < BPM_WINDOW) count30s++;
+            //     bpm30sButterHistory[bpmIndex30s] = bpm30sButter;
+            //     bpm30sButterMAHistory[bpmIndex30s] = bpm30sButterMA;
+            //     bpmIndex30s = (bpmIndex30s + 1) % BPM_WINDOW;
+            //     if (count30s < BPM_WINDOW) count30s++;
 
-                float avgBpm30sButter = 0, avgBpm30sButterMA = 0;
-                for (int i = 0; i < count30s; i++) {
-                    avgBpm30sButter += bpm30sButterHistory[i];
-                    avgBpm30sButterMA += bpm30sButterMAHistory[i];
-                }
-                avgBpm30sButter /= count30s;
-                avgBpm30sButterMA /= count30s;
+            //     float avgBpm30sButter = 0, avgBpm30sButterMA = 0;
+            //     for (int i = 0; i < count30s; i++) {
+            //         avgBpm30sButter += bpm30sButterHistory[i];
+            //         avgBpm30sButterMA += bpm30sButterMAHistory[i];
+            //     }
+            //     avgBpm30sButter /= count30s;
+            //     avgBpm30sButterMA /= count30s;
 
 
-                uart_PrintString(" BPM (30s ButterMA): ");
-                uart_PrintFloat(bpm30sButterMA);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm30sButterMA);
-                uart_PrintString("\n");
+            //     uart_PrintString(" BPM (30s ButterMA): ");
+            //     uart_PrintFloat(bpm30sButterMA);
+            //     uart_PrintString(" | Smoothed: ");
+            //     uart_PrintFloat(avgBpm30sButterMA);
+            //     uart_PrintString("\n");
 
-                uart_PrintString(" BPM (30s Butter): ");
-                uart_PrintFloat(bpm30sButter);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm30sButter);
-                uart_PrintString("\n");
-            }
+            //     uart_PrintString(" BPM (30s Butter): ");
+            //     uart_PrintFloat(bpm30sButter);
+            //     uart_PrintString(" | Smoothed: ");
+            //     uart_PrintFloat(avgBpm30sButter);
+            //     uart_PrintString("\n");
+            // }
 
 
             if (now - last60sTime >= 60000) {
-                float bpm60sButterMA = (peakCount60sButterMA * 1);  
-                float bpm60sButter = (peakCount60sButter * 1);  
+                float bpm60sButterMA = peakCount60sButterMA;  
+                float bpm60sButter = peakCount60sButter;  
                 peakCount60sButterMA = 0;
                 peakCount60sButter = 0;
                 last60sTime = now;
@@ -785,56 +805,35 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
                 uart_PrintFloat(avgBpm60sButter);
                 uart_PrintString("\n");
             }
-            float filMovInverse = (filMovAvg.out * -1);
-            float dummyGain = (lpbFilterRed.result * 3);
-            uart_PrintString("$");
-            uart_PrintFloat(m_fifoData.red_led_raw);
-            uart_PrintString(" ");
-            uart_PrintFloat(dcFilterRed.result);
-            uart_PrintString(" ");
-            uart_PrintFloat(meanDiffResRed);
-            uart_PrintString(" ");
-            //uart_PrintFloat(filMovAvg.out);
-            uart_PrintFloat(filMovInverse);
-            uart_PrintString(" ");
-            uart_PrintFloat(lpbFilterRed.result);
-            uart_PrintString(" ");
-            uart_PrintFloat(withButter.out);
-            uart_PrintString(" ");
-            uart_PrintFloat(withMean.out);
-            uart_PrintString(" ");
-            uart_PrintFloat(lpbFilterRed.result );
-            uart_PrintString(" ");
-            uart_PrintFloat(dummyGain);
-            uart_PrintString(";");
-        } 
+            
+        //     uart_PrintString("$");
+        //     uart_PrintFloat(m_fifoData.red_led_raw);
+        //     uart_PrintString(" ");
+        //     uart_PrintFloat(dcFilterRed.result);
+        //     uart_PrintString(" ");
+        //     uart_PrintFloat(meanDiffResRed);
+        //     uart_PrintString(" ");
+        //     //uart_PrintFloat(filMovAvg.out);
+        //     uart_PrintFloat(filMovInverse);
+        //     uart_PrintString(" ");
+        //     uart_PrintFloat(withButter.out);
+        //     uart_PrintString(" ");
+        //     uart_PrintFloat(lpbFilterRed.result );
+        //     uart_PrintString(" ");
+        //     //uart_PrintFloat(lpbFilterRedCoef.result);
+        //     //uart_PrintString(" ");
+        //     uart_PrintFloat(dummyGain);
+        //     uart_PrintString(";");
+        // // } 
     } 
     else {
-         uart_PrintString("$");
+        uart_PrintString("$");
         uart_PrintFloat(m_fifoData.red_led_raw);
         uart_PrintString(";");
     }
 
     return result;
 }
-
-
-
-// void balanceIntensity(float redLedDC, float IRLedDC)
-// {
-//     uint32_t currentTime = HAL_GetTick();
-//     if (currentTime - lastREDLedCurrentCheck >= RED_LED_CURRENT_ADJUTSMENT_MS) {
-//         if (IRLedDC - redLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent < MAX30102_LED_CURRENT_51MA) {
-//             redLEDCurrent++;
-//             MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
-//         } else if (redLedDC - IRLedDC > MAGIC_ACCEPTABLE_INTENSITY_DIFF && redLEDCurrent > 0) {
-//             redLEDCurrent--;
-//             MAX30102_setLedCurrent(RED_LED, redLEDCurrent);
-//         }
-
-//         lastREDLedCurrentCheck = HAL_GetTick();
-//     }
-// }
 
 void MAX30102_registerData(int voixd)
 {

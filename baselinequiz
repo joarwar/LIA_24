@@ -1,0 +1,43 @@
+Starting Data:
+
+Age: (Average för kvinnor mellan 26-35 år är 73-76bpm)
+Källa:
+https://www.medicinenet.com/what_is_a_good_resting_heart_rate_by_age/article.htm
+
+Height: (Längre personer har lägre HR )
+Källa:
+https://pmc.ncbi.nlm.nih.gov/articles/PMC3861069/
+
+Weight: (Påverkar HR)
+
+Do you consume alcohol regularly? (Yes/No) (Alcohol can increase HR and decrease HRV) (Al)
+
+How often do you exercise per week? (0 / 1-2 / 3-4 / 5+) (Regular exercise can lower HR and increase HRV over time)
+
+What type of exercise do you do most often? (Cardio / Strength / Mixed / None) (Cardio generally lowers HR and increases HRV, while strength training may temporarily increase HR)
+
+On a typical day, how much caffeine do you consume? (None / 1 cup / 2+ cups) (Caffeine can increase HR and decrease HRV temporarily)
+
+How would you rate your overall stress levels over the past week? (1-10) (Higher stress increases HR and decreases HRV)
+
+Daily Updated: (Will be done while measuring)
+
+Did you consume caffeine, alcohol, or nicotine in the last 2 hours? (Yes/No) (All can increase HR and decrease HRV)
+
+Did you engage in physical activity in the last 2 hours? (Yes/No) (Recent exercise may temporarily increase HR but improve HRV over time)
+
+How many hours of sleep did you get last night? (Less sleep can increase HR and decrease HRV)
+
+How would you rate your sleep quality? (Poor / Fair / Good / Excellent) (Better sleep quality lowers HR and increases HRV)
+
+Overtime Data: (Will be made in an application)
+
+Compare your BPM readings over multiple days. Are they consistent? (Yes/No)
+
+Are higher BPM readings linked to caffeine, alcohol, stress, or lack of sleep? (Yes/No)
+
+Are lower BPM readings linked to relaxation, exercise routine, or better sleep? (Yes/No)
+
+Do you notice changes in BPM based on time of day? (Yes/No) (HR tends to be lower in the morning and higher in the evening)
+
+Do you experience unexpected fluctuations in BPM? (Yes/No), Why? (Sudden changes can indicate dehydration, illness, or stress)

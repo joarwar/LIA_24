@@ -75,18 +75,21 @@ typedef struct
 
 DC_FILTER_T dcRemoval(float input, float prevState, float alpha);
 void lowPassButterworthFilter(float x, BUTTERWORTH_FILTER_T * filterResult);
+// void lowPassButterworthFilterCoeff(float x, BUTTERWORTH_FILTER_T * filterResult);
 float meanDiff(float M, MEAN_DIFF_FILTER_T* filterValues);
-void bandPassFilter( float x, HP_FILTER_T * filterResult);
+
+
+// void bandPassFilter( float x, HP_FILTER_T * filterResult);
 void FIRFilter_Init(FIRFilter *fir);
 float FIRFilter_Update(FIRFilter * fir, float inp);
 
 
-void EMA_Low_Init(EMA_Low_H *filt, float alpha);
-void EMA_Low_SetAlpha(EMA_Low_H *filt, float alpha);
-float EMA_Low_Update (EMA_Low_H *filt, float inp);
+// void EMA_Low_Init(EMA_Low_H *filt, float alpha);
+// void EMA_Low_SetAlpha(EMA_Low_H *filt, float alpha);
+// float EMA_Low_Update (EMA_Low_H *filt, float inp);
 
-void EMA_High_Init(EMA_High_H *filt, float beta);
-void EMA_High_SetBeta(EMA_High_H *filt, float beta);
-float EMA_High_Update(EMA_High_H *filt, float inp);
+// void EMA_High_Init(EMA_High_H *filt, float beta);
+// void EMA_High_SetBeta(EMA_High_H *filt, float beta);
+// float EMA_High_Update(EMA_High_H *filt, float inp);
 
 #endif /* FILTER_MAX30102_H */

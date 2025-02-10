@@ -62,21 +62,8 @@ void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
     //filterState->v[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * filterState->v[0]); //> Kanske bättre men mindre "peaks"
     filterState->result = filterState->v[0] + filterState->v[1];
 }
-void bandPassFilter(float input, HP_FILTER_T *filterState)
-{
-    static float v_low[2] = {0}; // For low-pass filter
-    static float v_high[2] = {0}; // For high-pass filter
 
-    v_low[0] = v_low[1];
-    v_low[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * v_low[0]);
-
-    v_high[0] = v_high[1];
-    v_high[1] = (1.367287359973195227e-1 * input) - (0.72654252800536101020 * v_high[0]);
-
-    filterState->result = v_low[1] - v_high[1];
-}
-
-/*Moving average filter*/
+// /*Moving average filter*/
 void FIRFilter_Init(FIRFilter * fir)
 {
     /*Rensar filter buffer*/
@@ -125,51 +112,51 @@ float FIRFilter_Update(FIRFilter *fir, float inp) {
     /*Skicka ut filtrerad output*/
     return fir->out;
 }
-//LOW EMA
-void EMA_Low_Init(EMA_Low_H *filt, float alpha){
-    EMA_Low_SetAlpha(filt, alpha);
-    filt->out = 0.0f;
-}
+// //LOW EMA
+// void EMA_Low_Init(EMA_Low_H *filt, float alpha){
+//     EMA_Low_SetAlpha(filt, alpha);
+//     filt->out = 0.0f;
+// }
 
-void EMA_Low_SetAlpha(EMA_Low_H *filt, float alpha){
+// void EMA_Low_SetAlpha(EMA_Low_H *filt, float alpha){
     
-    if (alpha > 1.0f){
-        alpha = 1.0f;
-    }else if (alpha < 0.0f){
-        alpha = 0.0f;
-    }
-    filt->alpha = alpha;
-}
+//     if (alpha > 1.0f){
+//         alpha = 1.0f;
+//     }else if (alpha < 0.0f){
+//         alpha = 0.0f;
+//     }
+//     filt->alpha = alpha;
+// }
 
-float EMA_Low_Update(EMA_Low_H *filt, float inp){
+// float EMA_Low_Update(EMA_Low_H *filt, float inp){
     
-    filt->out = filt->alpha * inp + (1.0f - filt->alpha) *filt->out;
-    return filt->out;
+//     filt->out = filt->alpha * inp + (1.0f - filt->alpha) *filt->out;
+//     return filt->out;
 
-}
-//HIGH EMA
-void EMA_High_Init(EMA_High_H *filt, float beta){
-    EMA_High_SetBeta(filt, beta);
-    filt->inp = 0.0f;
-    filt->out = 0.0f;
-}
+// }
+// //HIGH EMA
+// void EMA_High_Init(EMA_High_H *filt, float beta){
+//     EMA_High_SetBeta(filt, beta);
+//     filt->inp = 0.0f;
+//     filt->out = 0.0f;
+// }
 
-void EMA_High_SetBeta(EMA_High_H *filt, float beta){
+// void EMA_High_SetBeta(EMA_High_H *filt, float beta){
     
-    if (beta > 1.0f){
-        beta = 1.0f;
-    }else if (beta < 0.0f){
-        beta = 0.0f;
-    }
-    filt->beta = beta;
-}
+//     if (beta > 1.0f){
+//         beta = 1.0f;
+//     }else if (beta < 0.0f){
+//         beta = 0.0f;
+//     }
+//     filt->beta = beta;
+// }
 
-float EMA_High_Update(EMA_High_H *filt, float inp){
-    filt->out = 0.5f * (2.0f - filt->beta) * (inp - filt->inp) + (1.0f - filt->beta) * filt->out;
-    filt->inp = inp;
+// float EMA_High_Update(EMA_High_H *filt, float inp){
+//     filt->out = 0.5f * (2.0f - filt->beta) * (inp - filt->inp) + (1.0f - filt->beta) * filt->out;
+//     filt->inp = inp;
 
-    return filt->out;
-}
+//     return filt->out;
+// }
 
 
 
