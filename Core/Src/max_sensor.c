@@ -617,7 +617,6 @@ float calculateRMSSD() {
     return sqrt(sum / (countHRV - 1));
 }
 
-
 void updateRRInterval(uint32_t peakTime) {
     uint32_t rrInterval = peakTime - lastPeakTime;  
 
@@ -806,24 +805,24 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
                 uart_PrintString("\n");
             }
             
-        //     uart_PrintString("$");
-        //     uart_PrintFloat(m_fifoData.red_led_raw);
-        //     uart_PrintString(" ");
-        //     uart_PrintFloat(dcFilterRed.result);
-        //     uart_PrintString(" ");
-        //     uart_PrintFloat(meanDiffResRed);
-        //     uart_PrintString(" ");
-        //     //uart_PrintFloat(filMovAvg.out);
-        //     uart_PrintFloat(filMovInverse);
-        //     uart_PrintString(" ");
-        //     uart_PrintFloat(withButter.out);
-        //     uart_PrintString(" ");
-        //     uart_PrintFloat(lpbFilterRed.result );
-        //     uart_PrintString(" ");
-        //     //uart_PrintFloat(lpbFilterRedCoef.result);
-        //     //uart_PrintString(" ");
-        //     uart_PrintFloat(dummyGain);
-        //     uart_PrintString(";");
+            // uart_PrintString("$");
+            // uart_PrintFloat(m_fifoData.red_led_raw);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(dcFilterRed.result);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(meanDiffResRed);
+            // uart_PrintString(" ");
+            // //uart_PrintFloat(filMovAvg.out);
+            // uart_PrintFloat(filMovInverse);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(withButter.out);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(lpbFilterRed.result );
+            // uart_PrintString(" ");
+            // //uart_PrintFloat(lpbFilterRedCoef.result);
+            // //uart_PrintString(" ");
+            // uart_PrintFloat(dummyGain);
+            // uart_PrintString(";");
         // // } 
     } 
     else {

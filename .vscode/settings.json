@@ -21,6 +21,7 @@
         "stm32f1xx_hal.h": "c",
         "tt_lis2dw12.h": "c",
         "lis2dw12_reg.h": "c",
-        "compare": "c"
+        "compare": "c",
+        "type_traits": "cpp"
     },
 }

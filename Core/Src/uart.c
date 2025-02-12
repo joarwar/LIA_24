@@ -59,7 +59,6 @@ void uart_PrintFloat(float value)
         snprintf(buf, sizeof(buf), "%d.%02d", integerPart, fractionalPart); 
     }
 
-    // Transmit the string via UART
     HAL_UART_Transmit(&stLink_Uart, (uint8_t*)buf, strlen(buf), HAL_MAX_DELAY);
 }
 
@@ -73,6 +72,11 @@ void uart_PrintInt(unsigned int value, unsigned char base)
 	}
 
 	HAL_UART_Transmit(&stLink_Uart, buf, strlen((char*)buf), HAL_MAX_DELAY);
+}
+
+void uart_PrintChar(char c)
+{
+    HAL_UART_Transmit(&stLink_Uart, (uint8_t *)&c, 1, HAL_MAX_DELAY);
 }
 
 
