@@ -128,6 +128,7 @@ int main(void)
   while (1)
   {
     lis2dw12_activity();
+    //lis2dw12_single_tap();
     if (INTERRUPT == 1)
     {
       if (MAX30102_Flag)

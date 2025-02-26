@@ -1,0 +1,746 @@
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 1
+
+
+   1              		.cpu cortex-m3
+   2              		.arch armv7-m
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 6
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.file	"filter_max30102.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.file 1 "Core/Src/filter_max30102.c"
+  18              		.section	.data.FIR_IMPULSE_RESPONSE,"aw"
+  19              		.align	2
+  22              	FIR_IMPULSE_RESPONSE:
+  23 0000 CDCCCC3D 		.word	1036831949
+  24 0004 CDCCCC3D 		.word	1036831949
+  25 0008 CDCCCC3D 		.word	1036831949
+  26 000c CDCCCC3D 		.word	1036831949
+  27 0010 CDCCCC3D 		.word	1036831949
+  28 0014 CDCCCC3D 		.word	1036831949
+  29 0018 CDCCCC3D 		.word	1036831949
+  30 001c CDCCCC3D 		.word	1036831949
+  31 0020 CDCCCC3D 		.word	1036831949
+  32 0024 CDCCCC3D 		.word	1036831949
+  33              		.global	__aeabi_fmul
+  34              		.global	__aeabi_fadd
+  35              		.global	__aeabi_fsub
+  36              		.section	.text.dcRemoval,"ax",%progbits
+  37              		.align	1
+  38              		.global	dcRemoval
+  39              		.syntax unified
+  40              		.thumb
+  41              		.thumb_func
+  43              	dcRemoval:
+  44              	.LFB68:
+   1:Core/Src/filter_max30102.c **** /*
+   2:Core/Src/filter_max30102.c ****  *
+   3:Core/Src/filter_max30102.c ****  * Filter for sensor
+   4:Core/Src/filter_max30102.c ****  *
+   5:Core/Src/filter_max30102.c ****  * Author: Joar Warholm
+   6:Core/Src/filter_max30102.c ****  * Created: 13 November 2024
+   7:Core/Src/filter_max30102.c ****  * 
+   8:Core/Src/filter_max30102.c ****  *
+   9:Core/Src/filter_max30102.c ****  * Adapted from:
+  10:Core/Src/filter_max30102.c ****  * https://morf.lv/implementing-pulse-oximeter-using-max30100
+  11:Core/Src/filter_max30102.c ****  */
+  12:Core/Src/filter_max30102.c **** #include "filter_max30102.h"
+  13:Core/Src/filter_max30102.c **** #include "max_sensor.h"
+  14:Core/Src/filter_max30102.c **** #include "uart.h"
+  15:Core/Src/filter_max30102.c **** 
+  16:Core/Src/filter_max30102.c **** static float FIR_IMPULSE_RESPONSE[FIR_FILTER_LENGTH] = {0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0.1f, 0
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 2
+
+
+  17:Core/Src/filter_max30102.c **** /*Working dc removal*/
+  18:Core/Src/filter_max30102.c **** 
+  19:Core/Src/filter_max30102.c **** DC_FILTER_T dcRemoval(float input, float prevState, float alpha)
+  20:Core/Src/filter_max30102.c **** {
+  45              		.loc 1 20 1
+  46              		.cfi_startproc
+  47              		@ args = 0, pretend = 0, frame = 24
+  48              		@ frame_needed = 1, uses_anonymous_args = 0
+  49 0000 80B5     		push	{r7, lr}
+  50              	.LCFI0:
+  51              		.cfi_def_cfa_offset 8
+  52              		.cfi_offset 7, -8
+  53              		.cfi_offset 14, -4
+  54 0002 86B0     		sub	sp, sp, #24
+  55              	.LCFI1:
+  56              		.cfi_def_cfa_offset 32
+  57 0004 00AF     		add	r7, sp, #0
+  58              	.LCFI2:
+  59              		.cfi_def_cfa_register 7
+  60 0006 F860     		str	r0, [r7, #12]
+  61 0008 B960     		str	r1, [r7, #8]	@ float
+  62 000a 7A60     		str	r2, [r7, #4]	@ float
+  63 000c 3B60     		str	r3, [r7]	@ float
+  21:Core/Src/filter_max30102.c ****     DC_FILTER_T output;
+  22:Core/Src/filter_max30102.c ****     output.w = input + alpha * prevState;
+  64              		.loc 1 22 30
+  65 000e 7968     		ldr	r1, [r7, #4]	@ float
+  66 0010 3868     		ldr	r0, [r7]	@ float
+  67 0012 FFF7FEFF 		bl	__aeabi_fmul
+  68 0016 0346     		mov	r3, r0
+  69              		.loc 1 22 22
+  70 0018 B968     		ldr	r1, [r7, #8]	@ float
+  71 001a 1846     		mov	r0, r3
+  72 001c FFF7FEFF 		bl	__aeabi_fadd
+  73 0020 0346     		mov	r3, r0
+  74              		.loc 1 22 14
+  75 0022 3B61     		str	r3, [r7, #16]	@ float
+  23:Core/Src/filter_max30102.c ****     output.result = output.w - prevState;          
+  76              		.loc 1 23 27
+  77 0024 3B69     		ldr	r3, [r7, #16]	@ float
+  78              		.loc 1 23 30
+  79 0026 7968     		ldr	r1, [r7, #4]	@ float
+  80 0028 1846     		mov	r0, r3
+  81 002a FFF7FEFF 		bl	__aeabi_fsub
+  82 002e 0346     		mov	r3, r0
+  83              		.loc 1 23 19
+  84 0030 7B61     		str	r3, [r7, #20]	@ float
+  24:Core/Src/filter_max30102.c ****     return output;
+  85              		.loc 1 24 12
+  86 0032 FB68     		ldr	r3, [r7, #12]
+  87 0034 1A46     		mov	r2, r3
+  88 0036 07F11003 		add	r3, r7, #16
+  89 003a 93E80300 		ldm	r3, {r0, r1}
+  90 003e 82E80300 		stm	r2, {r0, r1}
+  25:Core/Src/filter_max30102.c **** }
+  91              		.loc 1 25 1
+  92 0042 F868     		ldr	r0, [r7, #12]
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 3
+
+
+  93 0044 1837     		adds	r7, r7, #24
+  94              	.LCFI3:
+  95              		.cfi_def_cfa_offset 8
+  96 0046 BD46     		mov	sp, r7
+  97              	.LCFI4:
+  98              		.cfi_def_cfa_register 13
+  99              		@ sp needed
+ 100 0048 80BD     		pop	{r7, pc}
+ 101              		.cfi_endproc
+ 102              	.LFE68:
+ 104              		.global	__aeabi_i2f
+ 105              		.global	__aeabi_fdiv
+ 106              		.section	.text.meanDiff,"ax",%progbits
+ 107              		.align	1
+ 108              		.global	meanDiff
+ 109              		.syntax unified
+ 110              		.thumb
+ 111              		.thumb_func
+ 113              	meanDiff:
+ 114              	.LFB69:
+  26:Core/Src/filter_max30102.c **** 
+  27:Core/Src/filter_max30102.c **** /*WIP mean filter => Moving average?*/
+  28:Core/Src/filter_max30102.c **** float meanDiff(float input, MEAN_DIFF_FILTER_T *filterData)
+  29:Core/Src/filter_max30102.c **** {
+ 115              		.loc 1 29 1
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 16
+ 118              		@ frame_needed = 1, uses_anonymous_args = 0
+ 119 0000 90B5     		push	{r4, r7, lr}
+ 120              	.LCFI5:
+ 121              		.cfi_def_cfa_offset 12
+ 122              		.cfi_offset 4, -12
+ 123              		.cfi_offset 7, -8
+ 124              		.cfi_offset 14, -4
+ 125 0002 85B0     		sub	sp, sp, #20
+ 126              	.LCFI6:
+ 127              		.cfi_def_cfa_offset 32
+ 128 0004 00AF     		add	r7, sp, #0
+ 129              	.LCFI7:
+ 130              		.cfi_def_cfa_register 7
+ 131 0006 7860     		str	r0, [r7, #4]	@ float
+ 132 0008 3960     		str	r1, [r7]
+  30:Core/Src/filter_max30102.c ****     float avg = 0; // average value
+ 133              		.loc 1 30 11
+ 134 000a 4FF00003 		mov	r3, #0
+ 135 000e FB60     		str	r3, [r7, #12]	@ float
+  31:Core/Src/filter_max30102.c ****     
+  32:Core/Src/filter_max30102.c ****     // Ta bort gamla värde från pågående summa
+  33:Core/Src/filter_max30102.c ****     filterData->sum -= filterData->values[filterData->index];
+ 136              		.loc 1 33 15
+ 137 0010 3B68     		ldr	r3, [r7]
+ 138 0012 DA6A     		ldr	r2, [r3, #44]	@ float
+ 139              		.loc 1 33 53
+ 140 0014 3B68     		ldr	r3, [r7]
+ 141 0016 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 142 001a 1946     		mov	r1, r3
+ 143              		.loc 1 33 42
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 4
+
+
+ 144 001c 3B68     		ldr	r3, [r7]
+ 145 001e 53F82130 		ldr	r3, [r3, r1, lsl #2]	@ float
+ 146              		.loc 1 33 21
+ 147 0022 1946     		mov	r1, r3
+ 148 0024 1046     		mov	r0, r2
+ 149 0026 FFF7FEFF 		bl	__aeabi_fsub
+ 150 002a 0346     		mov	r3, r0
+ 151 002c 1A46     		mov	r2, r3
+ 152 002e 3B68     		ldr	r3, [r7]
+ 153 0030 DA62     		str	r2, [r3, #44]	@ float
+  34:Core/Src/filter_max30102.c ****     
+  35:Core/Src/filter_max30102.c ****     // Ersätt gamla värdet med nytt värde på index
+  36:Core/Src/filter_max30102.c ****     filterData->values[filterData->index] = input;
+ 154              		.loc 1 36 34
+ 155 0032 3B68     		ldr	r3, [r7]
+ 156 0034 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 157 0038 1946     		mov	r1, r3
+ 158              		.loc 1 36 43
+ 159 003a 3B68     		ldr	r3, [r7]
+ 160 003c 7A68     		ldr	r2, [r7, #4]	@ float
+ 161 003e 43F82120 		str	r2, [r3, r1, lsl #2]	@ float
+  37:Core/Src/filter_max30102.c ****     
+  38:Core/Src/filter_max30102.c ****     // Lägg till nya värdet
+  39:Core/Src/filter_max30102.c ****     filterData->sum += filterData->values[filterData->index];
+ 162              		.loc 1 39 15
+ 163 0042 3B68     		ldr	r3, [r7]
+ 164 0044 DA6A     		ldr	r2, [r3, #44]	@ float
+ 165              		.loc 1 39 53
+ 166 0046 3B68     		ldr	r3, [r7]
+ 167 0048 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 168 004c 1946     		mov	r1, r3
+ 169              		.loc 1 39 42
+ 170 004e 3B68     		ldr	r3, [r7]
+ 171 0050 53F82130 		ldr	r3, [r3, r1, lsl #2]	@ float
+ 172              		.loc 1 39 21
+ 173 0054 1946     		mov	r1, r3
+ 174 0056 1046     		mov	r0, r2
+ 175 0058 FFF7FEFF 		bl	__aeabi_fadd
+ 176 005c 0346     		mov	r3, r0
+ 177 005e 1A46     		mov	r2, r3
+ 178 0060 3B68     		ldr	r3, [r7]
+ 179 0062 DA62     		str	r2, [r3, #44]	@ float
+  40:Core/Src/filter_max30102.c ****     
+  41:Core/Src/filter_max30102.c ****     // Gå till nästa steg
+  42:Core/Src/filter_max30102.c ****     filterData->index++;
+ 180              		.loc 1 42 15
+ 181 0064 3B68     		ldr	r3, [r7]
+ 182 0066 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 183              		.loc 1 42 22
+ 184 006a 0133     		adds	r3, r3, #1
+ 185 006c DAB2     		uxtb	r2, r3
+ 186 006e 3B68     		ldr	r3, [r7]
+ 187 0070 83F82820 		strb	r2, [r3, #40]
+  43:Core/Src/filter_max30102.c ****     filterData->index = filterData->index % MEAN_FILTER_SIZE;
+ 188              		.loc 1 43 35
+ 189 0074 3B68     		ldr	r3, [r7]
+ 190 0076 93F82820 		ldrb	r2, [r3, #40]	@ zero_extendqisi2
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 5
+
+
+ 191              		.loc 1 43 23
+ 192 007a 194B     		ldr	r3, .L6
+ 193 007c A3FB0213 		umull	r1, r3, r3, r2
+ 194 0080 D908     		lsrs	r1, r3, #3
+ 195 0082 0B46     		mov	r3, r1
+ 196 0084 9B00     		lsls	r3, r3, #2
+ 197 0086 0B44     		add	r3, r3, r1
+ 198 0088 5B00     		lsls	r3, r3, #1
+ 199 008a D31A     		subs	r3, r2, r3
+ 200 008c DAB2     		uxtb	r2, r3
+ 201 008e 3B68     		ldr	r3, [r7]
+ 202 0090 83F82820 		strb	r2, [r3, #40]
+  44:Core/Src/filter_max30102.c **** 
+  45:Core/Src/filter_max30102.c ****     // Check för kolla om tillräckligt med samples
+  46:Core/Src/filter_max30102.c ****     if (filterData->count < MEAN_FILTER_SIZE)
+ 203              		.loc 1 46 19
+ 204 0094 3B68     		ldr	r3, [r7]
+ 205 0096 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 206              		.loc 1 46 8
+ 207 009a 092B     		cmp	r3, #9
+ 208 009c 07D8     		bhi	.L4
+  47:Core/Src/filter_max30102.c ****         filterData->count++;
+ 209              		.loc 1 47 19
+ 210 009e 3B68     		ldr	r3, [r7]
+ 211 00a0 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 212              		.loc 1 47 26
+ 213 00a4 0133     		adds	r3, r3, #1
+ 214 00a6 DAB2     		uxtb	r2, r3
+ 215 00a8 3B68     		ldr	r3, [r7]
+ 216 00aa 83F83020 		strb	r2, [r3, #48]
+ 217              	.L4:
+  48:Core/Src/filter_max30102.c **** 
+  49:Core/Src/filter_max30102.c ****     // Summan delat på antal
+  50:Core/Src/filter_max30102.c ****     avg = filterData->sum / filterData->count;
+ 218              		.loc 1 50 21
+ 219 00ae 3B68     		ldr	r3, [r7]
+ 220 00b0 DC6A     		ldr	r4, [r3, #44]	@ float
+ 221              		.loc 1 50 39
+ 222 00b2 3B68     		ldr	r3, [r7]
+ 223 00b4 93F83030 		ldrb	r3, [r3, #48]	@ zero_extendqisi2
+ 224              		.loc 1 50 27
+ 225 00b8 1846     		mov	r0, r3
+ 226 00ba FFF7FEFF 		bl	__aeabi_i2f
+ 227 00be 0346     		mov	r3, r0
+ 228              		.loc 1 50 9
+ 229 00c0 1946     		mov	r1, r3
+ 230 00c2 2046     		mov	r0, r4
+ 231 00c4 FFF7FEFF 		bl	__aeabi_fdiv
+ 232 00c8 0346     		mov	r3, r0
+ 233 00ca FB60     		str	r3, [r7, #12]	@ float
+  51:Core/Src/filter_max30102.c **** 
+  52:Core/Src/filter_max30102.c ****     // Diffen mellan avg och input
+  53:Core/Src/filter_max30102.c ****     return avg - input;
+ 234              		.loc 1 53 16
+ 235 00cc 7968     		ldr	r1, [r7, #4]	@ float
+ 236 00ce F868     		ldr	r0, [r7, #12]	@ float
+ 237 00d0 FFF7FEFF 		bl	__aeabi_fsub
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 6
+
+
+ 238 00d4 0346     		mov	r3, r0
+  54:Core/Src/filter_max30102.c **** 
+  55:Core/Src/filter_max30102.c **** }
+ 239              		.loc 1 55 1
+ 240 00d6 1846     		mov	r0, r3
+ 241 00d8 1437     		adds	r7, r7, #20
+ 242              	.LCFI8:
+ 243              		.cfi_def_cfa_offset 12
+ 244 00da BD46     		mov	sp, r7
+ 245              	.LCFI9:
+ 246              		.cfi_def_cfa_register 13
+ 247              		@ sp needed
+ 248 00dc 90BD     		pop	{r4, r7, pc}
+ 249              	.L7:
+ 250 00de 00BF     		.align	2
+ 251              	.L6:
+ 252 00e0 CDCCCCCC 		.word	-858993459
+ 253              		.cfi_endproc
+ 254              	.LFE69:
+ 256              		.global	__aeabi_f2d
+ 257              		.global	__aeabi_dmul
+ 258              		.global	__aeabi_dadd
+ 259              		.global	__aeabi_d2f
+ 260              		.section	.text.lowPassButterworthFilter,"ax",%progbits
+ 261              		.align	1
+ 262              		.global	lowPassButterworthFilter
+ 263              		.syntax unified
+ 264              		.thumb
+ 265              		.thumb_func
+ 267              	lowPassButterworthFilter:
+ 268              	.LFB70:
+  56:Core/Src/filter_max30102.c **** 
+  57:Core/Src/filter_max30102.c **** /*Attempt to add a lowpassButterworth*/
+  58:Core/Src/filter_max30102.c **** void lowPassButterworthFilter(float input, BUTTERWORTH_FILTER_T *filterState)
+  59:Core/Src/filter_max30102.c **** {
+ 269              		.loc 1 59 1
+ 270              		.cfi_startproc
+ 271              		@ args = 0, pretend = 0, frame = 8
+ 272              		@ frame_needed = 1, uses_anonymous_args = 0
+ 273 0000 B0B5     		push	{r4, r5, r7, lr}
+ 274              	.LCFI10:
+ 275              		.cfi_def_cfa_offset 16
+ 276              		.cfi_offset 4, -16
+ 277              		.cfi_offset 5, -12
+ 278              		.cfi_offset 7, -8
+ 279              		.cfi_offset 14, -4
+ 280 0002 82B0     		sub	sp, sp, #8
+ 281              	.LCFI11:
+ 282              		.cfi_def_cfa_offset 24
+ 283 0004 00AF     		add	r7, sp, #0
+ 284              	.LCFI12:
+ 285              		.cfi_def_cfa_register 7
+ 286 0006 7860     		str	r0, [r7, #4]	@ float
+ 287 0008 3960     		str	r1, [r7]
+  60:Core/Src/filter_max30102.c ****     filterState->v[0] = filterState->v[1];
+ 288              		.loc 1 60 39
+ 289 000a 3B68     		ldr	r3, [r7]
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 7
+
+
+ 290 000c 5A68     		ldr	r2, [r3, #4]	@ float
+ 291              		.loc 1 60 23
+ 292 000e 3B68     		ldr	r3, [r7]
+ 293 0010 1A60     		str	r2, [r3]	@ float
+  61:Core/Src/filter_max30102.c ****     filterState->v[1] = (0.75 * input) + (0.75 * filterState->v[0]);
+ 294              		.loc 1 61 31
+ 295 0012 7868     		ldr	r0, [r7, #4]	@ float
+ 296 0014 FFF7FEFF 		bl	__aeabi_f2d
+ 297 0018 4FF00002 		mov	r2, #0
+ 298 001c 174B     		ldr	r3, .L9
+ 299 001e FFF7FEFF 		bl	__aeabi_dmul
+ 300 0022 0246     		mov	r2, r0
+ 301 0024 0B46     		mov	r3, r1
+ 302 0026 1446     		mov	r4, r2
+ 303 0028 1D46     		mov	r5, r3
+ 304              		.loc 1 61 64
+ 305 002a 3B68     		ldr	r3, [r7]
+ 306 002c 1B68     		ldr	r3, [r3]	@ float
+ 307 002e 1846     		mov	r0, r3
+ 308 0030 FFF7FEFF 		bl	__aeabi_f2d
+ 309              		.loc 1 61 48
+ 310 0034 4FF00002 		mov	r2, #0
+ 311 0038 104B     		ldr	r3, .L9
+ 312 003a FFF7FEFF 		bl	__aeabi_dmul
+ 313 003e 0246     		mov	r2, r0
+ 314 0040 0B46     		mov	r3, r1
+ 315              		.loc 1 61 40
+ 316 0042 2046     		mov	r0, r4
+ 317 0044 2946     		mov	r1, r5
+ 318 0046 FFF7FEFF 		bl	__aeabi_dadd
+ 319 004a 0246     		mov	r2, r0
+ 320 004c 0B46     		mov	r3, r1
+ 321 004e 1046     		mov	r0, r2
+ 322 0050 1946     		mov	r1, r3
+ 323 0052 FFF7FEFF 		bl	__aeabi_d2f
+ 324 0056 0246     		mov	r2, r0
+ 325              		.loc 1 61 23
+ 326 0058 3B68     		ldr	r3, [r7]
+ 327 005a 5A60     		str	r2, [r3, #4]	@ float
+  62:Core/Src/filter_max30102.c ****     //filterState->v[1] = (2.452372752527856026e-1 * input) + (0.50952544949442879485 * filterState
+  63:Core/Src/filter_max30102.c ****     filterState->result = filterState->v[0] + filterState->v[1];
+ 328              		.loc 1 63 41
+ 329 005c 3B68     		ldr	r3, [r7]
+ 330 005e 1A68     		ldr	r2, [r3]	@ float
+ 331              		.loc 1 63 61
+ 332 0060 3B68     		ldr	r3, [r7]
+ 333 0062 5B68     		ldr	r3, [r3, #4]	@ float
+ 334              		.loc 1 63 45
+ 335 0064 1946     		mov	r1, r3
+ 336 0066 1046     		mov	r0, r2
+ 337 0068 FFF7FEFF 		bl	__aeabi_fadd
+ 338 006c 0346     		mov	r3, r0
+ 339 006e 1A46     		mov	r2, r3
+ 340              		.loc 1 63 25
+ 341 0070 3B68     		ldr	r3, [r7]
+ 342 0072 9A60     		str	r2, [r3, #8]	@ float
+  64:Core/Src/filter_max30102.c **** }
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 8
+
+
+ 343              		.loc 1 64 1
+ 344 0074 00BF     		nop
+ 345 0076 0837     		adds	r7, r7, #8
+ 346              	.LCFI13:
+ 347              		.cfi_def_cfa_offset 16
+ 348 0078 BD46     		mov	sp, r7
+ 349              	.LCFI14:
+ 350              		.cfi_def_cfa_register 13
+ 351              		@ sp needed
+ 352 007a B0BD     		pop	{r4, r5, r7, pc}
+ 353              	.L10:
+ 354              		.align	2
+ 355              	.L9:
+ 356 007c 0000E83F 		.word	1072168960
+ 357              		.cfi_endproc
+ 358              	.LFE70:
+ 360              		.section	.text.FIRFilter_Init,"ax",%progbits
+ 361              		.align	1
+ 362              		.global	FIRFilter_Init
+ 363              		.syntax unified
+ 364              		.thumb
+ 365              		.thumb_func
+ 367              	FIRFilter_Init:
+ 368              	.LFB71:
+  65:Core/Src/filter_max30102.c **** 
+  66:Core/Src/filter_max30102.c **** // /*Moving average filter*/
+  67:Core/Src/filter_max30102.c **** void FIRFilter_Init(FIRFilter * fir)
+  68:Core/Src/filter_max30102.c **** {
+ 369              		.loc 1 68 1
+ 370              		.cfi_startproc
+ 371              		@ args = 0, pretend = 0, frame = 16
+ 372              		@ frame_needed = 1, uses_anonymous_args = 0
+ 373              		@ link register save eliminated.
+ 374 0000 80B4     		push	{r7}
+ 375              	.LCFI15:
+ 376              		.cfi_def_cfa_offset 4
+ 377              		.cfi_offset 7, -4
+ 378 0002 85B0     		sub	sp, sp, #20
+ 379              	.LCFI16:
+ 380              		.cfi_def_cfa_offset 24
+ 381 0004 00AF     		add	r7, sp, #0
+ 382              	.LCFI17:
+ 383              		.cfi_def_cfa_register 7
+ 384 0006 7860     		str	r0, [r7, #4]
+ 385              	.LBB2:
+  69:Core/Src/filter_max30102.c ****     /*Rensar filter buffer*/
+  70:Core/Src/filter_max30102.c ****     for(uint8_t n = 0; n < FIR_FILTER_LENGTH; n++)
+ 386              		.loc 1 70 17
+ 387 0008 0023     		movs	r3, #0
+ 388 000a FB73     		strb	r3, [r7, #15]
+ 389              		.loc 1 70 5
+ 390 000c 08E0     		b	.L12
+ 391              	.L13:
+  71:Core/Src/filter_max30102.c ****     {
+  72:Core/Src/filter_max30102.c ****         fir->buf[n] = 0.0f;
+ 392              		.loc 1 72 17 discriminator 3
+ 393 000e FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 9
+
+
+ 394              		.loc 1 72 21 discriminator 3
+ 395 0010 7B68     		ldr	r3, [r7, #4]
+ 396 0012 4FF00001 		mov	r1, #0
+ 397 0016 43F82210 		str	r1, [r3, r2, lsl #2]	@ float
+  70:Core/Src/filter_max30102.c ****     {
+ 398              		.loc 1 70 48 discriminator 3
+ 399 001a FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 400 001c 0133     		adds	r3, r3, #1
+ 401 001e FB73     		strb	r3, [r7, #15]
+ 402              	.L12:
+  70:Core/Src/filter_max30102.c ****     {
+ 403              		.loc 1 70 26 discriminator 1
+ 404 0020 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 405 0022 092B     		cmp	r3, #9
+ 406 0024 F3D9     		bls	.L13
+ 407              	.LBE2:
+  73:Core/Src/filter_max30102.c ****     }
+  74:Core/Src/filter_max30102.c ****     /*Rensar buffer index*/
+  75:Core/Src/filter_max30102.c ****     fir->bufIndex = 0;
+ 408              		.loc 1 75 19
+ 409 0026 7B68     		ldr	r3, [r7, #4]
+ 410 0028 0022     		movs	r2, #0
+ 411 002a 83F82820 		strb	r2, [r3, #40]
+  76:Core/Src/filter_max30102.c ****     /*Rensar filter output*/
+  77:Core/Src/filter_max30102.c ****     fir->out = 0.0f;
+ 412              		.loc 1 77 14
+ 413 002e 7B68     		ldr	r3, [r7, #4]
+ 414 0030 4FF00002 		mov	r2, #0
+ 415 0034 DA62     		str	r2, [r3, #44]	@ float
+  78:Core/Src/filter_max30102.c **** }
+ 416              		.loc 1 78 1
+ 417 0036 00BF     		nop
+ 418 0038 1437     		adds	r7, r7, #20
+ 419              	.LCFI18:
+ 420              		.cfi_def_cfa_offset 4
+ 421 003a BD46     		mov	sp, r7
+ 422              	.LCFI19:
+ 423              		.cfi_def_cfa_register 13
+ 424              		@ sp needed
+ 425 003c 80BC     		pop	{r7}
+ 426              	.LCFI20:
+ 427              		.cfi_restore 7
+ 428              		.cfi_def_cfa_offset 0
+ 429 003e 7047     		bx	lr
+ 430              		.cfi_endproc
+ 431              	.LFE71:
+ 433              		.section	.text.FIRFilter_Update,"ax",%progbits
+ 434              		.align	1
+ 435              		.global	FIRFilter_Update
+ 436              		.syntax unified
+ 437              		.thumb
+ 438              		.thumb_func
+ 440              	FIRFilter_Update:
+ 441              	.LFB72:
+  79:Core/Src/filter_max30102.c **** 
+  80:Core/Src/filter_max30102.c **** float FIRFilter_Update(FIRFilter *fir, float inp) {
+ 442              		.loc 1 80 51
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 10
+
+
+ 443              		.cfi_startproc
+ 444              		@ args = 0, pretend = 0, frame = 16
+ 445              		@ frame_needed = 1, uses_anonymous_args = 0
+ 446 0000 90B5     		push	{r4, r7, lr}
+ 447              	.LCFI21:
+ 448              		.cfi_def_cfa_offset 12
+ 449              		.cfi_offset 4, -12
+ 450              		.cfi_offset 7, -8
+ 451              		.cfi_offset 14, -4
+ 452 0002 85B0     		sub	sp, sp, #20
+ 453              	.LCFI22:
+ 454              		.cfi_def_cfa_offset 32
+ 455 0004 00AF     		add	r7, sp, #0
+ 456              	.LCFI23:
+ 457              		.cfi_def_cfa_register 7
+ 458 0006 7860     		str	r0, [r7, #4]
+ 459 0008 3960     		str	r1, [r7]	@ float
+  81:Core/Src/filter_max30102.c **** 
+  82:Core/Src/filter_max30102.c ****     /*Spara senaste värde i buffer*/
+  83:Core/Src/filter_max30102.c ****     fir->buf[fir->bufIndex] = inp;
+ 460              		.loc 1 83 17
+ 461 000a 7B68     		ldr	r3, [r7, #4]
+ 462 000c 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 463 0010 1946     		mov	r1, r3
+ 464              		.loc 1 83 29
+ 465 0012 7B68     		ldr	r3, [r7, #4]
+ 466 0014 3A68     		ldr	r2, [r7]	@ float
+ 467 0016 43F82120 		str	r2, [r3, r1, lsl #2]	@ float
+  84:Core/Src/filter_max30102.c ****     /* Öka index och wrappa runt om det behövs*/
+  85:Core/Src/filter_max30102.c ****     fir->bufIndex++;
+ 468              		.loc 1 85 8
+ 469 001a 7B68     		ldr	r3, [r7, #4]
+ 470 001c 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 471              		.loc 1 85 18
+ 472 0020 0133     		adds	r3, r3, #1
+ 473 0022 DAB2     		uxtb	r2, r3
+ 474 0024 7B68     		ldr	r3, [r7, #4]
+ 475 0026 83F82820 		strb	r2, [r3, #40]
+  86:Core/Src/filter_max30102.c **** 
+  87:Core/Src/filter_max30102.c ****     if (fir->bufIndex == FIR_FILTER_LENGTH)
+ 476              		.loc 1 87 12
+ 477 002a 7B68     		ldr	r3, [r7, #4]
+ 478 002c 93F82830 		ldrb	r3, [r3, #40]	@ zero_extendqisi2
+ 479              		.loc 1 87 8
+ 480 0030 0A2B     		cmp	r3, #10
+ 481 0032 03D1     		bne	.L15
+  88:Core/Src/filter_max30102.c ****     {
+  89:Core/Src/filter_max30102.c ****         fir->bufIndex = 0;
+ 482              		.loc 1 89 23
+ 483 0034 7B68     		ldr	r3, [r7, #4]
+ 484 0036 0022     		movs	r2, #0
+ 485 0038 83F82820 		strb	r2, [r3, #40]
+ 486              	.L15:
+  90:Core/Src/filter_max30102.c ****     }
+  91:Core/Src/filter_max30102.c ****     /*Uppskatta nya värdet med konvulation*/
+  92:Core/Src/filter_max30102.c ****     fir->out = 0.0f;
+ 487              		.loc 1 92 14
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 11
+
+
+ 488 003c 7B68     		ldr	r3, [r7, #4]
+ 489 003e 4FF00002 		mov	r2, #0
+ 490 0042 DA62     		str	r2, [r3, #44]	@ float
+  93:Core/Src/filter_max30102.c **** 
+  94:Core/Src/filter_max30102.c ****     uint8_t sumIndex = fir->bufIndex;
+ 491              		.loc 1 94 13
+ 492 0044 7B68     		ldr	r3, [r7, #4]
+ 493 0046 93F82830 		ldrb	r3, [r3, #40]
+ 494 004a FB73     		strb	r3, [r7, #15]
+ 495              	.LBB3:
+  95:Core/Src/filter_max30102.c **** 
+  96:Core/Src/filter_max30102.c ****     for (uint8_t n = 0; n < FIR_FILTER_LENGTH; n++)
+ 496              		.loc 1 96 18
+ 497 004c 0023     		movs	r3, #0
+ 498 004e BB73     		strb	r3, [r7, #14]
+ 499              		.loc 1 96 5
+ 500 0050 21E0     		b	.L16
+ 501              	.L19:
+  97:Core/Src/filter_max30102.c ****     {
+  98:Core/Src/filter_max30102.c ****         /*Sänk index om det behövs*/
+  99:Core/Src/filter_max30102.c ****         if (sumIndex > 0)
+ 502              		.loc 1 99 12
+ 503 0052 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 504 0054 002B     		cmp	r3, #0
+ 505 0056 03D0     		beq	.L17
+ 100:Core/Src/filter_max30102.c ****         {
+ 101:Core/Src/filter_max30102.c ****             sumIndex--;   
+ 506              		.loc 1 101 21
+ 507 0058 FB7B     		ldrb	r3, [r7, #15]	@ zero_extendqisi2
+ 508 005a 013B     		subs	r3, r3, #1
+ 509 005c FB73     		strb	r3, [r7, #15]
+ 510 005e 01E0     		b	.L18
+ 511              	.L17:
+ 102:Core/Src/filter_max30102.c ****         } 
+ 103:Core/Src/filter_max30102.c ****         else
+ 104:Core/Src/filter_max30102.c ****         {
+ 105:Core/Src/filter_max30102.c ****             sumIndex = FIR_FILTER_LENGTH - 1;
+ 512              		.loc 1 105 22
+ 513 0060 0923     		movs	r3, #9
+ 514 0062 FB73     		strb	r3, [r7, #15]
+ 515              	.L18:
+ 106:Core/Src/filter_max30102.c ****         }
+ 107:Core/Src/filter_max30102.c ****         /*Multiplicera impuls responsen med skiftad input värde och addera till output*/
+ 108:Core/Src/filter_max30102.c ****         fir->out += FIR_IMPULSE_RESPONSE[n] * fir->buf[sumIndex];
+ 516              		.loc 1 108 12 discriminator 2
+ 517 0064 7B68     		ldr	r3, [r7, #4]
+ 518 0066 DC6A     		ldr	r4, [r3, #44]	@ float
+ 519              		.loc 1 108 41 discriminator 2
+ 520 0068 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 521 006a 0F4A     		ldr	r2, .L21
+ 522 006c 52F82300 		ldr	r0, [r2, r3, lsl #2]	@ float
+ 523              		.loc 1 108 55 discriminator 2
+ 524 0070 FA7B     		ldrb	r2, [r7, #15]	@ zero_extendqisi2
+ 525 0072 7B68     		ldr	r3, [r7, #4]
+ 526 0074 53F82230 		ldr	r3, [r3, r2, lsl #2]	@ float
+ 527              		.loc 1 108 45 discriminator 2
+ 528 0078 1946     		mov	r1, r3
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 12
+
+
+ 529 007a FFF7FEFF 		bl	__aeabi_fmul
+ 530 007e 0346     		mov	r3, r0
+ 531              		.loc 1 108 18 discriminator 2
+ 532 0080 1946     		mov	r1, r3
+ 533 0082 2046     		mov	r0, r4
+ 534 0084 FFF7FEFF 		bl	__aeabi_fadd
+ 535 0088 0346     		mov	r3, r0
+ 536 008a 1A46     		mov	r2, r3
+ 537 008c 7B68     		ldr	r3, [r7, #4]
+ 538 008e DA62     		str	r2, [r3, #44]	@ float
+  96:Core/Src/filter_max30102.c ****     {
+ 539              		.loc 1 96 49 discriminator 2
+ 540 0090 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 541 0092 0133     		adds	r3, r3, #1
+ 542 0094 BB73     		strb	r3, [r7, #14]
+ 543              	.L16:
+  96:Core/Src/filter_max30102.c ****     {
+ 544              		.loc 1 96 27 discriminator 1
+ 545 0096 BB7B     		ldrb	r3, [r7, #14]	@ zero_extendqisi2
+ 546 0098 092B     		cmp	r3, #9
+ 547 009a DAD9     		bls	.L19
+ 548              	.LBE3:
+ 109:Core/Src/filter_max30102.c **** 
+ 110:Core/Src/filter_max30102.c **** 
+ 111:Core/Src/filter_max30102.c ****     }
+ 112:Core/Src/filter_max30102.c ****     /*Skicka ut filtrerad output*/
+ 113:Core/Src/filter_max30102.c ****     return fir->out;
+ 549              		.loc 1 113 15
+ 550 009c 7B68     		ldr	r3, [r7, #4]
+ 551 009e DB6A     		ldr	r3, [r3, #44]	@ float
+ 114:Core/Src/filter_max30102.c **** }
+ 552              		.loc 1 114 1
+ 553 00a0 1846     		mov	r0, r3
+ 554 00a2 1437     		adds	r7, r7, #20
+ 555              	.LCFI24:
+ 556              		.cfi_def_cfa_offset 12
+ 557 00a4 BD46     		mov	sp, r7
+ 558              	.LCFI25:
+ 559              		.cfi_def_cfa_register 13
+ 560              		@ sp needed
+ 561 00a6 90BD     		pop	{r4, r7, pc}
+ 562              	.L22:
+ 563              		.align	2
+ 564              	.L21:
+ 565 00a8 00000000 		.word	FIR_IMPULSE_RESPONSE
+ 566              		.cfi_endproc
+ 567              	.LFE72:
+ 569              		.text
+ 570              	.Letext0:
+ 571              		.file 2 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/../
+ 572              		.file 3 "C:\\ST\\STM32CubeCLT_1.16.0\\GNU-tools-for-STM32\\bin/../lib/gcc/arm-none-eabi/12.3.1/../
+ 573              		.file 4 "Core/Inc/filter_max30102.h"
+ARM GAS  C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s 			page 13
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 filter_max30102.c
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:19     .data.FIR_IMPULSE_RESPONSE:00000000 $d
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:22     .data.FIR_IMPULSE_RESPONSE:00000000 FIR_IMPULSE_RESPONSE
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:37     .text.dcRemoval:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:43     .text.dcRemoval:00000000 dcRemoval
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:107    .text.meanDiff:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:113    .text.meanDiff:00000000 meanDiff
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:252    .text.meanDiff:000000e0 $d
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:261    .text.lowPassButterworthFilter:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:267    .text.lowPassButterworthFilter:00000000 lowPassButterworthFilter
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:356    .text.lowPassButterworthFilter:0000007c $d
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:361    .text.FIRFilter_Init:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:367    .text.FIRFilter_Init:00000000 FIRFilter_Init
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:434    .text.FIRFilter_Update:00000000 $t
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:440    .text.FIRFilter_Update:00000000 FIRFilter_Update
+C:\Users\vct344\AppData\Local\Temp\ccX4QS6q.s:565    .text.FIRFilter_Update:000000a8 $d
+
+UNDEFINED SYMBOLS
+__aeabi_fmul
+__aeabi_fadd
+__aeabi_fsub
+__aeabi_i2f
+__aeabi_fdiv
+__aeabi_f2d
+__aeabi_dmul
+__aeabi_dadd
+__aeabi_d2f

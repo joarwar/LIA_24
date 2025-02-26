@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    activity.c
+ * @file    single_tap.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect activity/inactivity
- *       from sensor.
+ * @brief   This file show the simplest way to detect single tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -63,6 +62,7 @@
  *            header file of the driver (_reg.h).
  */
 
+
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
@@ -70,6 +70,7 @@
 #include "stm32f1xx_hal.h"
 #include "uart.h"
 #include <stdint.h>
+
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME            20 //ms
@@ -81,7 +82,6 @@ static uint8_t tx_buffer[1000];
 /* Extern variables ----------------------------------------------------------*/
 extern I2C_HandleTypeDef hi2c2;
 /* Private functions ---------------------------------------------------------*/
-
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -89,16 +89,16 @@ extern I2C_HandleTypeDef hi2c2;
  *
  */
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
-                              uint16_t len);
+  uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len);
+ uint16_t len);
 static void platform_delay(uint16_t ms);
 
 
 /* Main Example --------------------------------------------------------------*/
-void lis2dw12_activity(void)
+void lis2dw12_single_tap(void)
 {
-  /* Initialize mems driver interface */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
   lis2dw12_reg_t int_route;
   dev_ctx.write_reg = platform_write;
@@ -125,57 +125,61 @@ void lis2dw12_activity(void)
 
   /* Set full scale */
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
-  /* Configure filtering chain
-   * Accelerometer - filter path / bandwidth
-   */
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
-  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_2);
   /* Configure power mode */
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
-  /* Set wake-up duration
-   * Wake up duration event 1LSb = 1 / ODR
-   */
-  lis2dw12_wkup_dur_set(&dev_ctx, 1);
-  /* Set sleep duration
-   * Duration to go in sleep mode (1 LSb = 512 / ODR)
-   */
-  lis2dw12_act_sleep_dur_set(&dev_ctx, 1);
-  /* Set Activity wake-up threshold
-   * Threshold for wake-up 1 LSB = FS_XL / 64
-   */
-  lis2dw12_wkup_threshold_set(&dev_ctx, 8);
-  /* Data sent to wake-up interrupt function */
-  lis2dw12_wkup_feed_data_set(&dev_ctx, LIS2DW12_HP_FEED);
-  /* Config activity / inactivity or stationary / motion detection */
-  lis2dw12_act_mode_set(&dev_ctx, LIS2DW12_DETECT_ACT_INACT);
-  /* Enable activity detection interrupt */
-  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
-  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  lis2dw12_power_mode_set(&dev_ctx,
+                          LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set Output Data Rate */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
+  /* Enable Tap detection on X, Y, Z */
+  lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set Tap threshold on all axis */
+  lis2dw12_tap_threshold_x_set(&dev_ctx, 9);
+  lis2dw12_tap_threshold_y_set(&dev_ctx, 9);
+  lis2dw12_tap_threshold_z_set(&dev_ctx, 9);
+  /* Configure Single Tap parameter */
+  lis2dw12_tap_quiet_set(&dev_ctx, 1);
+  lis2dw12_tap_shock_set(&dev_ctx, 2);
+  /* Enable Single Tap detection only */
+  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_ONLY_SINGLE);
+  /* Enable single tap detection interrupt */
+  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  int_route.ctrl4_int1_pad_ctrl.int1_single_tap = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /* Wait Events */
   while (1) {
     lis2dw12_all_sources_t all_source;
-    /* Read status register */
+    /* Check Single Tap events */
     lis2dw12_all_sources_get(&dev_ctx, &all_source);
 
-      /* Check if Activity/Inactivity events */
-    if (all_source.wake_up_src.sleep_state_ia) {
-      uart_PrintString("No movement: ");
-      //uart_PrintInt(all_source.wake_up_src.sleep_state_ia, 10);  
+    if (all_source.tap_src.single_tap) {
+      uart_PrintString("Tap detected on: "); 
+      uart_PrintInt(all_source.tap_src.tap_sign, 10);
       uart_PrintString("\r\n");
-    }
 
-    if (all_source.wake_up_src.wu_ia) {
-      uart_PrintString("Movement detected: ");
-      //uart_PrintInt(all_source.wake_up_src.wu_ia, 10);  
-      uart_PrintString("\r\n");
-    }
+      if (all_source.tap_src.x_tap) {
+        uart_PrintString("x");
+        //uart_PrintInt(all_source.tap_src.x_tap, 10);
+        uart_PrintString("\r\n");
+      }
 
+      if (all_source.tap_src.y_tap) {
+        uart_PrintString("y");
+        //uart_PrintInt(all_source.tap_src.y_tap, 10);
+        uart_PrintString("\r\n");
+      }
+
+      if (all_source.tap_src.z_tap) {
+        uart_PrintString("z");
+        //uart_PrintInt(all_source.tap_src.z_tap, 10);
+        uart_PrintString("\r\n");
+      }
+
+      //tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
   }
-  
 }
 
 /*
@@ -189,49 +193,49 @@ void lis2dw12_activity(void)
  *
  */
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
-                              uint16_t len)
+  uint16_t len)
 {
-  HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
-                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
+HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
+I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 
-  return 0;
+return 0;
 }
 
 /*
- * @brief  Read generic device register (platform dependent)
- *
- * @param  handle    customizable argument. In this examples is used in
- *                   order to select the correct sensor bus handler.
- * @param  reg       register to read
- * @param  bufp      pointer to buffer that store the data read
- * @param  len       number of consecutive register to read
- *
- */
+* @brief  Read generic device register (platform dependent)
+*
+* @param  handle    customizable argument. In this examples is used in
+*                   order to select the correct sensor bus handler.
+* @param  reg       register to read
+* @param  bufp      pointer to buffer that store the data read
+* @param  len       number of consecutive register to read
+*
+*/
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len)
+ uint16_t len)
 {
-  HAL_I2C_Mem_Read(handle, LIS2DW12_I2C_ADD_L, reg,
-                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+HAL_I2C_Mem_Read(handle, LIS2DW12_I2C_ADD_L, reg,
+I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 
-  return 0;
+return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
- *
- * @param  tx_buffer     buffer to transmit
- * @param  len           number of byte to send
- *
- */
+* @brief  Write generic device register (platform dependent)
+*
+* @param  tx_buffer     buffer to transmit
+* @param  len           number of byte to send
+*
+*/
 
 /*
- * @brief  platform specific delay (platform dependent)
- *
- * @param  ms        delay in ms
- *
- */
+* @brief  platform specific delay (platform dependent)
+*
+* @param  ms        delay in ms
+*
+*/
 static void platform_delay(uint16_t ms)
 {
-  HAL_Delay(ms);
+HAL_Delay(ms);
 }
 
