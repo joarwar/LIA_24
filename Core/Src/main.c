@@ -127,8 +127,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    lis2dw12_activity();
+    //lis2dw12_activity();
     //lis2dw12_single_tap();
+    lis2dw12_orientation();
     if (INTERRUPT == 1)
     {
       if (MAX30102_Flag)
@@ -145,7 +146,7 @@ int main(void)
     }else{
       fifoledData = MAX30102_read_FIFO();
       
-      //max_Sensor = MAX30102_update(fifoledData);
+      max_Sensor = MAX30102_update(fifoledData);
 
       MAX30102_resetFIFO();
 

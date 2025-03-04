@@ -62,7 +62,8 @@ Core/Src/filter_max30102.c \
 Core/Src/uart.c \
 Core/Src/lis2dw12_reg.c \
 Core/Src/lis2dw12_activity.c \
-Core/Src/lis2dw12_tap_single.c
+Core/Src/lis2dw12_tap_single.c \
+Core/Src/lis2dw12_orientation.c
 
 
 # ASM sources
