@@ -101,6 +101,9 @@ int16_t ax_buffer[MOVING_AVG_SIZE] = {0};
 int16_t ay_buffer[MOVING_AVG_SIZE] = {0};
 int16_t az_buffer[MOVING_AVG_SIZE] = {0};
 
+//Global variables
+float current_roll = 0.0f;
+float current_pitch = 0.0f;
 // Variable to keep track of the index for storing the next sample
 uint8_t sample_index = 0;
 
@@ -205,6 +208,9 @@ void lis2dw12_orientation(void)
     // Calculate pitch and roll
     pitch = atan2f(y, sqrtf(x * x + z * z)) * RAD_TO_DEG;
     roll = atan2f(-x, sqrtf(y * y + z * z)) * RAD_TO_DEG;
+
+    current_pitch = pitch;
+    current_roll = roll;
 
     // Check for NaN or infinite values
     if (isnan(pitch) || isnan(roll) || !isfinite(pitch) || !isfinite(roll))

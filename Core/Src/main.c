@@ -38,6 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */ 
+#define ROLL_MIN_THRESHOLD -80.0f
+#define ROLL_MAX_THRESHOLD -35.0f
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -52,7 +54,8 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 
 volatile uint8_t MAX30102_Flag = 0;
-
+extern float current_roll;
+extern float current_pitch;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -130,27 +133,36 @@ int main(void)
     //lis2dw12_activity();
     //lis2dw12_single_tap();
     lis2dw12_orientation();
-    if (INTERRUPT == 1)
+
+    if (current_roll < ROLL_MIN_THRESHOLD && current_roll > ROLL_MAX_THRESHOLD)
     {
-      if (MAX30102_Flag)
+      if (INTERRUPT == 1)
       {
-        MAX30102_Flag = 0;
+        if (MAX30102_Flag)
+        {
+          MAX30102_Flag = 0;
+          fifoledData = MAX30102_read_FIFO();
+
+          //max_Sensor = MAX30102_update(fifoledData);
+
+          MAX30102_clearInterrupt();
+
+        }
+      }
+      else
+      {
         fifoledData = MAX30102_read_FIFO();
 
-        //max_Sensor = MAX30102_update(fifoledData);
+        max_Sensor = MAX30102_update(fifoledData);
 
-        MAX30102_clearInterrupt();
+        MAX30102_resetFIFO();
 
+        //HAL_Delay(10);
       }
-
-    }else{
-      fifoledData = MAX30102_read_FIFO();
-      
-      max_Sensor = MAX30102_update(fifoledData);
-
-      MAX30102_resetFIFO();
-
-      //HAL_Delay(10);
+    }
+    else
+    {
+      //out of range
     }
 
     MAX30102_displayData();
