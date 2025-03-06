@@ -55,6 +55,13 @@ EMA_High_H filHighEmAvg;
 #define PEAK_THRESHOLD_BUTTER 300
 #define PEAK_MIN_DISTANCE 400
 #define BPM_WINDOW 10
+#define MA_SIZE_PEAK_BPM 10
+
+float bpmPeakHistory[MA_SIZE_PEAK_BPM];
+static uint8_t historyPeakIndex = 0;
+float bpmPeakSum = 0;
+float previousBpmPeak = 0;
+
 
 static uint32_t lastPeakTimeButterMA = 0;
 static uint32_t lastPeakTimeButter = 0;
@@ -123,24 +130,6 @@ PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 LEDCURRENT irLedCurrent;
 uint16_t counter = 0;
 
-// void I2C_Init(void)
-// {
-// 	hi2c1.Instance = I2C1;
-// 	hi2c1.Init.ClockSpeed = 100000;
-// 	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-// 	hi2c1.Init.OwnAddress1 = 0;
-// 	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-// 	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-// 	hi2c1.Init.OwnAddress2 = 0;
-// 	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-// 	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-
-// 	// Call the HAL error handler on error
-// 	if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-// 	{
-// 		Error_Handler();
-// 	}
-// }
 
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
 {
@@ -628,7 +617,17 @@ void updateRRInterval(uint32_t peakTime) {
 
     lastPeakTime = peakTime;  
 }
-
+float calculatePeakMA(){
+    float peakAverage = bpmPeakSum / MA_SIZE_PEAK_BPM;
+    return peakAverage;
+}
+void updatePeakMovingAverage(float newBpm) {
+    bpmPeakSum -= bpmPeakHistory[historyPeakIndex];
+    bpmPeakHistory[historyPeakIndex] = newBpm;
+    bpmPeakSum += newBpm;
+ 
+    historyPeakIndex = (historyPeakIndex + 1) % MA_SIZE_PEAK_BPM;
+}
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     MAX30102 result = {0};
     result.temperature = MAX30102_readTemp();
