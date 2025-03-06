@@ -185,7 +185,8 @@ void lis2dw12_orientation(void)
   {
     lis2dw12_all_sources_t all_source;
     int16_t ax, ay, az;
-    float pitch, roll;
+    float pitch;
+    float roll;
 
     // Read raw accelerometer data for each axis
     lis2dw12_acceleration_raw_get(&dev_ctx, &ax);  // Get X axis
@@ -209,24 +210,22 @@ void lis2dw12_orientation(void)
     pitch = atan2f(y, sqrtf(x * x + z * z)) * RAD_TO_DEG;
     roll = atan2f(-x, sqrtf(y * y + z * z)) * RAD_TO_DEG;
 
-    current_pitch = pitch;
-    current_roll = roll;
+    current_pitch = (pitch * -1);
+    current_roll = (roll * -1);
 
     // Check for NaN or infinite values
     if (isnan(pitch) || isnan(roll) || !isfinite(pitch) || !isfinite(roll))
     {
-      continue; // Skip invalid prints
+      continue; 
     }
 
-    // Print the calculated pitch and roll, limiting the output to every 500ms
-    uart_PrintString("Pitch: ");
-    uart_PrintFloat(pitch);
-    uart_PrintString("°, Roll: ");
-    uart_PrintFloat(roll);
-    uart_PrintString("°\r\n");
-
-    // Delay to slow down the print rate
-    platform_delay(PRINT_DELAY_MS);
+    // uart_PrintString("Pitch: ");
+    // uart_PrintFloat(pitch);
+    // uart_PrintString("°, Roll: ");
+    // uart_PrintFloat(roll);
+    // uart_PrintString("°\r\n");
+    // platform_delay(PRINT_DELAY_MS);
+    break;
   }
 }
 /*

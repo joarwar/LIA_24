@@ -51,7 +51,7 @@ EMA_High_H filHighEmAvg;
 //BPM 
 
 //Need to be change depending on PEAK value 
-#define PEAK_THRESHOLD 1500
+#define PEAK_THRESHOLD 1000
 #define PEAK_THRESHOLD_BUTTER 300
 #define PEAK_MIN_DISTANCE 400
 #define BPM_WINDOW 10
@@ -633,24 +633,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     MAX30102 result = {0};
     result.temperature = MAX30102_readTemp();
     if (m_fifoData.red_led_raw > 9000) {
-        // if (m_fifoData.red_led_raw < 35000)
-        // {
-        //     float currentIncrease = 0.05;     
-        //     currentLevel += currentIncrease;  
-
-        //     MAX30102_setLedCurrent(RED_LED, currentLevel);
-        // }
-
-        // else if (m_fifoData.red_led_raw > 50000)
-        // {
-        //     float currentDecrease = 0.05;
-        //     currentLevel -= currentDecrease;
-
-        //     MAX30102_setLedCurrent(RED_LED, currentLevel);        
-        // }
-        
-        // else
-        // {
             dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);
             float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
             lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
@@ -712,63 +694,26 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
                 float sdnn = calculateSDNN();
                 float rmssd = calculateRMSSD();
 
-                uart_PrintString(" BPM (10s ButterMA): ");
-                uart_PrintFloat(bpm10sButterMA);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm10sButterMA);
-                uart_PrintString("\n");
+                // uart_PrintString(" BPM (10s ButterMA): ");
+                // uart_PrintFloat(bpm10sButterMA);
+                // uart_PrintString(" | Smoothed: ");
+                // uart_PrintFloat(avgBpm10sButterMA);
+                // uart_PrintString("\n");
 
-                uart_PrintString(" BPM (10s Butter): ");
-                uart_PrintFloat(bpm10sButter);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm10sButter);
-                uart_PrintString("\n");
+                // uart_PrintString(" BPM (10s Butter): ");
+                // uart_PrintFloat(bpm10sButter);
+                // uart_PrintString(" | Smoothed: ");
+                // uart_PrintFloat(avgBpm10sButter);
+                // uart_PrintString("\n");
 
-                uart_PrintString(" HRV (SDNN): ");
-                uart_PrintFloat(sdnn);
-                uart_PrintString("\n");
+                // uart_PrintString(" HRV (SDNN): ");
+                // uart_PrintFloat(sdnn);
+                // uart_PrintString("\n");
 
-                uart_PrintString(" HRV (RMSSD): ");
-                uart_PrintFloat(rmssd);
-                uart_PrintString("\n");
+                // uart_PrintString(" HRV (RMSSD): ");
+                // uart_PrintFloat(rmssd);
+                // uart_PrintString("\n");
             }
-
-
-            // if (now - last30sTime >= 30000) {
-            //     float bpm30sButterMA = (peakCount30sButterMA * 2);  
-            //     float bpm30sButter = (peakCount30sButter * 2);  
-            //     peakCount30sButter = 0;
-            //     last30sTime = now;
-
-
-            //     bpm30sButterHistory[bpmIndex30s] = bpm30sButter;
-            //     bpm30sButterMAHistory[bpmIndex30s] = bpm30sButterMA;
-            //     bpmIndex30s = (bpmIndex30s + 1) % BPM_WINDOW;
-            //     if (count30s < BPM_WINDOW) count30s++;
-
-            //     float avgBpm30sButter = 0, avgBpm30sButterMA = 0;
-            //     for (int i = 0; i < count30s; i++) {
-            //         avgBpm30sButter += bpm30sButterHistory[i];
-            //         avgBpm30sButterMA += bpm30sButterMAHistory[i];
-            //     }
-            //     avgBpm30sButter /= count30s;
-            //     avgBpm30sButterMA /= count30s;
-
-
-            //     uart_PrintString(" BPM (30s ButterMA): ");
-            //     uart_PrintFloat(bpm30sButterMA);
-            //     uart_PrintString(" | Smoothed: ");
-            //     uart_PrintFloat(avgBpm30sButterMA);
-            //     uart_PrintString("\n");
-
-            //     uart_PrintString(" BPM (30s Butter): ");
-            //     uart_PrintFloat(bpm30sButter);
-            //     uart_PrintString(" | Smoothed: ");
-            //     uart_PrintFloat(avgBpm30sButter);
-            //     uart_PrintString("\n");
-            // }
-
-
             if (now - last60sTime >= 60000) {
                 float bpm60sButterMA = peakCount60sButterMA;  
                 float bpm60sButter = peakCount60sButter;  
@@ -823,7 +768,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             // //uart_PrintString(" ");
             // uart_PrintFloat(dummyGain);
             // uart_PrintString(";");
-        // // } 
     } 
     else {
         uart_PrintString("$");

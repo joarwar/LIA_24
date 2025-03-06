@@ -38,8 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */ 
-#define ROLL_MIN_THRESHOLD -80.0f
-#define ROLL_MAX_THRESHOLD -35.0f
+#define ROLL_MIN_THRESHOLD -80
+#define ROLL_MAX_THRESHOLD -35
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -133,9 +133,14 @@ int main(void)
     //lis2dw12_activity();
     //lis2dw12_single_tap();
     lis2dw12_orientation();
-
-    if (current_roll < ROLL_MIN_THRESHOLD && current_roll > ROLL_MAX_THRESHOLD)
+    if (current_roll < 80 && current_roll > 35)
     {
+      fifoledData = MAX30102_read_FIFO();
+
+      max_Sensor = MAX30102_update(fifoledData);
+
+      MAX30102_resetFIFO();
+
       if (INTERRUPT == 1)
       {
         if (MAX30102_Flag)
@@ -143,7 +148,7 @@ int main(void)
           MAX30102_Flag = 0;
           fifoledData = MAX30102_read_FIFO();
 
-          //max_Sensor = MAX30102_update(fifoledData);
+          max_Sensor = MAX30102_update(fifoledData);
 
           MAX30102_clearInterrupt();
 
@@ -151,11 +156,11 @@ int main(void)
       }
       else
       {
-        fifoledData = MAX30102_read_FIFO();
+        // fifoledData = MAX30102_read_FIFO();
 
-        max_Sensor = MAX30102_update(fifoledData);
+        // max_Sensor = MAX30102_update(fifoledData);
 
-        MAX30102_resetFIFO();
+        // MAX30102_resetFIFO();
 
         //HAL_Delay(10);
       }
