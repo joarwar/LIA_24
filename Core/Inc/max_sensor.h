@@ -14,14 +14,14 @@
 #ifndef MAX30102_I2C_DRIVER_H
 #define MAX30102_I2C_DRIVER_H
 
-#include "stm32f1xx_hal.h" /*Needed for I2C*/
+#include "stm32f1xx_hal.h" 
 #include <stdbool.h>
 #include <stdio.h>
 
 
 /* PULSE DETECTION PARAMETERS */
 #define PULSE_MIN_THRESHOLD 300 // 300 for finger and around 20 for wrist
-#define PULSE_MAX_THRESHOLD 2000
+#define PULSE_MAX_THRESHOLD 800
 #define PULSE_GO_DOWN_THRESHOLD 1
 
 #define PULSE_BPM_SAMPLE_SIZE 10

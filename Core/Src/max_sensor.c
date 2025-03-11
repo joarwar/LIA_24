@@ -51,53 +51,14 @@ EMA_High_H filHighEmAvg;
 //BPM 
 
 //Need to be change depending on PEAK value 
-#define PEAK_THRESHOLD 1000
-#define PEAK_THRESHOLD_BUTTER 300
-#define PEAK_MIN_DISTANCE 400
-#define BPM_WINDOW 10
-#define MA_SIZE_PEAK_BPM 10
-
-float bpmPeakHistory[MA_SIZE_PEAK_BPM];
-static uint8_t historyPeakIndex = 0;
-float bpmPeakSum = 0;
-float previousBpmPeak = 0;
-
-
-static uint32_t lastPeakTimeButterMA = 0;
-static uint32_t lastPeakTimeButter = 0;
-static uint32_t lastBPMTime = 0;
-static uint32_t last30sTime = 0;
-static uint32_t last60sTime = 0;
-
-static float peakCount10sButterMA = 0;
-static float peakCount30sButterMA = 0;
-static float peakCount60sButterMA = 0;
-
-static float peakCount = 0;
-unsigned long firstTimeByPeak = 0;
-unsigned long lastTimeByPeak = 0 ;
-float peakIncrement = 0;
-
-
-static float peakCount10sButter = 0;
-static float peakCount30sButter = 0;
-static float peakCount60sButter = 0;
-
-static float bpm10sButterHistory[BPM_WINDOW] = {0};
-static float bpm30sButterHistory[BPM_WINDOW] = {0};
-static float bpm60sButterHistory[BPM_WINDOW] = {0};
-
-static float bpm10sButterMAHistory[BPM_WINDOW] = {0};
-static float bpm30sButterMAHistory[BPM_WINDOW] = {0};
-static float bpm60sButterMAHistory[BPM_WINDOW] = {0};
-
-static int bpmIndex10s = 0;
-static int bpmIndex30s = 0;
-static int bpmIndex60s = 0;
-
-static int count10s = 0;
-static int count30s = 0;
-static int count60s = 0;
+float currentBPM;
+float valuesBPM[PULSE_BPM_SAMPLE_SIZE] = {0};
+float valuesBPMSum = 0;
+uint8_t valuesBPMCount = 0;
+uint8_t bpmIndex = 0;
+uint32_t lastBeatThreshold = 0;
+int previousBeat = -1;   
+PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 
 
 //HRV
@@ -125,10 +86,7 @@ float currentSpO2Value = 0; // används ej
 uint8_t redLEDCurrent = 0;
 uint8_t lastREDLedCurrentCheck = 0;
 
-PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
-
 LEDCURRENT irLedCurrent;
-uint16_t counter = 0;
 
 
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
@@ -617,138 +575,22 @@ void updateRRInterval(uint32_t peakTime) {
 
     lastPeakTime = peakTime;  
 }
-float calculatePeakMA(){
-    float peakAverage = bpmPeakSum / MA_SIZE_PEAK_BPM;
-    return peakAverage;
-}
-void updatePeakMovingAverage(float newBpm) {
-    bpmPeakSum -= bpmPeakHistory[historyPeakIndex];
-    bpmPeakHistory[historyPeakIndex] = newBpm;
-    bpmPeakSum += newBpm;
- 
-    historyPeakIndex = (historyPeakIndex + 1) % MA_SIZE_PEAK_BPM;
-}
+
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     MAX30102 result = {0};
     result.temperature = MAX30102_readTemp();
     if (m_fifoData.red_led_raw > 9000) {
+
             dcFilterRed = dcRemoval((float)m_fifoData.red_led_raw, dcFilterRed.w, 0.95);
             float meanDiffResRed = meanDiff(dcFilterRed.result, &meanDiffRed);
             lowPassButterworthFilter(meanDiffResRed, &lpbFilterRed);
             FIRFilter_Update(&withButter, lpbFilterRed.result);
             float filMovInverse = (filMovAvg.out * -1);
             float dummyGain = (lpbFilterRed.result * 3);
-
-            uint32_t now = HAL_GetTick();
-
-            if (dummyGain > PEAK_THRESHOLD && (now - lastPeakTimeButter > PEAK_MIN_DISTANCE)) {
-                peakCount10sButter++;
-                peakCount30sButter++;
-                peakCount60sButter++;
-                peakCount++;
-                lastPeakTimeButter = now; 
-                updateRRInterval(now);
-                if (peakCount >= 10) {
-                    
-                    peakIncrement += 10;
-                    float bpmByPeak = (60.0 * peakIncrement) / (now / 1000.0); 
-                    
-                    uart_PrintString("BPM by Peak: ");
-                    uart_PrintFloat(bpmByPeak);
-                    uart_PrintString("\n");
-            
-                    peakCount = 0;
-                }
-            }
-            
-            if (withButter.out > PEAK_THRESHOLD_BUTTER && (now - lastPeakTimeButterMA > PEAK_MIN_DISTANCE)) {
-                peakCount10sButterMA++;
-                peakCount30sButterMA++;
-                peakCount60sButterMA++;
-                lastPeakTimeButterMA = now;
-                //updateRRInterval(now);
-            }
-
-            if (now - lastBPMTime >= 10000) {
-                float bpm10sButterMA = (peakCount10sButterMA * 6.0);  
-                float bpm10sButter = (peakCount10sButter * 6.0);  
-                peakCount10sButterMA = 0;
-                peakCount10sButter = 0;
-                lastBPMTime = now;
-
-                bpm10sButterHistory[bpmIndex10s] = bpm10sButter;
-                bpm10sButterMAHistory[bpmIndex10s] = bpm10sButterMA;
-                bpmIndex10s = (bpmIndex10s + 1) % BPM_WINDOW;
-                if (count10s < BPM_WINDOW) count10s++;
+            samplesRecorded++;
+            detectPulse(lpbFilterRed.result);
 
 
-                float avgBpm10sButter = 0, avgBpm10sButterMA = 0;
-                for (int i = 0; i < count10s; i++) {
-                    avgBpm10sButter += bpm10sButterHistory[i];
-                    avgBpm10sButterMA += bpm10sButterMAHistory[i];
-                }
-                avgBpm10sButter /= count10s;
-                avgBpm10sButterMA /= count10s;
-
-                float sdnn = calculateSDNN();
-                float rmssd = calculateRMSSD();
-
-                // uart_PrintString(" BPM (10s ButterMA): ");
-                // uart_PrintFloat(bpm10sButterMA);
-                // uart_PrintString(" | Smoothed: ");
-                // uart_PrintFloat(avgBpm10sButterMA);
-                // uart_PrintString("\n");
-
-                // uart_PrintString(" BPM (10s Butter): ");
-                // uart_PrintFloat(bpm10sButter);
-                // uart_PrintString(" | Smoothed: ");
-                // uart_PrintFloat(avgBpm10sButter);
-                // uart_PrintString("\n");
-
-                // uart_PrintString(" HRV (SDNN): ");
-                // uart_PrintFloat(sdnn);
-                // uart_PrintString("\n");
-
-                // uart_PrintString(" HRV (RMSSD): ");
-                // uart_PrintFloat(rmssd);
-                // uart_PrintString("\n");
-            }
-            if (now - last60sTime >= 60000) {
-                float bpm60sButterMA = peakCount60sButterMA;  
-                float bpm60sButter = peakCount60sButter;  
-                peakCount60sButterMA = 0;
-                peakCount60sButter = 0;
-                last60sTime = now;
-
-
-                bpm60sButterHistory[bpmIndex60s] = bpm60sButter;
-                bpm60sButterMAHistory[bpmIndex60s] = bpm60sButterMA;
-                bpmIndex60s = (bpmIndex60s + 1) % BPM_WINDOW;
-                if (count60s < BPM_WINDOW) count60s++;
-
-
-                float avgBpm60sButter = 0, avgBpm60sButterMA = 0;
-                for (int i = 0; i < count60s; i++) {
-                    avgBpm60sButter += bpm60sButterHistory[i];
-                    avgBpm60sButterMA += bpm60sButterMAHistory[i];
-                }
-                avgBpm60sButter /= count60s;
-                avgBpm60sButterMA /= count60s;
-
-
-                uart_PrintString(" BPM (60s ButterMA): ");
-                uart_PrintFloat(bpm60sButterMA);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm60sButterMA);
-                uart_PrintString("\n");
-
-                uart_PrintString(" BPM (60s Butter): ");
-                uart_PrintFloat(bpm60sButter);
-                uart_PrintString(" | Smoothed: ");
-                uart_PrintFloat(avgBpm60sButter);
-                uart_PrintString("\n");
-            }
-            
             // uart_PrintString("$");
             // uart_PrintFloat(m_fifoData.red_led_raw);
             // uart_PrintString(" ");
@@ -766,7 +608,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             // //uart_PrintFloat(lpbFilterRedCoef.result);
             // //uart_PrintString(" ");
             // uart_PrintFloat(dummyGain);
-            // uart_PrintString(";");
+            //uart_PrintString(";");
     } 
     else {
         uart_PrintString("$");
@@ -775,6 +617,118 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     }
 
     return result;
+}
+
+bool detectPulse(float sensor_value)
+{
+    //uart_PrintString("sensor_value: ");
+    //uart_PrintFloat(sensor_value);
+    //uart_PrintString("\n");
+    static float prev_sensor_value = 0;
+    static uint8_t values_went_down = 0;
+    static uint32_t currentBeat = 0;
+    static uint32_t lastBeat = 0;
+
+    if (sensor_value > PULSE_MAX_THRESHOLD)
+    {
+        currentPulseDetectorState = PULSE_IDLE;
+        prev_sensor_value = 0;
+        lastBeat = 0;
+        currentBeat = 0;
+        values_went_down = 0;
+        lastBeatThreshold = 0;
+        return false;
+    }
+
+    switch(currentPulseDetectorState)
+    {
+        case PULSE_IDLE:
+            //uart_PrintString("State: PULSE_IDLE\n");
+            if(sensor_value >= PULSE_MIN_THRESHOLD)
+            {
+                currentPulseDetectorState = PULSE_TRACE_UP;
+                values_went_down = 0;
+            }
+            break;
+
+        case PULSE_TRACE_UP:
+            //uart_PrintString("State: PULSE_TRACE_UP\n");
+            if(sensor_value > prev_sensor_value)
+            {
+                currentBeat = HAL_GetTick();
+                lastBeatThreshold = sensor_value;
+                uart_PrintString("currentBeat: ");
+                uart_PrintFloat(currentBeat);
+                uart_PrintString(" lastBeat: ");
+                uart_PrintFloat(lastBeat);
+                uart_PrintString("\n");
+            }
+            else
+            {
+                uint32_t beatDuration = currentBeat - lastBeat;
+                lastBeat = currentBeat;
+                float rawBPM = 0;
+                if (beatDuration > 0)
+                    rawBPM = 60000.0 / (float)beatDuration;
+                    
+                uart_PrintString("rawBPM: ");
+                uart_PrintFloat(rawBPM);
+                uart_PrintString("\n");
+                uart_PrintString("beatDuration: ");
+                uart_PrintFloat(beatDuration);
+                uart_PrintString(" rawBPM: ");
+                uart_PrintFloat(rawBPM);
+                uart_PrintString("\n");
+                valuesBPM[bpmIndex] = rawBPM;
+                valuesBPMSum = 0;
+                valuesBPMCount = 0;
+                uart_PrintString("valuesBPM: ");
+                uart_PrintString("\n");
+
+                for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++)
+                {
+                    if (valuesBPM[i] > 40 && valuesBPM[i] < 130)  
+                    {
+                        valuesBPMSum += valuesBPM[i];
+                        uart_PrintFloat(valuesBPM[i]);
+                        uart_PrintString(" ");
+                        uart_PrintString("\n");
+                        valuesBPMCount++;
+                    }
+                }
+                
+                bpmIndex++;
+                bpmIndex = bpmIndex % PULSE_BPM_SAMPLE_SIZE;
+                uart_PrintString("values count: ");
+                uart_PrintFloat(valuesBPMCount);
+                uart_PrintString("\n");
+                currentBPM = valuesBPMSum / valuesBPMCount;
+                uart_PrintString("currentBPM: ");
+                uart_PrintFloat(currentBPM);
+                uart_PrintString("\n");
+
+                currentPulseDetectorState = PULSE_TRACE_DOWN;
+
+                return true;
+            }
+            break;
+
+        case PULSE_TRACE_DOWN:
+            //uart_PrintString("State: PULSE_TRACE DOWN\n");
+            if(sensor_value < prev_sensor_value)
+            {
+                values_went_down++;
+            }
+
+            if(sensor_value < PULSE_MIN_THRESHOLD)
+            {
+                currentPulseDetectorState = PULSE_IDLE;
+            }
+            break;
+    }
+    prev_sensor_value = sensor_value;
+    return false;
+
 }
 
 void MAX30102_registerData(int voixd)
