@@ -608,7 +608,7 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             // //uart_PrintFloat(lpbFilterRedCoef.result);
             // //uart_PrintString(" ");
             // uart_PrintFloat(dummyGain);
-            //uart_PrintString(";");
+            // uart_PrintString(";");
     } 
     else {
         uart_PrintString("$");
@@ -657,11 +657,11 @@ bool detectPulse(float sensor_value)
             {
                 currentBeat = HAL_GetTick();
                 lastBeatThreshold = sensor_value;
-                uart_PrintString("currentBeat: ");
-                uart_PrintFloat(currentBeat);
-                uart_PrintString(" lastBeat: ");
-                uart_PrintFloat(lastBeat);
-                uart_PrintString("\n");
+                //uart_PrintString("currentBeat: ");
+                //art_PrintFloat(currentBeat);
+                //uart_PrintString(" lastBeat: ");
+                //uart_PrintFloat(lastBeat);
+                //uart_PrintString("\n");
             }
             else
             {
@@ -671,18 +671,16 @@ bool detectPulse(float sensor_value)
                 if (beatDuration > 0)
                     rawBPM = 60000.0 / (float)beatDuration;
                     
-                uart_PrintString("rawBPM: ");
-                uart_PrintFloat(rawBPM);
-                uart_PrintString("\n");
-                uart_PrintString("beatDuration: ");
-                uart_PrintFloat(beatDuration);
-                uart_PrintString(" rawBPM: ");
-                uart_PrintFloat(rawBPM);
+                //uart_PrintString("rawBPM: ");
+                //uart_PrintFloat(rawBPM);
+                //uart_PrintString("\n");
+                //uart_PrintString("beatDuration: ");
+                //uart_PrintFloat(beatDuration);
                 uart_PrintString("\n");
                 valuesBPM[bpmIndex] = rawBPM;
                 valuesBPMSum = 0;
                 valuesBPMCount = 0;
-                uart_PrintString("valuesBPM: ");
+                uart_PrintString("BPM LIST: ");
                 uart_PrintString("\n");
 
                 for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++)
