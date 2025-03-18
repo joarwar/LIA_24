@@ -20,9 +20,12 @@
 
 
 /* PULSE DETECTION PARAMETERS */
-#define PULSE_MIN_THRESHOLD 1200 // 300 for finger and around 20 for wrist
-#define PULSE_MAX_THRESHOLD 2500
+#define PULSE_MIN_THRESHOLD 200 // Dependable on computer and surroundings
+#define PULSE_MAX_THRESHOLD 2000
 #define PULSE_GO_DOWN_THRESHOLD 1
+
+#define HRV_WINDOW 50
+#define PEAK_THRESHOLD_HRV 1100
 
 #define PULSE_BPM_SAMPLE_SIZE 10
 

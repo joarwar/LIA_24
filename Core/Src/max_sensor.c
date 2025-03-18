@@ -49,44 +49,22 @@ EMA_High_H filHighEmAvg;
 
 
 //BPM 
-
-//Need to be change depending on PEAK value 
 float currentBPM;
+float currentBPMCon;
 float valuesBPM[PULSE_BPM_SAMPLE_SIZE] = {0};
 float valuesBPMSum = 0;
+float valuesBPMSumCon = 0;
 uint8_t valuesBPMCount = 0;
 uint8_t bpmIndex = 0;
 uint32_t lastBeatThreshold = 0;
-int previousBeat = -1;   
 PULSE_STATE currentPulseDetectorState = PULSE_IDLE;
 
 
 //HRV
-
-#define HRV_WINDOW 50
-#define PEAK_THRESHOLD_HRV 1100
-
 float rrIntervals[HRV_WINDOW] = {0};  
 static int rrIndex = 0; 
 int countHRV = 0;
 static uint32_t lastPeakTime = 0;  
-
-
-
-//IR & RED
-
-float irACValueSqSum = 0; // används ej
-float redACValueSqSum = 0;
-uint16_t samplesRecorded = 0;
-uint16_t pulsesDetected = 0; // omgjort
-float currentSpO2Value = 0; // används ej 
-
-//CURRENT
-
-uint8_t redLEDCurrent = 0;
-uint8_t lastREDLedCurrentCheck = 0;
-
-LEDCURRENT irLedCurrent;
 
 
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
@@ -534,48 +512,6 @@ float MAX30102_readTemp(void)
     return temperature;
 }
 
-float calculateSDNN() {
-    if (countHRV < 2) return 0.0;  
-    
-    float sum = 0.0;
-    float mean = 0.0;
-    for (int i = 0; i < countHRV; i++) {
-        sum += rrIntervals[i];
-    }
-    mean = sum / countHRV;
-
-    float varianceSum = 0.0;
-    for (int i = 0; i < countHRV; i++) {
-        varianceSum += (rrIntervals[i] - mean) * (rrIntervals[i] - mean);
-    }
-    float sdnn = sqrt(varianceSum / countHRV);  
-    return sdnn;
-}
-
-float calculateRMSSD() {
-    if (countHRV < 2) return 0.0;
-
-    float sum = 0.0;
-    for (int i = 1; i < countHRV; i++) {
-        float diff = rrIntervals[i] - rrIntervals[i - 1];
-        sum += diff * diff;
-    }
-
-    return sqrt(sum / (countHRV - 1));
-}
-
-void updateRRInterval(uint32_t peakTime) {
-    uint32_t rrInterval = peakTime - lastPeakTime;  
-
-    rrIntervals[rrIndex] = rrInterval;
-    rrIndex = (rrIndex + 1) % HRV_WINDOW;
-    if (countHRV < HRV_WINDOW) {
-        countHRV++;  
-    }
-
-    lastPeakTime = peakTime;  
-}
-
 MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
     MAX30102 result = {0};
     result.temperature = MAX30102_readTemp();
@@ -587,7 +523,6 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             FIRFilter_Update(&withButter, lpbFilterRed.result);
             float filMovInverse = (filMovAvg.out * -1);
             float dummyGain = (lpbFilterRed.result * 3);
-            samplesRecorded++;
             detectPulse(lpbFilterRed.result);
 
 
@@ -622,10 +557,12 @@ bool detectPulse(float sensor_value) {
     static uint8_t values_went_down = 0;
     static uint32_t currentBeat = 0;
     static uint32_t lastBeat = 0;
-    static uint32_t lastPulseTime = 0;  // Store the last time a valid pulse was detected
-
-    // If the sensor value exceeds the maximum threshold, reset all states
+    static uint32_t lastPulseTime = 0;
+    static uint8_t divisionChecker = 0;
+    static uint16_t divisionCheckerCon = 0;
     if (sensor_value > PULSE_MAX_THRESHOLD) {
+        uart_PrintString("sensor value above MAX, 0 everything ");
+        uart_PrintString("\n");
         currentPulseDetectorState = PULSE_IDLE;
         prev_sensor_value = 0;
         lastBeat = 0;
@@ -634,6 +571,11 @@ bool detectPulse(float sensor_value) {
         lastBeatThreshold = 0;
         valuesBPMSum = 0;
         valuesBPMCount = 0;
+        bpmIndex = 0;
+        divisionChecker = 0;
+        for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
+            valuesBPM[i] = 0;
+        }
         return false;
     }
 
@@ -651,54 +593,87 @@ bool detectPulse(float sensor_value) {
                 currentBeat = HAL_GetTick();
                 lastBeatThreshold = sensor_value;
 
-                uart_PrintString("currentBeat: ");
-                uart_PrintFloat(currentBeat);
-                uart_PrintString(", lastBeat: ");
-                uart_PrintFloat(lastBeat);
-                uart_PrintString("\n");
-            } else if (currentBeat > lastBeat) {  
+                // uart_PrintString("currentBeat: ");
+                // uart_PrintFloat(currentBeat);
+                // uart_PrintString(", lastBeat: ");
+                // uart_PrintFloat(lastBeat);
+                // uart_PrintString("\n");
+            } else if (currentBeat > lastBeat) {
                 uint32_t beatDuration = currentBeat - lastBeat;
-
+                //uart_PrintString("beatduration ");
+                //uart_PrintFloat(beatDuration);
+                //uart_PrintString("\n");
                 if (beatDuration > 10) {  
                     lastBeat = currentBeat;
                     float rawBPM = 60000.0 / (float)beatDuration;  
 
-                    uart_PrintString("Peak detected, calculating BPM...\n");
-                    uart_PrintString("Raw BPM Calculated: ");
-                    uart_PrintFloat(rawBPM);
-                    uart_PrintString("\n");
-
-                    if (rawBPM > 40 && rawBPM < 130) {
+                    if (rawBPM > 45 && rawBPM < 130) {
                         if (valuesBPMCount > 0) {  
                             valuesBPMSum -= valuesBPM[bpmIndex];  
                             valuesBPMCount--; 
                         }
-
                         valuesBPM[bpmIndex] = rawBPM;
                         bpmIndex = (bpmIndex + 1) % PULSE_BPM_SAMPLE_SIZE;  
 
                         valuesBPMSum += rawBPM;
+                        valuesBPMSumCon += rawBPM;
                         valuesBPMCount++;  
-
+                        divisionChecker++;
+                        divisionCheckerCon++;
                         uart_PrintString("BPM List: ");
                         for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
                             uart_PrintFloat(valuesBPM[i]);
                             uart_PrintString(" ");
                         }
                         uart_PrintString("\n");
-                    } else {
-                        uart_PrintString("Invalid BPM: ");
-                        uart_PrintFloat(rawBPM);
-                        uart_PrintString("\n");
                     }
 
                     if (valuesBPMCount > 0) {
-                        currentBPM = valuesBPMSum / valuesBPMCount;
+                        uart_PrintString("\n--- BPM Debug Information ---\n");
+
+                        uart_PrintString("BPM index: ");
+                        uart_PrintFloat(bpmIndex);
+                        uart_PrintString("\n");
+                        
+                        uart_PrintString("BPM Count: ");
+                        uart_PrintFloat(valuesBPMCount);
+                        uart_PrintString("\n");
+                        
+                        uart_PrintString("Division Checker: ");
+                        uart_PrintFloat(divisionChecker);
+                        uart_PrintString("\n");
+                        
+                        uart_PrintString("Division Checker (CONT): ");
+                        uart_PrintFloat(divisionCheckerCon);
+                        uart_PrintString("\n");
+                        
+                        uart_PrintString("BPM Sum: ");
+                        uart_PrintFloat(valuesBPMSum);
+                        uart_PrintString("\n");
+                        
+                        uart_PrintString("BPM Sum (CONT): ");
+                        uart_PrintFloat(valuesBPMSumCon);
+                        uart_PrintString("\n");
+                        if (divisionChecker > 10){
+                            divisionChecker = 10;
+                        }
+                        currentBPM = valuesBPMSum / divisionChecker;
+                        currentBPMCon = valuesBPMSumCon / divisionCheckerCon;
                     }
+                    uart_PrintString("\n--- Current BPM Results ---\n");
 
                     uart_PrintString("Current BPM: ");
                     uart_PrintFloat(currentBPM);
                     uart_PrintString("\n");
+                    
+                    uart_PrintString("Current BPM (Cont): ");
+                    uart_PrintFloat(currentBPMCon);
+                    uart_PrintString("\n");
+                    
+                    uart_PrintString("Combined BPM: ");
+                    uart_PrintFloat((currentBPM + currentBPMCon) / 2);
+                    uart_PrintString("\n");
+                    
 
                     currentPulseDetectorState = PULSE_TRACE_DOWN;
                     return true;
