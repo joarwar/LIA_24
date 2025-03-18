@@ -68,6 +68,7 @@ uint8_t counterHRV = 0;
 float hrvDiffSubSum = 0.0f;
 float hrvDiffSub = 0.0f;
 float hrvCalculated = 0.0f;
+float hrvSqr = 0.0f;
 int8_t MAX30102_readReg(uint8_t reg, uint8_t* value)
 {
     HAL_StatusTypeDef retStatus;
@@ -606,67 +607,33 @@ bool detectPulse(float sensor_value) {
                 for (int i = 0; i < 10; i++) {
                     uart_PrintFloat(currentHRV[i]);
                     uart_PrintString(" ");
-                    
-                    hrvDiffSub += (currentHRV[(i + 1) % 10] - currentHRV[i]) ;
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
-                    uart_PrintString("hrvdiffsub ");
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
-                    uart_PrintFloat(currentHRV[(i + 1) % 10]);
-                    uart_PrintString(" - ");
-                    uart_PrintFloat(currentHRV[i]);
-                    uart_PrintString(" += ");
-                    uart_PrintFloat(hrvDiffSub);
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
-                    uart_PrintString("hrvDiffSubSum ");
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
+                    hrvDiffSub = (currentHRV[(i + 1) % 10] - currentHRV[i]) ;
                     hrvDiffSubSum += (hrvDiffSub * hrvDiffSub);
-                    uart_PrintFloat(hrvDiffSub);
-                    uart_PrintString(" * ");
-                    uart_PrintFloat(hrvDiffSub);
-                    uart_PrintString(" = ");
-                    uart_PrintFloat(hrvDiffSubSum);
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
-                    uart_PrintString("hrvCalculated ");
-                    uart_PrintString("\n");
-                    uart_PrintString("\n");
-                    hrvCalculated = hrvDiffSubSum / i;
-                    uart_PrintFloat(hrvDiffSubSum);
-                    uart_PrintString(" / ");
-                    uart_PrintFloat(i);
-                    uart_PrintString(" = ");
-                    uart_PrintFloat(hrvCalculated);
-
-                    
                 }
-                // uart_PrintString("\n");
-                // uart_PrintString("HRV calculations ");
-                // uart_PrintString("\n");
-                // uart_PrintString("hrvdiffSub ");
-                // uart_PrintFloat(hrvDiffSub);
-                // uart_PrintString("\n");
-                // uart_PrintString("hrvdiffSubSum ");
-                // uart_PrintFloat(hrvDiffSubSum);
-                // uart_PrintString("\n");
-                // uart_PrintString("hrvcalculated ");
-                // uart_PrintFloat(hrvCalculated);
-                // uart_PrintString("\n");
-                // uart_PrintString("\n");
-                // uart_PrintString("counter HRV ");
-                uart_PrintFloat(counterHRV);
+                hrvSqr = sqrt((hrvDiffSubSum/10));
                 uart_PrintString("\n");
-                
+                uart_PrintString("HRV calculations ");
+                uart_PrintString("\n");
+                uart_PrintString("hrvdiffSub ");
+                uart_PrintFloat(hrvDiffSub);
+                uart_PrintString("\n");
+                uart_PrintString("hrvdiffSubSum ");
+                uart_PrintFloat(hrvDiffSubSum);
+                uart_PrintString("\n");
+                uart_PrintString("\n");
+                uart_PrintString("hrv SQR ");
+                uart_PrintFloat(hrvSqr);
+                uart_PrintString("\n");
+                uart_PrintString("\n");
+                uart_PrintString("counter HRV ");
+                hrvDiffSubSum = 0;
 
 
                 // uart_PrintString("currentBeat: ");
                 // uart_PrintFloat(currentBeat);
                 // uart_PrintString(", lastBeat: ");
                 // uart_PrintFloat(lastBeat);
-                // uart_PrintString("\n");
+                uart_PrintString("\n");
             } else if (currentBeat > lastBeat) {
                 uint32_t beatDuration = currentBeat - lastBeat;
                 //uart_PrintString("beatduration ");
