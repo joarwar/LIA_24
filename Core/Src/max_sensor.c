@@ -611,122 +611,113 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             // uart_PrintString(";");
     } 
     else {
-        uart_PrintString("$");
-        uart_PrintFloat(m_fifoData.red_led_raw);
-        uart_PrintString(";");
+        uart_PrintString("no finger detected\n");
     }
 
     return result;
 }
 
-bool detectPulse(float sensor_value)
-{
-    //uart_PrintString("sensor_value: ");
-    //uart_PrintFloat(sensor_value);
-    //uart_PrintString("\n");
+bool detectPulse(float sensor_value) {
     static float prev_sensor_value = 0;
     static uint8_t values_went_down = 0;
     static uint32_t currentBeat = 0;
     static uint32_t lastBeat = 0;
+    static uint32_t lastPulseTime = 0;  // Store the last time a valid pulse was detected
 
-    if (sensor_value > PULSE_MAX_THRESHOLD)
-    {
+    // If the sensor value exceeds the maximum threshold, reset all states
+    if (sensor_value > PULSE_MAX_THRESHOLD) {
         currentPulseDetectorState = PULSE_IDLE;
         prev_sensor_value = 0;
         lastBeat = 0;
         currentBeat = 0;
         values_went_down = 0;
         lastBeatThreshold = 0;
+        valuesBPMSum = 0;
+        valuesBPMCount = 0;
         return false;
     }
 
-    switch(currentPulseDetectorState)
-    {
+    switch (currentPulseDetectorState) {
         case PULSE_IDLE:
-            //uart_PrintString("State: PULSE_IDLE\n");
-            if(sensor_value >= PULSE_MIN_THRESHOLD)
-            {
+            if (sensor_value >= PULSE_MIN_THRESHOLD) {
                 currentPulseDetectorState = PULSE_TRACE_UP;
+                prev_sensor_value = sensor_value;
                 values_went_down = 0;
             }
             break;
 
         case PULSE_TRACE_UP:
-            //uart_PrintString("State: PULSE_TRACE_UP\n");
-            if(sensor_value > prev_sensor_value)
-            {
+            if (sensor_value > prev_sensor_value) {  
                 currentBeat = HAL_GetTick();
                 lastBeatThreshold = sensor_value;
-                //uart_PrintString("currentBeat: ");
-                //art_PrintFloat(currentBeat);
-                //uart_PrintString(" lastBeat: ");
-                //uart_PrintFloat(lastBeat);
-                //uart_PrintString("\n");
-            }
-            else
-            {
+
+                uart_PrintString("currentBeat: ");
+                uart_PrintFloat(currentBeat);
+                uart_PrintString(", lastBeat: ");
+                uart_PrintFloat(lastBeat);
+                uart_PrintString("\n");
+            } else if (currentBeat > lastBeat) {  
                 uint32_t beatDuration = currentBeat - lastBeat;
-                lastBeat = currentBeat;
-                float rawBPM = 0;
-                if (beatDuration > 0)
-                    rawBPM = 60000.0 / (float)beatDuration;
-                    
-                //uart_PrintString("rawBPM: ");
-                //uart_PrintFloat(rawBPM);
-                //uart_PrintString("\n");
-                //uart_PrintString("beatDuration: ");
-                //uart_PrintFloat(beatDuration);
-                uart_PrintString("\n");
-                valuesBPM[bpmIndex] = rawBPM;
-                valuesBPMSum = 0;
-                valuesBPMCount = 0;
-                uart_PrintString("BPM LIST: ");
-                uart_PrintString("\n");
 
-                for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++)
-                {
-                    if (valuesBPM[i] > 40 && valuesBPM[i] < 130)  
-                    {
-                        valuesBPMSum += valuesBPM[i];
-                        uart_PrintFloat(valuesBPM[i]);
-                        uart_PrintString(" ");
+                if (beatDuration > 10) {  
+                    lastBeat = currentBeat;
+                    float rawBPM = 60000.0 / (float)beatDuration;  
+
+                    uart_PrintString("Peak detected, calculating BPM...\n");
+                    uart_PrintString("Raw BPM Calculated: ");
+                    uart_PrintFloat(rawBPM);
+                    uart_PrintString("\n");
+
+                    if (rawBPM > 40 && rawBPM < 130) {
+                        if (valuesBPMCount > 0) {  
+                            valuesBPMSum -= valuesBPM[bpmIndex];  
+                            valuesBPMCount--; 
+                        }
+
+                        valuesBPM[bpmIndex] = rawBPM;
+                        bpmIndex = (bpmIndex + 1) % PULSE_BPM_SAMPLE_SIZE;  
+
+                        valuesBPMSum += rawBPM;
+                        valuesBPMCount++;  
+
+                        uart_PrintString("BPM List: ");
+                        for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
+                            uart_PrintFloat(valuesBPM[i]);
+                            uart_PrintString(" ");
+                        }
                         uart_PrintString("\n");
-                        valuesBPMCount++;
+                    } else {
+                        uart_PrintString("Invalid BPM: ");
+                        uart_PrintFloat(rawBPM);
+                        uart_PrintString("\n");
                     }
+
+                    if (valuesBPMCount > 0) {
+                        currentBPM = valuesBPMSum / valuesBPMCount;
+                    }
+
+                    uart_PrintString("Current BPM: ");
+                    uart_PrintFloat(currentBPM);
+                    uart_PrintString("\n");
+
+                    currentPulseDetectorState = PULSE_TRACE_DOWN;
+                    return true;
                 }
-                
-                bpmIndex++;
-                bpmIndex = bpmIndex % PULSE_BPM_SAMPLE_SIZE;
-                uart_PrintString("values count: ");
-                uart_PrintFloat(valuesBPMCount);
-                uart_PrintString("\n");
-                currentBPM = valuesBPMSum / valuesBPMCount;
-                uart_PrintString("currentBPM: ");
-                uart_PrintFloat(currentBPM);
-                uart_PrintString("\n");
-
-                currentPulseDetectorState = PULSE_TRACE_DOWN;
-
-                return true;
             }
             break;
 
         case PULSE_TRACE_DOWN:
-            //uart_PrintString("State: PULSE_TRACE DOWN\n");
-            if(sensor_value < prev_sensor_value)
-            {
+            if (sensor_value < prev_sensor_value) {  
                 values_went_down++;
             }
-
-            if(sensor_value < PULSE_MIN_THRESHOLD)
-            {
-                currentPulseDetectorState = PULSE_IDLE;
+            if (sensor_value < PULSE_MIN_THRESHOLD) {  
+                currentPulseDetectorState = PULSE_IDLE;  
             }
             break;
     }
-    prev_sensor_value = sensor_value;
-    return false;
 
+    prev_sensor_value = sensor_value;  
+    return false;
 }
 
 void MAX30102_registerData(int voixd)
