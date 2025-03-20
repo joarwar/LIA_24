@@ -528,24 +528,24 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             detectPulse(lpbFilterRed.result);
 
 
-            // uart_PrintString("$");
-            // uart_PrintFloat(m_fifoData.red_led_raw);
-            // uart_PrintString(" ");
-            // uart_PrintFloat(dcFilterRed.result);
-            // uart_PrintString(" ");
-            // uart_PrintFloat(meanDiffResRed);
-            // uart_PrintString(" ");
-            // //uart_PrintFloat(filMovAvg.out);
-            // uart_PrintFloat(filMovInverse);
-            // uart_PrintString(" ");
-            // uart_PrintFloat(withButter.out);
-            // uart_PrintString(" ");
-            // uart_PrintFloat(lpbFilterRed.result );
-            // uart_PrintString(" ");
-            // //uart_PrintFloat(lpbFilterRedCoef.result);
-            // //uart_PrintString(" ");
-            // uart_PrintFloat(dummyGain);
-            // uart_PrintString(";");
+            uart_PrintString("$");
+            uart_PrintFloat(m_fifoData.red_led_raw);
+            uart_PrintString(" ");
+            uart_PrintFloat(dcFilterRed.result);
+            uart_PrintString(" ");
+            uart_PrintFloat(meanDiffResRed);
+            uart_PrintString(" ");
+            //uart_PrintFloat(filMovAvg.out);
+            uart_PrintFloat(filMovInverse);
+            uart_PrintString(" ");
+            uart_PrintFloat(withButter.out);
+            uart_PrintString(" ");
+            uart_PrintFloat(lpbFilterRed.result );
+            uart_PrintString(" ");
+            //uart_PrintFloat(lpbFilterRedCoef.result);
+            //uart_PrintString(" ");
+            uart_PrintFloat(dummyGain);
+            uart_PrintString(";");
     } 
     else {
         uart_PrintString("no finger detected\n");
@@ -967,8 +967,3 @@ void MAX30102_displayData(void)
     // uart_PrintFloat(max_Sensor.ir_Cardiogram);
 
 }
-
-
-
-
-
