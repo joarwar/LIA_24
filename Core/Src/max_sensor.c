@@ -528,24 +528,24 @@ MAX30102 MAX30102_update(FIFO_LED_DATA m_fifoData) {
             detectPulse(lpbFilterRed.result);
 
 
-            uart_PrintString("$");
-            uart_PrintFloat(m_fifoData.red_led_raw);
-            uart_PrintString(" ");
-            uart_PrintFloat(dcFilterRed.result);
-            uart_PrintString(" ");
-            uart_PrintFloat(meanDiffResRed);
-            uart_PrintString(" ");
-            //uart_PrintFloat(filMovAvg.out);
-            uart_PrintFloat(filMovInverse);
-            uart_PrintString(" ");
-            uart_PrintFloat(withButter.out);
-            uart_PrintString(" ");
-            uart_PrintFloat(lpbFilterRed.result );
-            uart_PrintString(" ");
-            //uart_PrintFloat(lpbFilterRedCoef.result);
-            //uart_PrintString(" ");
-            uart_PrintFloat(dummyGain);
-            uart_PrintString(";");
+            // uart_PrintString("$");
+            // uart_PrintFloat(m_fifoData.red_led_raw);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(dcFilterRed.result);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(meanDiffResRed);
+            // uart_PrintString(" ");
+            // //uart_PrintFloat(filMovAvg.out);
+            // uart_PrintFloat(filMovInverse);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(withButter.out);
+            // uart_PrintString(" ");
+            // uart_PrintFloat(lpbFilterRed.result );
+            // uart_PrintString(" ");
+            // //uart_PrintFloat(lpbFilterRedCoef.result);
+            // //uart_PrintString(" ");
+            // uart_PrintFloat(dummyGain);
+            // uart_PrintString(";");
     } 
     else {
         uart_PrintString("no finger detected\n");
@@ -608,10 +608,10 @@ bool detectPulse(float sensor_value) {
             if (sensor_value > prev_sensor_value) {  
                 currentBeat = HAL_GetTick();
                 if (firstTime > 0){
-                    uart_PrintString("Beat time up (HRV) ");
+                    //uart_PrintString("Beat time up (HRV) ");
                     secondTime = HAL_GetTick();
-                    uart_PrintFloat(secondTime);
-                    uart_PrintString("\n");
+                    //uart_PrintFloat(secondTime);
+                    //uart_PrintString("\n");
                 }
                 float hrvDiff = secondTime - firstTime;
                 if (hrvDiff >= 600 && hrvDiff <= 1200) {
@@ -620,7 +620,7 @@ bool detectPulse(float sensor_value) {
                 }
 
                 lastBeatThreshold = sensor_value;
-                if (counterHRV > 4) {
+                if (counterHRV > 2) {
                     hrvDiffSubSum = 0;  
 
                     for (int i = 0; i < counterHRV - 1; i++) {
@@ -628,8 +628,7 @@ bool detectPulse(float sensor_value) {
                         hrvDiffSubSum += (diff * diff);  
                     }
                     hrvSqr = sqrt(hrvDiffSubSum / (counterHRV - 1));
-
-                    // Print HRV details
+                    uart_PrintString("\n");
                     uart_PrintString("HRV List: "); 
                     for (int i = 0; i < counterHRV; i++) {
                         uart_PrintFloat(currentHRV[i]);
@@ -645,7 +644,6 @@ bool detectPulse(float sensor_value) {
                 // uart_PrintFloat(currentBeat);
                 // uart_PrintString(", lastBeat: ");
                 // uart_PrintFloat(lastBeat);
-                uart_PrintString("\n");
             } else if (currentBeat > lastBeat) {
                 uint32_t beatDuration = currentBeat - lastBeat;
                 //uart_PrintString("beatduration ");
@@ -668,40 +666,40 @@ bool detectPulse(float sensor_value) {
                         valuesBPMCount++;  
                         divisionChecker++;
                         divisionCheckerCon++;
-                        // uart_PrintString("BPM List: ");
-                        // for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
-                        //     uart_PrintFloat(valuesBPM[i]);
-                        //     uart_PrintString(" ");
-                        // }
-                        // uart_PrintString("\n");
+                        uart_PrintString("BPM List: ");
+                        for (int i = 0; i < PULSE_BPM_SAMPLE_SIZE; i++) {
+                            uart_PrintFloat(valuesBPM[i]);
+                            uart_PrintString(" ");
+                        }
+                        uart_PrintString("\n");
                     }
 
                     if (valuesBPMCount > 0) {
-                        // uart_PrintString("\n--- BPM Debug Information ---\n");
+                        uart_PrintString("\n--- BPM Debug Information ---\n");
 
-                        // uart_PrintString("BPM index: ");
-                        // uart_PrintFloat(bpmIndex);
-                        // uart_PrintString("\n");
+                        uart_PrintString("BPM index: ");
+                        uart_PrintFloat(bpmIndex);
+                        uart_PrintString("\n");
                         
-                        // uart_PrintString("BPM Count: ");
-                        // uart_PrintFloat(valuesBPMCount);
-                        // uart_PrintString("\n");
+                        uart_PrintString("BPM Count: ");
+                        uart_PrintFloat(valuesBPMCount);
+                        uart_PrintString("\n");
                         
-                        // uart_PrintString("Division Checker: ");
-                        // uart_PrintFloat(divisionChecker);
-                        // uart_PrintString("\n");
+                        uart_PrintString("Division Checker: ");
+                        uart_PrintFloat(divisionChecker);
+                        uart_PrintString("\n");
                         
-                        // uart_PrintString("Division Checker (CONT): ");
-                        // uart_PrintFloat(divisionCheckerCon);
-                        // uart_PrintString("\n");
+                        uart_PrintString("Division Checker (CONT): ");
+                        uart_PrintFloat(divisionCheckerCon);
+                        uart_PrintString("\n");
                         
-                        // uart_PrintString("BPM Sum: ");
-                        // uart_PrintFloat(valuesBPMSum);
-                        // uart_PrintString("\n");
+                        uart_PrintString("BPM Sum: ");
+                        uart_PrintFloat(valuesBPMSum);
+                        uart_PrintString("\n");
                         
-                        // uart_PrintString("BPM Sum (CONT): ");
-                        // uart_PrintFloat(valuesBPMSumCon);
-                        // uart_PrintString("\n");
+                        uart_PrintString("BPM Sum (CONT): ");
+                        uart_PrintFloat(valuesBPMSumCon);
+                        uart_PrintString("\n");
                         if (divisionChecker > 10){
                             divisionChecker = 10;
                         }
@@ -735,10 +733,10 @@ bool detectPulse(float sensor_value) {
             }
             if (sensor_value < PULSE_MIN_THRESHOLD) {  
                 currentPulseDetectorState = PULSE_IDLE;
-                uart_PrintString("Beat time down (HRV) ");
+                //uart_PrintString("Beat time down (HRV) ");
                 firstTime = HAL_GetTick();
-                uart_PrintFloat(firstTime);
-                uart_PrintString("\n");
+                //uart_PrintFloat(firstTime);
+                //uart_PrintString("\n");
             }
             break;
     }
